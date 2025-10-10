@@ -1,0 +1,92 @@
+{
+  "project_info": {
+    "project_number": "214358315657",
+    "project_id": "lebanese-jewelry",
+    "storage_bucket": "lebanese-jewelry.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214358315657:android:14ea95cd61d3e8687f6c58",
+        "android_client_info": {
+          "package_name": "com.brainkets.jewelry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "214358315657-f28q2beadqrm3ji8eedntvn02nomi10c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN9sc6e87Hgw56Ss6Z_Ed6XGYHbNGlGig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214358315657-f28q2beadqrm3ji8eedntvn02nomi10c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214358315657:android:43db6c3b29bcdf487f6c58",
+        "android_client_info": {
+          "package_name": "com.jewelry.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "214358315657-4e2elkrjsrjf13ml24ltj983c80pq824.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jewelry.app",
+            "certificate_hash": "d086c636f413ccae793f7283bde6792f56e4b021"
+          }
+        },
+        {
+          "client_id": "214358315657-5ci4enganvm102glqht1155lkdlck18s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jewelry.app",
+            "certificate_hash": "c96cc7c7556cad731223ff3f6a2b676d439d34ba"
+          }
+        },
+        {
+          "client_id": "214358315657-qkut4f2b268rvodqg9ml8p7nkd9k8mm2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jewelry.app",
+            "certificate_hash": "d62710d5ea7cceb1532c5c5a4e6a11f01f89bf51"
+          }
+        },
+        {
+          "client_id": "214358315657-f28q2beadqrm3ji8eedntvn02nomi10c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN9sc6e87Hgw56Ss6Z_Ed6XGYHbNGlGig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214358315657-f28q2beadqrm3ji8eedntvn02nomi10c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

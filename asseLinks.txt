@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.brainkets.jewelry",
+    "sha256_cert_fingerprints":
+    ["7C:8A:B9:D3:83:E8:BE:54:8B:82:39:81:B5:DD:B3:3F:DA:0B:BC:D5:8A:E0:18:03:6E:AF:6A:9C:30:A3:0B:0C",
+"13:61:2A:BD:D1:E5:97:AB:6D:82:F9:83:BC:FC:CC:8A:50:E1:BB:FC:EC:F5:4A:51:99:A3:83:FF:EF:22:E5:62"
+]
+  }
+}]

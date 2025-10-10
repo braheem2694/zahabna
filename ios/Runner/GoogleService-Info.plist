@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>214358315657-748j1301qcp32rio0jdeg8mrp7mvac7h.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.214358315657-748j1301qcp32rio0jdeg8mrp7mvac7h</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>214358315657-22p2aqkeblqdg9l3rhjjlika1q0dsadg.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCE7tn9LdTz40FpdIp-gVquBuGMfsH04Bc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>214358315657</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.brainkets.jewelry</string>
+	<key>PROJECT_ID</key>
+	<string>lebanese-jewelry</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lebanese-jewelry.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:214358315657:ios:bcae9808445da60e7f6c58</string>
+</dict>
+</plist>

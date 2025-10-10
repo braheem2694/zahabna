@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "contract_pdf": {
+    "id": "c1",
+    "pdf_name": "Subscription_Contract_2025.pdf",
+    "pdf_url": "https://example.com/contracts/Subscription_Contract_2025.pdf"
+  },
+  "transactions": [
+    {
+      "id": "txn_001",
+      "date": "2025-09-01T14:30:00Z",
+      "amount": 49.99,
+      "paymentType": "Card",
+      "recipientName": "John Doe",
+      "subscriptionEndDate": "2026-09-01T00:00:00Z"
+    },
+    {
+      "id": "txn_002",
+      "date": "2025-09-10T09:45:00Z",
+      "amount": 99.00,
+      "paymentType": "Bank Transfer",
+      "recipientName": "Jane Smith",
+      "subscriptionEndDate": "2026-09-10T00:00:00Z"
+    },
+    {
+      "id": "txn_003",
+      "date": "2025-09-15T11:00:00Z",
+      "amount": 25.50,
+      "paymentType": "Cash",
+      "recipientName": "Ahmad Hassan",
+      "subscriptionEndDate": "2026-09-15T00:00:00Z"
+    },
+    {
+      "id": "txn_004",
+      "date": "2025-09-20T16:00:00Z",
+      "amount": 150.75,
+      "paymentType": "Card",
+      "recipientName": "Beirut Media Co.",
+      "subscriptionEndDate": "2026-09-20T00:00:00Z"
+    },
+    {
+      "id": "txn_005",
+      "date": "2025-09-30T08:15:00Z",
+      "amount": 200.00,
+      "paymentType": "Bank Transfer",
+      "recipientName": "Sarah Lee",
+      "subscriptionEndDate": "2026-09-30T00:00:00Z"
+    }
+  ]
+}
