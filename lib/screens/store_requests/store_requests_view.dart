@@ -217,12 +217,14 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                       _buildInfoRow(Icons.calendar_today, 'Duration: ${request.subscriptionMonths} months'),
                       const SizedBox(height: 8),
                       SizedBox(
-                        height: getVerticalSize(120),
+                        height: getVerticalSize(147),
                         child: Column(
                           children: [
-                            request.startDate == null ? const SizedBox() : _buildInfoRow(Icons.calendar_today, '${'Start Date'.tr}:  ${request.startDate != null ? Ui.formatDate(request.startDate!) : "N/A"}'),
-                            request.startDate == null ? const SizedBox() : const SizedBox(height: 8),
-                            request.startDate == null ? const SizedBox() : _buildInfoRow(Icons.calendar_today, '${'End Date'.tr}:  ${request.endDate != null ? Ui.formatDate(request.endDate!) : "N/A"}', color: canCancel ? Colors.red : null),
+                            request.registerDate == null ? const SizedBox() : _buildInfoRow(Icons.calendar_today, '${'registration Date'.tr}:  ${request.registerDate != null ? Ui.formatDate(request.registerDate!) : "N/A"}'),
+                            const SizedBox(height: 8),
+                            _buildInfoRow(Icons.calendar_today, '${'Start Date'.tr}:  ${request.startDate != null ? Ui.formatDate(request.startDate!) : "N/A"}'),
+                            const SizedBox(height: 8),
+                            _buildInfoRow(Icons.calendar_today, '${'End Date'.tr}:  ${request.endDate != null ? Ui.formatDate(request.endDate!) : "N/A"}', color: canCancel ? Colors.red : null),
                             const Spacer(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

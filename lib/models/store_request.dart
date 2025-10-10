@@ -7,6 +7,7 @@ class StoreRequest {
   final String country;
   final String region;
   final String address;
+  final String? email;
   final double recordNumber;
   final double? latitude;
   final double? longitude;
@@ -15,6 +16,7 @@ class StoreRequest {
 
   final bool agreedToTerms;
   final bool hasTransaction;
+  final DateTime? registerDate;
   final DateTime? createdAt;
   final DateTime? startDate;
   DateTime? endDate;
@@ -35,6 +37,8 @@ class StoreRequest {
     required this.storeName,
     required this.phoneNumber,
     required this.country,
+    required this.registerDate,
+    this.email,
     required this.region,
     required this.recordNumber,
     required this.address,
@@ -66,6 +70,7 @@ class StoreRequest {
       'subscriptionMonths': subscriptionMonths,
       'agreedToTerms': agreedToTerms,
       'createdAt': createdAt?.toIso8601String(),
+      'registerDate': registerDate?.toIso8601String(),
       'status': status,
       'birthDay': birthDay,
       'longitude': longitude,
@@ -92,6 +97,7 @@ class StoreRequest {
       country: map['country'] ?? '',
       region: map['place'] ?? '',
       birthDay: map['birth_date'] ?? '',
+      email: map['email'],
       hasTransaction: map['has_transaction'] ?? false,
       userTermsANdConditions: map['terms_conditions'] ?? '',
       latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
@@ -104,6 +110,7 @@ class StoreRequest {
       createdAt: DateTime.parse(map['created_at']),
       endDate: map['ending_date'] != null ? DateTime.parse(map['ending_date']) : null,
       startDate: map['starting_date'] != null ? DateTime.parse(map['starting_date']) : null,
+      registerDate: map['registration_date'] != null ? DateTime.parse(map['registration_date']) : null,
       status: (map['status'] ?? 'pending').toString(),
       images: parsedImages,
     );

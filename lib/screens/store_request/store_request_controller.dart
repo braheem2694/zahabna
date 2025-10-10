@@ -18,6 +18,7 @@ class StoreRequestController extends GetxController {
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController countryController = TextEditingController();
   final TextEditingController regionController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController recordNumber = TextEditingController();
   final TextEditingController branchCountController = TextEditingController();
@@ -75,6 +76,7 @@ class StoreRequestController extends GetxController {
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
+      'email': emailController.text,
       'record_no': recordNumber.text,
       'place': regionController.text,
       'birth_date': birthDay.text,
@@ -109,7 +111,9 @@ class StoreRequestController extends GetxController {
           createdAt: args!.createdAt,
           hasTransaction: args!.hasTransaction,
           endDate: args!.endDate,
+          email: args!.email,
           startDate: args!.startDate,
+          registerDate: args!.registerDate,
           status: args!.status,
           recordNumber: recordNumber.text != "" ? double.tryParse(recordNumber.text) ?? 0.0 : 0.0,
           branchCount: int.tryParse(branchCountController.text) ?? 1,
@@ -473,6 +477,7 @@ class StoreRequestController extends GetxController {
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
+      'email': regionController.text,
       'place': regionController.text,
       'latitude': latController.text,
       'longitude': lngController.text,

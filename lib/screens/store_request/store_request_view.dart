@@ -34,6 +34,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
   final FocusNode recordFocus = FocusNode();
   final FocusNode birthDayFocus = FocusNode();
   final FocusNode branchCountFocus = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
   final FocusNode subscriptionMonthsFocus = FocusNode();
 
   // Method to unfocus all text fields
@@ -47,6 +48,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
     addressFocus.unfocus();
     branchCountFocus.unfocus();
     subscriptionMonthsFocus.unfocus();
+    emailFocusNode.unfocus();
     FocusNode().unfocus();
   }
 

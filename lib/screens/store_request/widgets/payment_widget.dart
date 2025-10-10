@@ -139,7 +139,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         entryType: FieldEntryType.number,
         validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
-      FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: "", isTitleLocked: true, entryType: FieldEntryType.text),
+      FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: widget.request.email ?? '', isTitleLocked: true, entryType: FieldEntryType.text),
     ]);
     htmlContract.value = globalController.homeDataList.value.paymentRequestTerms ?? '';
   }
@@ -565,7 +565,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                 // const SizedBox(height: 12),
 
                 // ---- Dynamic form (only visible when agreed) ----
-                widget.isReneu ? const SizedBox.shrink() : _buildDynamicForm(context),
+                !widget.isReneu ? const SizedBox.shrink() : _buildDynamicForm(context),
 
                 const SizedBox(height: 12),
 
@@ -612,9 +612,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                               }
 
                               // 2) (optional) generate PDF if first-time (no transaction) and not a renew
-                              if (!widget.request.hasTransaction && widget.isReneu == false) {
-                                await _generatePdfAndSave(result);
-                              }
+                              // if (!widget.request.hasTransaction && widget.isReneu == false) {
+                              await _generatePdfAndSave(result);
+                              // }
 
                               // 3) close the confirm dialog
                               Get.back(); // closes the dialog only
