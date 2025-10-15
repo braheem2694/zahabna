@@ -32,18 +32,18 @@ if (keystorePropertiesFile.exists()) {
 android {
      compileSdkVersion 35
     buildToolsVersion "30.0.2"
-    ndkVersion flutter.ndkVersion
+    ndkVersion "26.1.10909125"
     namespace "com.brainkets.jewelry"
     // ndkVersion "25.1.8937393"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
         coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "11"
     }
 
     sourceSets {

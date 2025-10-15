@@ -20,7 +20,8 @@ import 'controller/Home_screen_fragment_controller.dart';
 // ignore_for_file: must_be_immutable
 
 class Home_screen_fragmentscreen extends StatelessWidget {
-  Home_screen_fragmentController controller = Get.put(Home_screen_fragmentController());
+  Home_screen_fragmentController controller =
+      Get.put(Home_screen_fragmentController());
 
   Home_screen_fragmentscreen({super.key});
 
@@ -42,118 +43,6 @@ class Home_screen_fragmentscreen extends StatelessWidget {
       },
       child: Scaffold(
           key: controller.homeScaffoldKey,
-          // appBar: AppBar(
-          //   toolbarHeight: getSize(50),
-          //   shape: const RoundedRectangleBorder(
-          //     borderRadius: BorderRadius.vertical(
-          //       bottom: Radius.circular(30), // Change the value to your desired radius
-          //     ),
-          //   ),
-          //   backgroundColor: Colors.white,
-          //   foregroundColor: Colors.grey,
-          //   shadowColor: Colors.white,
-          //   elevation: 0.5,
-          //   iconTheme: const IconThemeData(color: sh_textColorPrimary),
-          //   centerTitle: true,
-          //   leading: GestureDetector(
-          //     onTap: () {
-          //       controller.homeScaffoldKey.currentState?.openDrawer();
-          //
-          //       // globalController.scaffoldKey.currentState?.openDrawer();
-          //       // if (globalController.sideMenuController.addListener(listener)?? false) {
-          //       //   state?.closeSideMenu();
-          //       // } else {
-          //       //   state?.openSideMenu();
-          //       // }
-          //     },
-          //     child: SizedBox(
-          //       width: getSize(10), // Set the desired width
-          //       height: getSize(10), // Set the desired height
-          //       child: Padding(
-          //         padding: const EdgeInsets.all(12.0),
-          //         child: SvgPicture.asset(
-          //           AssetPaths.menu,
-          //           fit: BoxFit.contain, // Optionally, set fit to control scaling
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          //   title: InkWell(
-          //     splashColor: Colors.transparent,
-          //     highlightColor: Colors.transparent,
-          //     onTap: () {
-          //       TabsController _controller = Get.find();
-          //       _controller.OnBottomNavTapPress(_controller.currentIndex.value);
-          //     },
-          //     child: Padding(
-          //       padding: const EdgeInsets.only(bottom: 8.0),
-          //       child: Obx(() {
-          //         return CustomImageView(
-          //           width: getSize(40),
-          //           height: getSize(40),
-          //           url: globalController.storeImage.value,
-          //           svgUrl: globalController.storeImage.value,
-          //           fit: BoxFit.cover,
-          //           imagePath: AssetPaths.placeholder,
-          //         );
-          //       }),
-          //     ),
-          //   ),
-          //   actions: <Widget>[
-          //     Padding(
-          //       padding: getPadding(right: 8.0),
-          //       child: IconButton(
-          //         icon: SVG(AssetPaths.search_image, 27, 27, Button_color),
-          //         onPressed: () {
-          //           Get.toNamed(AppRoutes.Search)!.then((value) {
-          //             cartlist = cartlist;
-          //           });
-          //         },
-          //       ),
-          //     ),
-          //     prefs?.getString('logged_in') == 'true'
-          //         ? Padding(
-          //             padding: getPadding(right: 8.0),
-          //             child: GestureDetector(
-          //                 onTap: () {
-          //                   Get.toNamed(AppRoutes.NotificationsScreen, arguments: false);
-          //                 },
-          //                 child: InkWell(
-          //                   onTap: () {
-          //                     TabsController _controller = Get.find();
-          //
-          //                     Get.toNamed(AppRoutes.NotificationsScreen, arguments: false)!.then(
-          //                       (value) => _controller.unreadednotification(),
-          //                     );
-          //                   },
-          //                   radius: getSize(35),
-          //                   child: Stack(
-          //                     alignment: Alignment.center,
-          //                     children: <Widget>[
-          //                       Container(width: getSize(30), height: getSize(30), child: SVG(AssetPaths.notification_image, 30, 30, Button_color)),
-          //                       Obx(() => globalController.unreadednotifications.value != 0
-          //                           ? Align(
-          //                               alignment: Alignment.centerRight,
-          //                               child: Container(
-          //                                   width: getSize(30),
-          //                                   margin: EdgeInsets.only(left: MediaQuery.of(context).size.height * 0.02, bottom: MediaQuery.of(context).size.height * 0.02),
-          //                                   padding: const EdgeInsets.all(2),
-          //                                   decoration: BoxDecoration(
-          //                                     shape: BoxShape.circle,
-          //                                     color: Colors.white,
-          //                                     border: Border.all(width: 3, color: MainColor),
-          //                                   ),
-          //                                   child: Text(globalController.unreadednotifications.value.toString(), style: TextStyle(color: MainColor, fontSize: 16))),
-          //                             )
-          //                           : const SizedBox())
-          //                     ],
-          //                   ),
-          //                 )),
-          //           )
-          //         : const SizedBox(),
-          //   ],
-          // ),
-          // drawer: MainDrawer(),
           body: GestureDetector(
             onTap: () {},
             child: Obx(() => controller.errorOccurred.value
@@ -176,11 +65,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                           shrinkWrap: true,
                           slivers: <Widget>[
                             SliverPadding(
-                              padding: EdgeInsets.only(top: AppBar().preferredSize.height + getTopPadding()),
+                              padding: EdgeInsets.only(
+                                  top: AppBar().preferredSize.height +
+                                      getTopPadding()),
                               sliver: SliverToBoxAdapter(
                                 child: Obx(() {
                                   return BannerWidget(
-                                    gridElements: globalController.homeDataList.value.gridElements ?? [],
+                                    gridElements: globalController
+                                            .homeDataList.value.gridElements ??
+                                        [],
                                   );
                                 }),
                               ),
@@ -199,8 +92,11 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                                   refreshEvery: const Duration(seconds: 20),
                                   fetchPrice: () async {
                                     // Example static value or real API call
-                                    await Future.delayed(const Duration(milliseconds: 3000));
-                                    return 2450 + Random().nextDouble() * 10; // simulate live fluctuation
+                                    await Future.delayed(
+                                        const Duration(milliseconds: 3000));
+                                    return 2450 +
+                                        Random().nextDouble() *
+                                            10; // simulate live fluctuation
                                   },
                                   // or: () => fetchGoldFromGoldApi('<YOUR_KEY>'),
                                 ),
@@ -231,11 +127,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                                 () => controller.loadingMore.value
                                     ? Container(
                                         padding: getPadding(top: 10),
-                                        height: getSize(90) + getBottomPadding(),
+                                        height:
+                                            getSize(90) + getBottomPadding(),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
                                           children: [
-                                            Ui.circularIndicator(color: ColorConstant.logoFirstColor),
+                                            Ui.circularIndicator(
+                                                color: ColorConstant
+                                                    .logoFirstColor),
                                           ],
                                         ))
                                     : const SizedBox(),
@@ -289,7 +189,8 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                     },
                     shape: CircleBorder(),
                     backgroundColor: ColorConstant.logoSecondColor,
-                    child: Icon(Icons.store, color: ColorConstant.whiteA700, size: getSize(25)),
+                    child: Icon(Icons.store,
+                        color: ColorConstant.whiteA700, size: getSize(25)),
                   ))
               : SizedBox()),
     );
@@ -313,7 +214,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'Alert'.tr,
                 style: TextStyle(
@@ -323,7 +226,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               ),
             ),
             Directionality(
-              textDirection: prefs?.getString("locale") != "ar" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") != "ar"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 "Do you want to return to main store?".tr,
                 textAlign: TextAlign.justify,
@@ -357,7 +262,8 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 "Yes".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.whiteA700),
+                style: TextStyle(
+                    fontSize: getFontSize(16), color: ColorConstant.whiteA700),
               ),
             ),
           ),
@@ -375,12 +281,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: ColorConstant.whiteA700,
-                border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
+                border:
+                    Border.all(color: ColorConstant.logoSecondColor, width: 1),
               ),
               alignment: Alignment.center,
               child: Text(
                 "No".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.logoSecondColor),
+                style: TextStyle(
+                    fontSize: getFontSize(16),
+                    color: ColorConstant.logoSecondColor),
               ),
             ),
           ),
@@ -416,7 +325,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'تحذير'.tr,
                 style: TextStyle(
@@ -426,7 +337,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               ),
             ),
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'lbl_terms_and_conditions'.tr,
                 textAlign: TextAlign.justify,

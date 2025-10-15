@@ -43,8 +43,21 @@ class _PdfActionsCardState extends State<PdfActionsCard> {
 
   @override
   void initState() {
+    checkFile();
     super.initState();
     _initViewer();
+  }
+  checkFile()async{
+    final dir = await getApplicationDocumentsDirectory();
+    final savePath = '${dir.path}/${_deriveFileName()}.pdf';
+    bool iFound = await File(savePath).exists();
+    if(iFound){
+      setState(() {
+        _localPath =savePath;
+
+      });
+    }
+
   }
 
   Future<void> _initViewer() async {
@@ -88,7 +101,7 @@ class _PdfActionsCardState extends State<PdfActionsCard> {
 
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final savePath = '${dir.path}/${_deriveFileName()}';
+      final savePath = '${dir.path}/${_deriveFileName()}.pdf';
 
       await Dio().download(
         widget.pdfUrl,

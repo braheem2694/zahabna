@@ -24,6 +24,7 @@ import 'package:iq_mall/widgets/ui.dart';
 
 import '../../../cores/assets.dart';
 import '../../../utils/ShColors.dart';
+import '../../store_requests/widgets/whish_payment_view.dart';
 import '../../transactions/models/payment_model.dart';
 import '../store_request_view.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -37,10 +38,12 @@ class PaymentImagePickerScreen extends StatefulWidget {
   final StoreRequest request;
   final bool isReneu;
 
-  const PaymentImagePickerScreen({super.key, required this.request, this.isReneu = false});
+  const PaymentImagePickerScreen(
+      {super.key, required this.request, this.isReneu = false});
 
   @override
-  _PaymentImagePickerScreenState createState() => _PaymentImagePickerScreenState();
+  _PaymentImagePickerScreenState createState() =>
+      _PaymentImagePickerScreenState();
 }
 
 class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
@@ -55,6 +58,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
   RxString htmlContract = "".obs;
   final RxBool isSubmittingPayment = false.obs;
   final _formKey = GlobalKey<FormState>();
+  late StoreRequest request;
 
   Future<void> pickImage(int imageNumber) async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.camera);
@@ -69,6 +73,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
   @override
   void initState() {
+    request = widget.request;
     seedDefaultPaymentFields();
 
     // _acceptUserDataAndRefill(data);
@@ -88,60 +93,69 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         initialValue: "Zahabna",
         isTitleLocked: true,
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'second team'.tr,
         initialValue: widget.request.subscriberName,
         isTitleLocked: true,
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'store address'.tr,
         initialValue: widget.request.address,
         isTitleLocked: true,
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'phone number'.tr,
         initialValue: widget.request.phoneNumber,
         isTitleLocked: true,
         entryType: FieldEntryType.number,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'represented by Mr.'.tr,
         initialValue: widget.request.storeName,
         isTitleLocked: true,
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'his birthday'.tr,
         initialValue: widget.request.birthDay ?? "",
         isTitleLocked: true,
         entryType: FieldEntryType.birthday,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'moms name'.tr,
         initialValue: widget.request.motherName,
         isTitleLocked: true,
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'record number'.tr,
         initialValue: widget.request.recordNumber.toString(),
         isTitleLocked: true,
         entryType: FieldEntryType.number,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
-      FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: widget.request.email ?? '', isTitleLocked: true, entryType: FieldEntryType.text),
+      // FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: widget.request.email ?? '', isTitleLocked: true, entryType: FieldEntryType.text),
     ]);
-    htmlContract.value = globalController.homeDataList.value.paymentRequestTerms ?? '';
+    htmlContract.value =
+        globalController.homeDataList.value.paymentRequestTerms ?? '';
   }
 
   @override
@@ -172,7 +186,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
   }
 
   String exportCurrentFormToJson() {
-    final fields = _fields.map((f) => PaymentFormField(title: f.title.text.trim(), value: f.value.text.trim())).toList();
+    final fields = _fields
+        .map((f) => PaymentFormField(
+            title: f.title.text.trim(), value: f.value.text.trim()))
+        .toList();
 
     final data = PaymentFormData(
       requestId: _requestIdForSubtitle,
@@ -183,7 +200,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     return PaymentFormIO.toJsonString(data);
   }
 
-  Widget imageBox({required Rxn<String>? imagePath, required int imageNumber, required String label}) {
+  Widget imageBox(
+      {required Rxn<String>? imagePath,
+      required int imageNumber,
+      required String label}) {
     return GestureDetector(
       onTap: () => showPickerBottomSheet(imagePath!),
       child: Container(
@@ -196,7 +216,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: imagePath == null
-            ? Center(child: Text("Click to add $label", style: TextStyle(fontSize: 16)))
+            ? Center(
+                child:
+                    Text("Click to add $label", style: TextStyle(fontSize: 16)))
             : ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Obx(
@@ -207,7 +229,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                           width: double.infinity,
                         )
                       : SizedBox(
-                          child: Center(child: Text("Click to add $label".tr, style: TextStyle(fontSize: 16))),
+                          child: Center(
+                              child: Text("Click to add $label".tr,
+                                  style: TextStyle(fontSize: 16))),
                         ),
                 )),
       ),
@@ -276,8 +300,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                                 row: row.value,
                                 isRequired: row.value.isRequired,
                                 validator: row.value.validator,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                onEditTitle: () => _editTitleDialog(context, row.value),
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                onEditTitle: () =>
+                                    _editTitleDialog(context, row.value),
                               )
                             : _FieldTwoPerLine(row: row),
                       ),
@@ -313,18 +339,24 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     );
   }
 
-  Future<SubmitPaymentResult> submitStorePayment({
-    required String requestId,
-    required num amount,
-    required DateTime date,
-    String? token,
-  }) async {
+  Future<SubmitPaymentResult?> submitStorePayment(
+      {required String requestId,
+      required num amount,
+      required DateTime date,
+      String? token,
+      required BuildContext context}) async {
     isSubmittingPayment.value = true;
     saving.value = true;
 
+    Future.delayed(Duration(milliseconds: 400)).then(
+      (value) {
+        FocusScope.of(context).unfocus();
+      },
+    );
+
     final String authToken = token ?? (prefs?.getString("token") ?? "");
     final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-
+    SubmitPaymentResult? result;
     try {
       // Using your existing helper (you used getData for POST earlier)
       final Map<String, dynamic> payload = {
@@ -341,12 +373,35 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
       // Defensive parsing
       if (res['success'] == true) {
-        return SubmitPaymentResult.fromMap(res);
+        await Get.to(
+                () => WhshPaymentView(
+                      url: res['collect_url'],
+                      requestId: requestId,
+                    ),
+                transition: Transition.rightToLeft,
+                duration: const Duration(milliseconds: 200))
+            ?.then(
+          (value) {
+            if (value["key"] == "success" && value["value"] == true) {
+              res.addAll({"subscription_end_date": value["end_date"]});
+              result = SubmitPaymentResult.fromMap(res);
+            } else {
+              return SubmitPaymentResult(
+                success: false,
+                message: (res['message'] as String?) ??
+                    'Payment submission failed. Please try again.',
+                raw: res,
+              );
+            }
+          },
+        );
+        return result;
       } else {
         // unify error shape
         return SubmitPaymentResult(
           success: false,
-          message: (res['message'] as String?) ?? 'Payment submission failed. Please try again.',
+          message: (res['message'] as String?) ??
+              'Payment submission failed. Please try again.',
           raw: res,
         );
       }
@@ -367,10 +422,14 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     try {
       saving.value = true;
 
-      final pairs = _fields.map((f) => MapEntry(f.title.text.trim(), f.value.text.trim())).where((e) => e.key.isNotEmpty || e.value.isNotEmpty).toList();
+      final pairs = _fields
+          .map((f) => MapEntry(f.title.text.trim(), f.value.text.trim()))
+          .where((e) => e.key.isNotEmpty || e.value.isNotEmpty)
+          .toList();
 
       if (pairs.isEmpty && _htmlCtrl.text.trim().isEmpty) {
-        Fluttertoast.showToast(msg: 'Please add at least one field or HTML text'.tr);
+        Fluttertoast.showToast(
+            msg: 'Please add at least one field or HTML text'.tr);
         return;
       }
 
@@ -385,7 +444,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
       final doc = pw.Document();
       var unescape = HtmlUnescape();
       String htmlText = unescape.convert(htmlContract.value);
+      htmlText = htmlText.replaceAll(RegExp(r'<[^>]*>'), '');
 
+// Optionally trim and normalize spaces/newlines
+      htmlText = htmlText.replaceAll(RegExp(r'\s+'), ' ').trim();
       // Build table rows: 2 pairs per row
       final rows = <pw.TableRow>[];
       for (int i = 0; i < pairs.length; i += 2) {
@@ -398,7 +460,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
               pw.Padding(
                 padding: const pw.EdgeInsets.all(6),
                 child: pw.Text(
-                  (left.key.isEmpty && left.value.isEmpty) ? '' : '${left.key}:   ${left.value}',
+                  (left.key.isEmpty && left.value.isEmpty)
+                      ? ''
+                      : '${left.key}:   ${left.value}',
                   style: pw.TextStyle(fontSize: 10, font: fontRegular),
                   // If any Arabic can appear here, also set textDirection:
                   textDirection: pw.TextDirection.rtl,
@@ -407,7 +471,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
               pw.Padding(
                 padding: const pw.EdgeInsets.all(6),
                 child: pw.Text(
-                  (right == null || (right.key.isEmpty && right.value.isEmpty)) ? '' : '${right.key}:    ${right.value}',
+                  (right == null || (right.key.isEmpty && right.value.isEmpty))
+                      ? ''
+                      : '${right.key}:    ${right.value}',
                   style: pw.TextStyle(fontSize: 10, font: fontRegular),
                   textDirection: pw.TextDirection.rtl,
                 ),
@@ -436,8 +502,12 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
             pw.SizedBox(height: 12),
             if (rows.isNotEmpty)
               pw.Table(
-                border: pw.TableBorder.all(color: pdf.PdfColors.grey500, width: 0.5),
-                columnWidths: const {0: pw.FlexColumnWidth(1), 1: pw.FlexColumnWidth(1)},
+                border: pw.TableBorder.all(
+                    color: pdf.PdfColors.grey500, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(1),
+                  1: pw.FlexColumnWidth(1)
+                },
                 children: rows,
               ),
             if (rows.isNotEmpty) pw.SizedBox(height: 16),
@@ -454,7 +524,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
       final bytes = await doc.save();
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/payment_form_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      final file = File(
+          '${dir.path}/payment_form_${DateTime.now().millisecondsSinceEpoch}.pdf');
       await file.writeAsBytes(bytes);
 
       Fluttertoast.showToast(msg: 'PDF saved:\n${file.path}');
@@ -475,7 +546,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
   Future<pw.Font> getArabicFont() async {
     if (arabicFont == null) {
-      final data = await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
+      final data =
+          await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
       arabicFont = pw.Font.ttf(data);
     }
     return arabicFont!;
@@ -517,7 +589,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
             preferredSize: const Size.fromHeight(1),
             child: Container(
               height: 1,
-              color: Colors.black.withOpacity(0.08), // subtle divider under the app bar
+              color: Colors.black
+                  .withOpacity(0.08), // subtle divider under the app bar
             ),
           ),
         ),
@@ -535,8 +608,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                     methodName: "Whish Payment".tr,
                     logo: "https://example.com/visa.png",
                     logoIsNetwork: true,
-                    beforePaymentText: "Please review your details before proceeding".tr,
-                    amountText: "${globalController.homeDataList.value.requestPrice.toString()}\$",
+                    beforePaymentText:
+                        "Please review your details before proceeding".tr,
+                    amountText:
+                        "${globalController.homeDataList.value.requestPrice.toString()}\$",
                     onTap: () {
                       // open payment method selection, etc.
                     },
@@ -565,7 +640,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                 // const SizedBox(height: 12),
 
                 // ---- Dynamic form (only visible when agreed) ----
-                !widget.isReneu ? const SizedBox.shrink() : _buildDynamicForm(context),
+                _buildDynamicForm(context),
 
                 const SizedBox(height: 12),
 
@@ -580,47 +655,69 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                     width: 280,
                     isExpanded: saving.value,
                     onTap: () async {
-                      final amount = globalController.homeDataList.value.requestPrice!.toDouble();
+                      final amount = globalController
+                          .homeDataList.value.requestPrice!
+                          .toDouble();
                       final now = DateTime.now();
                       final dateStr = DateFormat('yyyy-MM-dd').format(now);
-
+                      Future.delayed(Duration(milliseconds: 400)).then(
+                        (value) {
+                          FocusScope.of(context).unfocus();
+                        },
+                      );
                       await Get.dialog(
                         _ConfirmSubmitPaymentDialog(
                             amount: amount,
                             dateLabel: dateStr,
                             onConfirm: () async {
                               // 0) validate required fields first
-                              final isValid = _formKey.currentState?.validate() ?? false;
+                              final isValid =
+                                  _formKey.currentState?.validate() ?? false;
                               if (!isValid) {
                                 Navigator.of(context).pop(false);
 
-                                Ui.flutterToast("Please fill all required fields correctly.", Toast.LENGTH_SHORT, Colors.red, whiteA700);
+                                Ui.flutterToast(
+                                    "Please fill all required fields correctly.",
+                                    Toast.LENGTH_SHORT,
+                                    Colors.red,
+                                    whiteA700);
                                 return;
                               }
+                              Navigator.of(context).pop(false);
 
+                              // await callPaymentApi(context);
                               // 1) submit payment
-                              final SubmitPaymentResult result = await submitStorePayment(
-                                requestId: widget.request.id,
-                                amount: amount,
-                                date: now,
-                              );
-
-                              // If submit failed, inform user and keep screen
-                              if (!result.success) {
-                                Get.snackbar('Payment', result.message.isEmpty ? 'Payment failed.' : result.message, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
+                              final SubmitPaymentResult? result =
+                                  await submitStorePayment(
+                                      requestId: widget.request.id,
+                                      amount: amount,
+                                      date: now,
+                                      context: context);
+                              //
+                              // // If submit failed, inform user and keep screen
+                              if (result != null && !result.success) {
+                                Get.snackbar(
+                                    'Payment',
+                                    result.message.isEmpty
+                                        ? 'Payment failed.'
+                                        : result.message,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    duration: const Duration(seconds: 3));
                                 return; // don't proceed to PDF or pop screens
                               }
 
                               // 2) (optional) generate PDF if first-time (no transaction) and not a renew
-                              // if (!widget.request.hasTransaction && widget.isReneu == false) {
-                              await _generatePdfAndSave(result);
-                              // }
+                              if (!widget.request.hasTransaction &&
+                                  result != null) {
+                                await _generatePdfAndSave(result);
+                              }
 
                               // 3) close the confirm dialog
-                              Get.back(); // closes the dialog only
-
+                              // Get.back(); // closes the dialog only
+                              request.status = "Accepted";
+                              request.endDate = result?.subscriptionEndDate;
                               // 4) return to previous screen with the subscriptionEndDate as result
-                              Get.back(result: result.subscriptionEndDate);
+                              Get.back(result: request);
                             }),
                         barrierDismissible: false,
                       );
@@ -772,7 +869,8 @@ class PaymentSummaryCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 18, color: theme.colorScheme.primary),
+                  Icon(Icons.info_outline_rounded,
+                      size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -795,14 +893,16 @@ class PaymentSummaryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: (isDark ? Colors.white10 : Colors.grey.shade50),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: (isDark ? Colors.white12 : Colors.black12)),
+                border: Border.all(
+                    color: (isDark ? Colors.white12 : Colors.black12)),
               ),
               child: Row(
                 children: [
                   Text(
                     'Payment Amount'.tr,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color:
+                          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
                   const Spacer(),
@@ -834,7 +934,8 @@ class _Logo extends StatelessWidget {
 
     Widget inner;
     if (logo == null || logo!.trim().isEmpty) {
-      inner = Icon(Icons.account_balance_wallet_rounded, size: 22, color: ColorConstant.logoSecondColor);
+      inner = Icon(Icons.account_balance_wallet_rounded,
+          size: 22, color: ColorConstant.logoSecondColor);
     } else if (isNetwork) {
       inner = ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -903,7 +1004,8 @@ class _FieldOnePerLine extends StatelessWidget {
     final now = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 18, now.month, now.day), // default: 18 years old
+      initialDate:
+          DateTime(now.year - 18, now.month, now.day), // default: 18 years old
       firstDate: DateTime(1900, 1, 1),
       lastDate: now,
       helpText: 'Select birthday',
@@ -918,7 +1020,8 @@ class _FieldOnePerLine extends StatelessWidget {
     );
     if (picked != null) {
       row.value.text = DateFormat('yyyy-MM-dd').format(picked);
-      row.value.selection = TextSelection.collapsed(offset: row.value.text.length);
+      row.value.selection =
+          TextSelection.collapsed(offset: row.value.text.length);
       row.value.notifyListeners();
     }
   }
@@ -1029,9 +1132,19 @@ class _FieldOnePerLine extends StatelessWidget {
         // Build a label that can show a red asterisk for required fields.
         final label = RichText(
           text: TextSpan(
-            text: row.entryType == FieldEntryType.birthday ? 'YYYY-MM-DD' : titleText,
-            style: Theme.of(context).inputDecorationTheme.labelStyle ?? Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
-            children: isRequired ? const [TextSpan(text: ' *', style: TextStyle(color: Colors.red))] : const [],
+            text: row.entryType == FieldEntryType.birthday
+                ? 'YYYY-MM-DD'
+                : titleText,
+            style: Theme.of(context).inputDecorationTheme.labelStyle ??
+                Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Colors.black54),
+            children: isRequired
+                ? const [
+                    TextSpan(text: ' *', style: TextStyle(color: Colors.red))
+                  ]
+                : const [],
           ),
         );
 
@@ -1044,20 +1157,23 @@ class _FieldOnePerLine extends StatelessWidget {
           textInputAction: TextInputAction.next,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
           decoration: InputDecoration(
             label: label, // uses the RichText above
             isDense: false,
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Colors.black12),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+              borderSide:
+                  const BorderSide(color: Color(0xFF1976D2), width: 1.4),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -1093,25 +1209,35 @@ class _FieldTwoPerLine extends StatelessWidget {
               return Obx(() => TextField(
                     controller: row.value.title,
                     textInputAction: TextInputAction.next,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                     decoration: InputDecoration(
                       labelText: 'Title'.tr,
                       hintText: 'e.g. Bank Name'.tr,
-                      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
-                      floatingLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1976D2)),
+                      labelStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87),
+                      floatingLabelStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1976D2)),
                       isDense: true,
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: const BorderSide(color: Colors.black12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF1976D2), width: 1.4),
                       ),
-                      prefixIcon: const Icon(Icons.badge_outlined, size: 18, color: Colors.black54),
+                      prefixIcon: const Icon(Icons.badge_outlined,
+                          size: 18, color: Colors.black54),
                       prefixIconConstraints: const BoxConstraints(minWidth: 40),
                       suffixIcon: value.text.isNotEmpty
                           ? IconButton(
@@ -1136,25 +1262,35 @@ class _FieldTwoPerLine extends StatelessWidget {
               return TextField(
                 controller: row.value.value,
                 textInputAction: TextInputAction.next,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                 decoration: InputDecoration(
                   labelText: 'Value'.tr,
                   hintText: 'e.g. User Name'.tr,
-                  labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
-                  floatingLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1976D2)),
+                  labelStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87),
+                  floatingLabelStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1976D2)),
                   isDense: true,
                   filled: true,
                   fillColor: Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(color: Colors.black12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF1976D2), width: 1.4),
                   ),
-                  prefixIcon: const Icon(Icons.edit_note_outlined, size: 18, color: Colors.black54),
+                  prefixIcon: const Icon(Icons.edit_note_outlined,
+                      size: 18, color: Colors.black54),
                   prefixIconConstraints: const BoxConstraints(minWidth: 40),
                   suffixIcon: value.text.isNotEmpty
                       ? IconButton(
@@ -1176,7 +1312,8 @@ class _FieldTwoPerLine extends StatelessWidget {
 }
 
 /// Inline dialog to edit the "Title" when in 1-per-line mode.
-Future<void> _editTitleDialog(BuildContext context, FieldRowController row) async {
+Future<void> _editTitleDialog(
+    BuildContext context, FieldRowController row) async {
   final tempCtrl = TextEditingController(text: row.title.text);
   await showDialog(
     context: context,
@@ -1191,12 +1328,14 @@ Future<void> _editTitleDialog(BuildContext context, FieldRowController row) asyn
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel'.tr)),
+        TextButton(
+            onPressed: () => Navigator.pop(ctx), child: Text('Cancel'.tr)),
         ElevatedButton(
           onPressed: () {
             // Update and explicitly notify to trigger rebuilds
             row.title.text = tempCtrl.text;
-            row.title.selection = TextSelection.collapsed(offset: row.title.text.length);
+            row.title.selection =
+                TextSelection.collapsed(offset: row.title.text.length);
             row.title.notifyListeners(); // <-- ensures listeners rebuild
             Navigator.pop(ctx);
           },
@@ -1221,10 +1360,12 @@ class _ConfirmSubmitPaymentDialog extends StatefulWidget {
   final Future<void> Function() onConfirm;
 
   @override
-  State<_ConfirmSubmitPaymentDialog> createState() => _ConfirmSubmitPaymentDialogState();
+  State<_ConfirmSubmitPaymentDialog> createState() =>
+      _ConfirmSubmitPaymentDialogState();
 }
 
-class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog> {
+class _ConfirmSubmitPaymentDialogState
+    extends State<_ConfirmSubmitPaymentDialog> {
   RxBool isSubmittingPayment = false.obs;
   @override
   Widget build(BuildContext context) {
@@ -1238,13 +1379,22 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
           children: [
             const Icon(Icons.warning_rounded, size: 40, color: Colors.red),
             const SizedBox(height: 12),
-            Text('Confirm payment?'.tr, style: Theme.of(context).textTheme.titleMedium),
+            Text('Confirm payment?'.tr,
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               // keep it concise and clear
-              'You are about to submit a payment of  ${globalController.homeDataList.value.requestPrice.toString()}\$\nThis action will be recorded.'.trParams({'amount': '${globalController.homeDataList.value.requestPrice.toString()}\$', 'date': widget.dateLabel}),
+              'You are about to submit a payment of  ${globalController.homeDataList.value.requestPrice.toString()}\$\nThis action will be recorded.'
+                  .trParams({
+                'amount':
+                    '${globalController.homeDataList.value.requestPrice.toString()}\$',
+                'date': widget.dateLabel
+              }),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black54),
             ),
             const SizedBox(height: 16),
             Row(
@@ -1253,7 +1403,8 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text('Cancel'.tr),
                   ),
@@ -1273,13 +1424,17 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Obx(() => isSubmittingPayment.value
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white)),
                           )
                         : Text('Yes, submit'.tr)),
                   ),

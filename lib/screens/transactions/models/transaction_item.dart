@@ -26,12 +26,12 @@ class TransactionItem extends Equatable {
     }
 
     return TransactionItem(
-      id: json['id'] as String,
-      date: DateTime.parse(json['date'] as String),
-      amount: parseAmount(json['amount']),
-      paymentType: json['paymentType'] as String,
-      recipientName: json['recipientName'] as String,
-      subscriptionEndDate: DateTime.parse(json['subscriptionEndDate'] as String),
+      id: json['id'].toString(),
+      date: DateTime.parse(json['date'].toString()),
+      amount: parseAmount(json['amount'].toString()),
+      paymentType: json['paymentType'].toString(),
+      recipientName: json['recipientName'].toString(),
+      subscriptionEndDate: DateTime.parse(json['subscriptionEndDate'].toString()),
     );
   }
 
@@ -64,7 +64,7 @@ class ContractPDF {
 
   factory ContractPDF.fromJson(Map<String, dynamic> json) {
     return ContractPDF(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       pdfName: json['pdf_name'] as String, // <-- fixed
       pdfUrl: json['pdf_url'] as String, // <-- fixed
     );

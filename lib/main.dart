@@ -82,7 +82,8 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   // 1️⃣ Load translations before launching the app
-  await api.getDataaa({'date': getTranslationPref() ?? "1970-01-01 00:00:00"}, "master/get-translations", true).then((value) async {
+  await api.getDataaa({'date': getTranslationPref() ?? "1970-01-01 00:00:00"},
+      "master/get-translations", true).then((value) async {
     try {
       appLocalization = AppLocalization();
       await appLocalization.loadTranslations(value);
@@ -121,7 +122,8 @@ ChangeStroredStore(store, newsLetterChoosen, String fromKey) async {
   try {
     prefs!.setString('id', store.id);
     if (newsLetterChoosen != null) {
-      List<newsLetter> newsLetters = List<newsLetter>.from(newsLetterChoosen.map((x) => newsLetter.fromJson(x)));
+      List<newsLetter> newsLetters = List<newsLetter>.from(
+          newsLetterChoosen.map((x) => newsLetter.fromJson(x)));
 
       // news = newsLetters.firstWhere(
       //   (n) => n.r_store_id.toString() == prefs!.getString('id'),
@@ -153,7 +155,8 @@ ChangeStroredStore(store, newsLetterChoosen, String fromKey) async {
     prefs!.setString('privacy_policy', store.privacy_policy);
     prefs!.setString('terms_conditions', store.terms_conditions);
     // globalController.updateStoreImage(fromKey);
-    changeColorsAndDisplay(store.button_color, store.main_color, store.dicount_price_color);
+    changeColorsAndDisplay(
+        store.button_color, store.main_color, store.dicount_price_color);
   } on Exception catch (_) {}
 }
 
@@ -189,10 +192,14 @@ Future<bool> FetchStores() async {
 
         prefs!.setBool('multi_store', true);
         branches_countries = response["branches_countries"];
-        prefs!.setString('Stores_page_background', response['section'][0]['main_image']);
-        prefs!.setString('welcome_text', response['section'][0]['welcome_text'].toString());
-        prefs!.setString('brief_text', response['section'][0]['brief_text'].toString());
-        prefs!.setString('gif_image', response['section'][0]['gif_image'].toString());
+        prefs!.setString(
+            'Stores_page_background', response['section'][0]['main_image']);
+        prefs!.setString(
+            'welcome_text', response['section'][0]['welcome_text'].toString());
+        prefs!.setString(
+            'brief_text', response['section'][0]['brief_text'].toString());
+        prefs!.setString(
+            'gif_image', response['section'][0]['gif_image'].toString());
 
         payment_methods = response["payment_types"];
         GiftCards_payment_methods = response["gift_cards_payment_types"];
@@ -206,26 +213,31 @@ Future<bool> FetchStores() async {
             'main_image',
             storeList
                     .firstWhere(
-                      (element) => element.id == globalController.currentStoreId,
+                      (element) =>
+                          element.id == globalController.currentStoreId,
                     )
                     .main_image ??
                 '');
         globalController.updateStoreImage("fetchstoresmainfirst");
 
         globalController.companySettings.value = CompanySettings.fromJson(
-          (response["company_settings"] as List<dynamic>).first as Map<String, dynamic>,
+          (response["company_settings"] as List<dynamic>).first
+              as Map<String, dynamic>,
         );
 
         globalController.stores.clear();
-        globalController.stores.addAll(storeList.where((element) => element.ownerId == int.parse(prefs!.getString("user_id") ?? '0')));
+        globalController.stores.addAll(storeList.where((element) =>
+            element.ownerId == int.parse(prefs!.getString("user_id") ?? '0')));
 
         prefs!.setBool('multi_store', true);
         prefs!.setString('cart_btn', response['cart_btn'].toString());
         prefs!.setString('has_gift_card', response['has_gift_card'].toString());
         prefs!.setString('has_shipping', response['has_shipping'].toString());
-        prefs!.setString('express_delivery_img', response['express_delivery_img'].toString());
+        prefs!.setString('express_delivery_img',
+            response['express_delivery_img'].toString());
 
-        ChangeStroredStore(storeList[0], response["newsLetters"], "fetchstoresmain");
+        ChangeStroredStore(
+            storeList[0], response["newsLetters"], "fetchstoresmain");
         loading.value = false;
         globalController.stores.firstWhere(
           (element) => element.ownerId.toString() == prefs?.getString("id"),
@@ -272,7 +284,8 @@ Widget buildMenu(context) {
       ? Container(
           color: Colors.white10,
           key: UniqueKey(),
-          height: MediaQuery.of(context).size.height - (AppBar().preferredSize.height),
+          height: MediaQuery.of(context).size.height -
+              (AppBar().preferredSize.height),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -284,7 +297,13 @@ Widget buildMenu(context) {
                     child: Row(
                       children: <Widget>[
                         CustomImageView(
-                            image: prefs!.getString('Profile_image').toString().toLowerCase().startsWith("http") ? prefs!.getString('Profile_image') : null,
+                            image: prefs!
+                                    .getString('Profile_image')
+                                    .toString()
+                                    .toLowerCase()
+                                    .startsWith("http")
+                                ? prefs!.getString('Profile_image')
+                                : null,
                             url: prefs!.getString('Profile_image'),
                             // svgUrl: prefs!.getString('Profile_image') ?? null,
                             imagePath: AssetPaths.placeholder,
@@ -329,43 +348,57 @@ Widget buildMenu(context) {
                   ),
 
                   prefs?.getString('logged_in') == 'true'
-                      ? getDrawerItem(AssetPaths.account_image, 'Account'.tr, callback: () {
+                      ? getDrawerItem(AssetPaths.account_image, 'Account'.tr,
+                          callback: () {
                           state?.closeSideMenu();
-                          Get.toNamed(AppRoutes.AccountsScreen)?.then((value) => {});
+                          Get.toNamed(AppRoutes.AccountsScreen)
+                              ?.then((value) => {});
                         })
                       : const SizedBox(),
-                  globalController.stores.isNotEmpty && prefs?.getString('logged_in') == 'true'
-                      ? getDrawerItem(AssetPaths.stores, 'My Stores'.tr, callback: () {
+                  globalController.stores.isNotEmpty &&
+                          prefs?.getString('logged_in') == 'true'
+                      ? getDrawerItem(AssetPaths.stores, 'My Store'.tr,
+                          callback: () {
                           state?.closeSideMenu();
-                          globalController.updateStoreRoute(AppRoutes.soreDetails);
+                          globalController
+                              .updateStoreRoute(AppRoutes.soreDetails);
 
                           // StoreController _controller = Get.find();
                           // _controller.selectedCity.value = null;
                           // _controller.selectedCityId.value = null;
                           // _controller.fetchStores(false, true);
 
-                          Get.toNamed(AppRoutes.Stores, arguments: {"tag": "side_menu"})?.then((value) {
-                            globalController.updateStoreRoute(AppRoutes.tabsRoute);
+                          Get.toNamed(AppRoutes.Stores,
+                              arguments: {"tag": "side_menu"})?.then((value) {
+                            globalController
+                                .updateStoreRoute(AppRoutes.tabsRoute);
                           });
                         })
                       : const SizedBox(),
-                  getDrawerItem(AssetPaths.terms, 'Terms and Conditions'.tr, callback: () {
+                  getDrawerItem(AssetPaths.terms, 'Terms and Conditions'.tr,
+                      callback: () {
                     state?.closeSideMenu();
-                    Get.toNamed(AppRoutes.TermsAndConditionsScreen); // This should match the name in GetPage
+                    Get.toNamed(AppRoutes
+                        .TermsAndConditionsScreen); // This should match the name in GetPage
                   }),
 
                   // getDrawerItem(AssetPaths.terms, 'Store Request'.tr, callback: () {
                   //   state?.closeSideMenu();
                   //   Get.toNamed(AppRoutes.storeRequest);
                   // }),
-                  prefs?.getString('logged_in') == 'true'
-                      ? getDrawerItem(AssetPaths.addStore, 'Store Requests List'.tr, callback: () {
+
+                  globalController.stores.isNotEmpty &&
+                          prefs?.getString('logged_in') == 'true'
+                      ? getDrawerItem(AssetPaths.addStore, 'Store Request'.tr,
+                          callback: () {
                           state?.closeSideMenu();
                           Get.toNamed(AppRoutes.storeRequests);
                         })
                       : const SizedBox(),
-                  prefs?.getString('logged_in') == 'true'
-                      ? getDrawerItem(AssetPaths.transaction, 'Transactions'.tr, callback: () {
+                  globalController.stores.isNotEmpty &&
+                          prefs?.getString('logged_in') == 'true'
+                      ? getDrawerItem(AssetPaths.transaction, 'Transactions'.tr,
+                          callback: () {
                           state?.closeSideMenu();
                           Get.toNamed(AppRoutes.transactionsScreen);
                         })
@@ -383,13 +416,15 @@ Widget buildMenu(context) {
                   //         Get.toNamed(AppRoutes.wallet);
                   //       })
                   //     : const SizedBox(),
-                  getDrawerItem(AssetPaths.contactus_image, 'Contact us'.tr, callback: () {
+                  getDrawerItem(AssetPaths.contactus_image, 'Contact us'.tr,
+                      callback: () {
                     state?.closeSideMenu();
                     Get.toNamed(
                       AppRoutes.ContactusScreen,
                     );
                   }),
-                  getDrawerItem(AssetPaths.language, 'Languages'.tr, callback: () {
+                  getDrawerItem(AssetPaths.language, 'Languages'.tr,
+                      callback: () {
                     state?.closeSideMenu();
                     Get.toNamed(AppRoutes.settings);
                   }),
@@ -398,12 +433,14 @@ Widget buildMenu(context) {
                     child: Container(
                       color: Colors.white,
                       child: prefs?.getString('logged_in') != 'true'
-                          ? getDrawerItem(AssetPaths.logout, "Login".tr, callback: () {
+                          ? getDrawerItem(AssetPaths.logout, "Login".tr,
+                              callback: () {
                               state?.closeSideMenu();
 
                               Get.toNamed(AppRoutes.SignIn);
                             })
-                          : getDrawerItem(AssetPaths.logout, "Logout".tr, callback: () {
+                          : getDrawerItem(AssetPaths.logout, "Logout".tr,
+                              callback: () {
                               showLogoutAlert(context);
                             }),
                     ),
@@ -430,7 +467,8 @@ Widget buildMenu(context) {
                             const String url = "https://brainkets.com";
                             final Uri uri = Uri.parse(url);
                             if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              await launchUrl(uri,
+                                  mode: LaunchMode.externalApplication);
                             } else {
                               throw 'Could not launch $url';
                             }
@@ -442,7 +480,9 @@ Widget buildMenu(context) {
                       ),
                       Padding(
                         padding: getPadding(top: 8.0),
-                        child: Text("Version ${globalController.appVersion.value}", style: TextStyle(fontSize: getFontSize(12))),
+                        child: Text(
+                            "Version ${globalController.appVersion.value}",
+                            style: TextStyle(fontSize: getFontSize(12))),
                       )
                     ],
                   ),
@@ -472,7 +512,9 @@ showLogoutAlert(context) {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Directionality(
-            textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+            textDirection: prefs?.getString("locale") == "en"
+                ? TextDirection.ltr
+                : TextDirection.rtl,
             child: Text(
               'Alert'.tr,
               style: TextStyle(
@@ -482,7 +524,9 @@ showLogoutAlert(context) {
             ),
           ),
           Directionality(
-            textDirection: prefs?.getString("locale") != "ar" ? TextDirection.ltr : TextDirection.rtl,
+            textDirection: prefs?.getString("locale") != "ar"
+                ? TextDirection.ltr
+                : TextDirection.rtl,
             child: Text(
               "Are you sure you want to log out?".tr,
               textAlign: TextAlign.justify,
@@ -530,7 +574,8 @@ showLogoutAlert(context) {
             alignment: Alignment.center,
             child: Text(
               "Yes".tr,
-              style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.whiteA700),
+              style: TextStyle(
+                  fontSize: getFontSize(16), color: ColorConstant.whiteA700),
             ),
           ),
         ),
@@ -548,12 +593,15 @@ showLogoutAlert(context) {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: ColorConstant.whiteA700,
-              border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
+              border:
+                  Border.all(color: ColorConstant.logoSecondColor, width: 1),
             ),
             alignment: Alignment.center,
             child: Text(
               "No".tr,
-              style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.logoSecondColor),
+              style: TextStyle(
+                  fontSize: getFontSize(16),
+                  color: ColorConstant.logoSecondColor),
             ),
           ),
         ),
@@ -583,7 +631,9 @@ Widget getDrawerItem(String? icon, String? name, {VoidCallback? callback}) {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Row(
           children: <Widget>[
-            icon != null ? SVG(icon, 27, 27, Button_color) : Container(width: 20),
+            icon != null
+                ? SVG(icon, 27, 27, Button_color)
+                : Container(width: 20),
             const SizedBox(width: 20),
             Expanded(
               child: text(
@@ -682,7 +732,8 @@ class _MyAppState extends State<MyApp> {
         page: () => ProductDetails_screen(),
         binding: BindingsBuilder(() async {
           prefs = await SharedPreferences.getInstance();
-          String? tag = prefs?.getString("tag") ?? Get.parameters['tag'] ?? 'default';
+          String? tag =
+              prefs?.getString("tag") ?? Get.parameters['tag'] ?? 'default';
           if (!Get.isRegistered<ProductDetails_screenController>(tag: tag)) {
             Get.lazyPut(() => ProductDetails_screenController(), tag: tag);
           }
@@ -814,10 +865,14 @@ class Counter with ChangeNotifier, DiagnosticableTreeMixin {
     double totalAmount = 0.0;
 
     for (int i = 0; i < cartlist!.length; i++) {
-      if (cartlist![i].price_after_discount == null || cartlist![i].price_after_discount.toString() == 'null') {
-        totalAmount += (double.parse(cartlist![i].product_price.toString()) * int.parse(cartlist![i].quantity!));
+      if (cartlist![i].price_after_discount == null ||
+          cartlist![i].price_after_discount.toString() == 'null') {
+        totalAmount += (double.parse(cartlist![i].product_price.toString()) *
+            int.parse(cartlist![i].quantity!));
       } else {
-        totalAmount += (double.parse(cartlist![i].price_after_discount.toString()) * int.parse(cartlist![i].quantity!));
+        totalAmount +=
+            (double.parse(cartlist![i].price_after_discount.toString()) *
+                int.parse(cartlist![i].quantity!));
       }
     }
 
@@ -825,7 +880,8 @@ class Counter with ChangeNotifier, DiagnosticableTreeMixin {
     if (prefs != null) {
       String? deliveryCostString = prefs!.getString('delivery_cost');
       if (deliveryCostString != null) {
-        totalAmount = ((totalAmount - discount) + double.parse(deliveryCostString));
+        totalAmount =
+            ((totalAmount - discount) + double.parse(deliveryCostString));
       }
     }
     // globalController.updateCartPrice(totalAmount);
@@ -842,13 +898,16 @@ class Counter with ChangeNotifier, DiagnosticableTreeMixin {
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String? host, int port) => true;
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String? host, int port) => true;
   }
 }
 
 void computeAdditionalCostSum() {
   if (prefs!.getString('has_shipping') == '1' && cartlist != null) {
-    Set<String> flatRateProductsProcessed = {}; // to track items with flat rate already added
+    Set<String> flatRateProductsProcessed =
+        {}; // to track items with flat rate already added
 
     for (var product in cartlist!) {
       // If the product has free shipping
@@ -860,17 +919,22 @@ void computeAdditionalCostSum() {
         try {
           quantity = int.parse(product.quantity!);
         } catch (e) {
-          quantity = null; // or provide a default value if you want, e.g., quantity = 1;
+          quantity =
+              null; // or provide a default value if you want, e.g., quantity = 1;
         }
 
-        globalController.updateAdditionalPrice(globalController.sum.value + (product.shipping_cost ?? 0.0) * (quantity ?? 1));
+        globalController.updateAdditionalPrice(globalController.sum.value +
+            (product.shipping_cost ?? 0.0) * (quantity ?? 1));
       }
 
       // If the product has a flat rate and has not been processed yet
-      else if (product.flat_rate == 1 && !flatRateProductsProcessed.contains(product.product_id)) {
-        globalController.updateAdditionalPrice(globalController.sum.value + (product.shipping_cost ?? 0.0));
+      else if (product.flat_rate == 1 &&
+          !flatRateProductsProcessed.contains(product.product_id)) {
+        globalController.updateAdditionalPrice(
+            globalController.sum.value + (product.shipping_cost ?? 0.0));
 
-        flatRateProductsProcessed.add(product.product_id.toString()); // mark the product as processed
+        flatRateProductsProcessed.add(
+            product.product_id.toString()); // mark the product as processed
       }
     }
   }
@@ -881,10 +945,15 @@ void calculateTotalWithoutDelivery() {
   RxDouble totalAmounnt = RxDouble(0);
 
   for (int i = 0; i < cartlist!.length; i++) {
-    if (cartlist![i].price_after_discount == null || cartlist![i].price_after_discount.toString() == 'null') {
-      totalAmounnt.value += (double.parse(cartlist![i].product_price.toString()) * int.parse(cartlist![i].quantity!));
+    if (cartlist![i].price_after_discount == null ||
+        cartlist![i].price_after_discount.toString() == 'null') {
+      totalAmounnt.value +=
+          (double.parse(cartlist![i].product_price.toString()) *
+              int.parse(cartlist![i].quantity!));
     } else {
-      totalAmounnt.value += (double.parse(cartlist![i].price_after_discount.toString()) * int.parse(cartlist![i].quantity.toString()));
+      totalAmounnt.value +=
+          (double.parse(cartlist![i].price_after_discount.toString()) *
+              int.parse(cartlist![i].quantity.toString()));
     }
   }
 
@@ -898,7 +967,11 @@ void calculateTotalWithoutDelivery() {
   }
 
   // Round to 2 decimal places
-  double roundedResult = (double.parse((globalController.result.value + 0.004).toStringAsFixed(3)) * 100 / 100).toDouble();
+  double roundedResult = (double.parse(
+              (globalController.result.value + 0.004).toStringAsFixed(3)) *
+          100 /
+          100)
+      .toDouble();
 
   totalAmounnt.value = double.parse(roundedResult.toStringAsFixed(2));
   total!.value = totalAmounnt.value;

@@ -90,7 +90,7 @@ class _IDImagePickerScreenState extends State<IDImagePickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text("Add Passport Image".tr),
+        title:  Text("Add National ID Images".tr),
         centerTitle: true,
       ),
       body: Padding(

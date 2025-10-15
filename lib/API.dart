@@ -95,7 +95,9 @@ class API extends GetxService {
             print(e);
           }
         }
-      } else {}
+      } else {
+
+      }
     } catch (error) {
       print('Error occurred: $error');
       // Ui.flutterToast('Error occurred', Toast.LENGTH_LONG, MainColor, whiteA700);

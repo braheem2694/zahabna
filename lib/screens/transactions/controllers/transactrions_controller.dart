@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:iq_mall/main.dart';
@@ -7,6 +8,9 @@ import 'package:iq_mall/screens/transactions/models/transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:iq_mall/widgets/Ui.dart';
+
+import '../../../utils/ShColors.dart';
 
 // Call example:
 // await fetchTransactions(useMock: true);
@@ -52,6 +56,60 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
   initializeScreen() async {
     await fetchStoreRequests();
     await fetchTransactions(filter: TxnFilter.all, useMock: false);
+  }
+  Future<List<StoreRequest>> disableStore(id) async {
+    isLoading.value = true;
+    final String token = prefs!.getString("token") ?? "";
+
+    final Map<String, dynamic> response = await api.getData(
+      {'token': token,
+      "id":id,
+      },
+      "stores/delete-store-request",
+    );
+
+    try {
+      if (response['success'] == true) {
+       Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+       Get.back();
+      } else {
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+
+      }
+    } catch (e) {
+      Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+
+    } finally {
+      isLoading.value = false;
+    }
+    return requests;
+  }
+  Future<List<StoreRequest>> enableStore(id) async {
+    isLoading.value = true;
+    final String token = prefs!.getString("token") ?? "";
+
+    final Map<String, dynamic> response = await api.getData(
+      {'token': token,
+        "request_id":id,
+      },
+      "stores/reactivate-request",
+    );
+
+    try {
+      if (response['success'] == true) {
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+        Get.back();
+      } else {
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+
+      }
+    } catch (e) {
+      Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+
+    } finally {
+      isLoading.value = false;
+    }
+    return requests;
   }
 
   // ----------------- Store Requests (unchanged) -----------------
@@ -142,6 +200,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
           try {
             items.add(TransactionItem.fromJson(raw as Map<String, dynamic>));
           } catch (_) {
+            print(_);
             // ignore malformed entries
           }
         }
@@ -254,7 +313,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
     final range = _computeRangeFromFilter(f, from: from, to: to);
     fetchTransactions(
       filter: f,
-      useMock: true,
+      useMock: false,
       from: range?.start,
       to: range?.end,
     );

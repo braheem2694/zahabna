@@ -24,7 +24,7 @@ class TransactionsView extends GetView<TransactionsController> {
   const TransactionsView({super.key});
 
 // Build defaults exactly like your current logic
-  List<AppBarMenuItem<_Action>> defaultTxnMenuItems(dynamic c, bool isEnabled) {
+  List<AppBarMenuItem<_Action>> defaultTxnMenuItems(TransactionsController c, bool isEnabled) {
     final items = <AppBarMenuItem<_Action>>[];
 
     items.add(
@@ -42,7 +42,14 @@ class TransactionsView extends GetView<TransactionsController> {
 
           if (confirmed == true) {
             try {
-              await c.deleteRequest();
+              if(!isEnabled){
+                await c.enableStore(c.requests.first.id);
+
+              }
+              else{
+                await c.disableStore(c.requests.first.id);
+
+              }
               if (Get.context!.mounted) Get.back();
             } catch (_) {
               Ui.flutterToast('Disable failed'.tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
@@ -494,6 +501,21 @@ class _TxnTile extends StatelessWidget {
     );
   }
 }
+Color _getStatusColor(String status) {
+  switch (status) {
+    case 'Accepted':
+      return Colors.green;
+    case 'Cancelled':
+      return gray400;
+    case 'Deleted':
+      return redDark;
+    case 'Waiting Payment':
+      return Colors.blue;
+    default:
+      return Colors.orange;
+  }
+}
+
 
 class _PaymentTypeIcon extends StatelessWidget {
   final String type;
@@ -534,64 +556,87 @@ class StoreRegisterCard extends StatelessWidget {
 
     return SizedBox(
       height: 110, // reduced from 150
-      child: Card(
-        elevation: 0,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: Colors.grey.shade300),
-        ),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Store name
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child:Obx(()=>
+          Card(
+            elevation: 0,
+            color:
+            c.requests.first.status.toLowerCase()=="deleted"?
+            Colors.red.withAlpha(180):
+            Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: Colors.grey.shade300),
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.store, color: Colors.blueGrey, size: 18),
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    child: Text(
-                      storeName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87, overflow: TextOverflow.ellipsis),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  // Store name
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.store, color: Colors.blueGrey, size: 18),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        child: Text(
+                          storeName,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87, overflow: TextOverflow.ellipsis),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Spacer(),
+                      Obx(()=>
+                      c.requests.first.status.toLowerCase()=="deleted"?
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: getPadding(left: 8,right: 8,top: 2,bottom: 2),
+                        child: Text(
+                          c.requests.first.status,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white, overflow: TextOverflow.ellipsis),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ):SizedBox(),
+                      ),
+                      const Spacer(),
+                      Obx(()=>
+                          PdfActionsCard(
+                            pdfUrl: c.contractPdf.value?.pdfUrl ?? '',
+                            fileName: "contract".tr,
+                            viewInBrowserByDefault: true,
+                          )
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  PdfActionsCard(
-                    pdfUrl: c.contractPdf.value?.pdfUrl ?? '',
-                    fileName: "contract".tr,
-                    viewInBrowserByDefault: true,
+                  const SizedBox(height: 8),
+                  Divider(height: 1, color: Colors.grey.shade300),
+                  const SizedBox(height: 8),
+                  // Dates section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildDateColumn(
+                        label: 'Register',
+                        date: dateFormat.format(registerDate),
+                        icon: Icons.calendar_today_outlined,
+                        color: Colors.green,
+                      ),
+                      _buildDateColumn(
+                        label: 'End',
+                        date: endDate != null ? dateFormat.format(endDate!) : "N/A",
+                        icon: Icons.event_busy,
+                        color: Colors.redAccent,
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Divider(height: 1, color: Colors.grey.shade300),
-              const SizedBox(height: 8),
-              // Dates section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildDateColumn(
-                    label: 'Register',
-                    date: dateFormat.format(registerDate),
-                    icon: Icons.calendar_today_outlined,
-                    color: Colors.green,
-                  ),
-                  _buildDateColumn(
-                    label: 'End',
-                    date: endDate != null ? dateFormat.format(endDate!) : "N/A",
-                    icon: Icons.event_busy,
-                    color: Colors.redAccent,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+            ),
+          )
       ),
     );
   }

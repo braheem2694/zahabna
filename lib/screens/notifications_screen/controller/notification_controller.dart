@@ -11,14 +11,25 @@ import 'package:iq_mall/models/Notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/ShColors.dart';
+import 'package:flutter/src/widgets/scroll_controller.dart';
 
 class NotificationsController extends GetxController {
   bool? reload;
   RxBool loading = true.obs;
 
+  ScrollController mainController = ScrollController();
+
+
+
   @override
   void onInit() {
-    GetNotifications();
+    mainController.addListener(() {
+      if (mainController.position.pixels == mainController.position.maxScrollExtent ) {
+        GetNotifications(true);
+
+      }
+    });
+    GetNotifications(false);
     super.onInit();
   }
 
@@ -29,13 +40,13 @@ class NotificationsController extends GetxController {
   }
 
   int limit = 20;
-  int offset = 0;
+  int offset = 1;
 
-
-  Future<bool> GetNotifications() async {
+  Future<bool> GetNotifications(bool isScroll) async {
     bool success = false;
 
     try {
+
       Map<String, dynamic> response = await api.getData({
         'token': prefs!.getString("token") ?? "",
         'page': offset.toString(),
@@ -44,9 +55,13 @@ class NotificationsController extends GetxController {
       if (response.isNotEmpty) {
         success = response["succeeded"];
         loading.value = true;
+        offset++;
 
         if (success) {
-          notificationslist.clear();
+          if(!isScroll){
+            notificationslist.clear();
+
+          }
           List notificationsInfo = response["notifications"];
           for (int i = 0; i < notificationsInfo.length; i++) {
             notificationsclass.fromJson(notificationsInfo[i]);

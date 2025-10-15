@@ -12,7 +12,8 @@ import '../SignIn_screen/controller/SignIn_controller.dart';
 
 class StoreRequestController extends GetxController {
   // Form fields
-  final TextEditingController subscriberNameController = TextEditingController();
+  final TextEditingController subscriberNameController =
+      TextEditingController();
   final TextEditingController motherNameController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
@@ -23,7 +24,8 @@ class StoreRequestController extends GetxController {
   final TextEditingController recordNumber = TextEditingController();
   final TextEditingController branchCountController = TextEditingController();
   final TextEditingController birthDay = TextEditingController();
-  final TextEditingController subscriptionMonthsController = TextEditingController(text: "3");
+  final TextEditingController subscriptionMonthsController =
+      TextEditingController(text: "3");
   final agreedToTerms = false.obs;
   LatLng markerPosition = const LatLng(33.8886, 35.4955); // Beirut
   GoogleMapController? mapController;
@@ -62,17 +64,57 @@ class StoreRequestController extends GetxController {
   Future<void> updateRequestForm() async {
     if (args == null) return; // only for existing requests
 
+    // --- VALIDATION ---
+    List<String> validationErrors = [];
+
+    // Form validation
+    if (formKey.currentState?.validate() != true) {
+      validationErrors.add('Please fill all required fields'.tr);
+    }
+
+    // Image validation
+    if (idImage.value == null && id2Image.value == null) {
+      validationErrors.add('Please upload both ID/Passport images'.tr);
+    }
+    if (selfieImage.value == null) {
+      validationErrors.add('Please upload a selfie image'.tr);
+    }
+    if (storeImage.value == null) {
+      validationErrors.add('Please upload a store image'.tr);
+    }
+
+    // Terms validation
+    if (!agreedToTerms.value) {
+      validationErrors.add('Please accept the terms and conditions'.tr);
+    }
+
+    // If there are validation errors, show a single snackbar and stop
+    if (validationErrors.isNotEmpty) {
+      Get.snackbar(
+        'Required Fields'.tr,
+        validationErrors.join('\n'),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: EdgeInsets.only(bottom: 10, left: 10, right: 10),
+        duration: Duration(seconds: 5),
+      );
+      return;
+    }
+
+    // --- PROCEED WITH UPDATE ---
     final token = prefs!.getString("token") ?? "";
     sendingRequest.value = true;
 
     final Map<String, dynamic> formData = {
       'token': token,
       "id": args?.id,
-      'row_id': args!.id, // adjust if your StoreRequest uses another id field
+      'row_id': args!.id,
       'name': subscriberNameController.text,
       'mother_name': motherNameController.text,
       'store_name': storeNameController.text,
-      'phone_number': "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+      'phone_number':
+          "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
@@ -82,28 +124,31 @@ class StoreRequestController extends GetxController {
       'birth_date': birthDay.text,
       'latitude': latController.text,
       'longitude': lngController.text,
-      'terms_conditions': termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms,
+      'terms_conditions': termsConditions.value != ""
+          ? termsConditions.value
+          : globalController.homeDataList.value.requestTerms,
       'branch_count': branchCountController.text,
       'subscription_count': subscriptionMonthsController.text,
     };
 
     try {
-      // If your backend updates on the same endpoint, you can keep "create-store-request" and include row_id.
-      // Otherwise, point to your real update endpoint:
-      final response = await api.getData(formData, "stores/update-store-request");
+      final response =
+          await api.getData(formData, "stores/update-store-request");
 
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
-        Ui.flutterToast("Changes saved".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
+        Ui.flutterToast(
+            "Changes saved".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
 
-        // Optionally refresh local args with current edits
+        // Update local args with current edits
         args = StoreRequest(
           id: args!.id,
           subscriberName: subscriberNameController.text,
           motherName: motherNameController.text,
           storeName: storeNameController.text,
-          phoneNumber: "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+          phoneNumber:
+              "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
           country: globalController.countryName.value,
           region: regionController.text,
           address: addressController.text,
@@ -115,30 +160,37 @@ class StoreRequestController extends GetxController {
           startDate: args!.startDate,
           registerDate: args!.registerDate,
           status: args!.status,
-          recordNumber: recordNumber.text != "" ? double.tryParse(recordNumber.text) ?? 0.0 : 0.0,
+          recordNumber: recordNumber.text != ""
+              ? double.tryParse(recordNumber.text) ?? 0.0
+              : 0.0,
           branchCount: int.tryParse(branchCountController.text) ?? 1,
-          subscriptionMonths: int.tryParse(subscriptionMonthsController.text) ?? 1,
+          subscriptionMonths:
+              int.tryParse(subscriptionMonthsController.text) ?? 1,
           agreedToTerms: agreedToTerms.value,
-          userTermsANdConditions: termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms ?? '',
+          userTermsANdConditions: termsConditions.value != ""
+              ? termsConditions.value
+              : globalController.homeDataList.value.requestTerms ?? '',
           latitude: double.tryParse(latController.text),
           longitude: double.tryParse(lngController.text),
-          images: args!.images, // keep existing image list
+          images: args!.images,
         );
 
-        // Upload any newly selected images (if any)
+        // Upload any newly selected images
         await uploadImageInBackground({
           'row_id': args!.id,
-          'table_name': 'stores_request', // use the table name your backend returns/uses
+          'table_name': 'stores_request',
           'token': token,
         });
 
         editing.value = false; // exit edit mode
       } else {
-        Ui.flutterToast(response['message'] ?? "Update failed".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+        Ui.flutterToast(response['message'] ?? "Update failed".tr,
+            Toast.LENGTH_LONG, Colors.red, Colors.white);
       }
     } catch (e) {
       sendingRequest.value = false;
-      Ui.flutterToast("Update error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+      Ui.flutterToast(
+          "Update error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
     }
   }
 
@@ -164,13 +216,15 @@ class StoreRequestController extends GetxController {
 
         Get.back();
         Get.back(result: args);
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT, Colors.black45, Colors.white);
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
+            Colors.black45, Colors.white);
 
         return true;
       } else {
         deletingRequest.value = false;
 
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT, Colors.black45, Colors.white);
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
+            Colors.black45, Colors.white);
 
         return false;
       }
@@ -308,7 +362,8 @@ class StoreRequestController extends GetxController {
     }
   }
 
-  Future<void> uploadImage(String tableName, String rowId, String fileName, String filePath, int type) async {
+  Future<void> uploadImage(String tableName, String rowId, String fileName,
+      String filePath, int type) async {
     final token = prefs!.getString("token") ?? "";
 
     try {
@@ -343,7 +398,8 @@ class StoreRequestController extends GetxController {
         //   throw Exception(responseData['message'] ?? 'Upload failed');
         // }
       } else {
-        throw Exception('Upload failed with status code: ${response.statusCode}');
+        throw Exception(
+            'Upload failed with status code: ${response.statusCode}');
       }
     } catch (e) {
       rethrow;
@@ -353,11 +409,13 @@ class StoreRequestController extends GetxController {
 
   bool _hasExistingImageType(int type) {
     if (args == null) return false;
-    return args!.images.any((img) => img.type == type && (img.filePath).toString().isNotEmpty);
+    return args!.images
+        .any((img) => img.type == type && (img.filePath).toString().isNotEmpty);
   }
 
   void submitRequest() {
-    if (isUploading.value) return; // Prevent multiple submissions while uploading
+    if (isUploading.value)
+      return; // Prevent multiple submissions while uploading
 
     List<String> validationErrors = [];
 
@@ -417,10 +475,13 @@ class StoreRequestController extends GetxController {
     branchCountController.text = request.branchCount.toString();
     subscriptionMonthsController.text = request.subscriptionMonths.toString();
     agreedToTerms.value = request.userTermsANdConditions != "" ? true : false;
-    termsConditions.value = request.userTermsANdConditions != "" ? request.userTermsANdConditions : globalController.homeDataList.value.requestTerms ?? '';
+    termsConditions.value = request.userTermsANdConditions != ""
+        ? request.userTermsANdConditions
+        : globalController.homeDataList.value.requestTerms ?? '';
 
     if (request.status.toLowerCase() == "deleted") {
-      Ui.flutterToast("This request is deleted".tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+      Ui.flutterToast("This request is deleted".tr, Toast.LENGTH_SHORT,
+          Colors.red, Colors.white);
     }
 
     // Clear all image observables
@@ -432,7 +493,8 @@ class StoreRequestController extends GetxController {
     int idCounter = 0;
     latController.text = request.latitude.toString();
     lngController.text = request.longitude.toString();
-    markerPosition = LatLng(request.latitude ?? 33.8886, request.longitude ?? 35.4955);
+    markerPosition =
+        LatLng(request.latitude ?? 33.8886, request.longitude ?? 35.4955);
     mapController?.animateCamera(CameraUpdate.newLatLng(markerPosition));
 
     // Assign images by type
@@ -473,7 +535,8 @@ class StoreRequestController extends GetxController {
       'name': subscriberNameController.text,
       'mother_name': motherNameController.text,
       'store_name': storeNameController.text,
-      'phone_number': "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+      'phone_number':
+          "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
@@ -481,18 +544,22 @@ class StoreRequestController extends GetxController {
       'place': regionController.text,
       'latitude': latController.text,
       'longitude': lngController.text,
-      'terms_conditions': termsConditions != "" ? termsConditions : globalController.homeDataList.value.requestTerms,
+      'terms_conditions': termsConditions != ""
+          ? termsConditions
+          : globalController.homeDataList.value.requestTerms,
       'branch_count': branchCountController.text,
       'subscription_count': subscriptionMonthsController.text,
     };
 
     if (formKey.currentState?.validate() != true) {
-      Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+      Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT,
+          Colors.red, Colors.white);
       return;
     }
 
     try {
-      final response = await api.getData(formData, "stores/create-store-request");
+      final response =
+          await api.getData(formData, "stores/create-store-request");
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
@@ -503,13 +570,16 @@ class StoreRequestController extends GetxController {
           'token': token,
         });
 
-        Ui.flutterToast("Subscription submitted successfully".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
+        Ui.flutterToast("Subscription submitted successfully".tr,
+            Toast.LENGTH_LONG, Colors.green, Colors.white);
         Get.back();
       } else {
-        Ui.flutterToast(response['message'] ?? "Submission failed".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+        Ui.flutterToast(response['message'] ?? "Submission failed".tr,
+            Toast.LENGTH_LONG, Colors.red, Colors.white);
       }
     } catch (e) {
-      Ui.flutterToast("Request error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+      Ui.flutterToast(
+          "Request error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
     }
   }
 
@@ -519,6 +589,9 @@ class StoreRequestController extends GetxController {
     args = Get.arguments;
     if (args != null) {
       fillFromStoreRequest(args!);
+    } else {
+      termsConditions.value =
+          globalController.homeDataList.value.requestTerms ?? '';
     }
   }
 }
