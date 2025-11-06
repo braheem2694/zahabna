@@ -4,26 +4,17 @@ import 'dart:io';
 import 'package:app_links/app_links.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:iq_mall/cores/assets.dart';
 import 'package:iq_mall/main.dart';
-import 'package:iq_mall/models/HomeData.dart';
-import 'package:iq_mall/screens/Address_manager_screen/controller/Address_manager_controller.dart';
 import 'package:iq_mall/screens/tabs_screen/controller/tabs_controller.dart';
 import 'package:iq_mall/widgets/CommonFunctions.dart';
 import 'package:iq_mall/models/online_adds.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../cores/language_model.dart';
-import '../../../cores/math_utils.dart';
-import '../../../getxController.dart';
 import '../../../models/Address.dart';
 import '../../../models/Stores.dart';
 import '../../../routes/app_routes.dart';
 import '../../../utils/ShColors.dart';
-import '../../../widgets/applink.dart';
 import '../../TermsAndConditions_screen/terms_widget.dart';
 import '../../tabs_screen/models/SocialMedia.dart';
 import '../widgets/NewsLetter.dart';
@@ -49,14 +40,12 @@ class Home_screen_fragmentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
   }
 
   final _navigatorKey = GlobalKey<NavigatorState>();
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
   String? propertyId;
-
 
   Future<void> waitForInitialization() async {
     // Wait until the app is initialized
@@ -66,8 +55,7 @@ class Home_screen_fragmentController extends GetxController {
   }
 
   void openAppLink(Uri uri) {
-    if (uri.pathSegments.isNotEmpty && uri.host == 'cms.lebanonjewelry.net') {
-      print("asdasdas$uri");
+    if (uri.pathSegments.isNotEmpty && uri.host == '$con') {
       propertyId = uri.path.split("/").last;
 
       // if (propertyId == null) {
@@ -102,7 +90,6 @@ class Home_screen_fragmentController extends GetxController {
     }
   }
 
-
   @override
   Future<void> onReady() async {
     // TODO: implement onReady
@@ -135,24 +122,26 @@ class Home_screen_fragmentController extends GetxController {
     // });
 
     // await DeepLinkService().init();
-
   }
+
   void _handle(Uri uri) {
     final productId = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
     if (productId != null && uri.pathSegments.first == 'product') {
-      Future.delayed(Duration(seconds: 10)).then((value) {
-        Get.toNamed(
-          AppRoutes.Productdetails_screen,
-          arguments: {
-            'product': null,
-            'fromCart': false,
-            'productSlug': productId,
-            'from_banner': true,
-            'tag': productId,
-          },
-          parameters: {'tag': productId},
-        );
-      },);
+      Future.delayed(Duration(seconds: 10)).then(
+        (value) {
+          Get.toNamed(
+            AppRoutes.Productdetails_screen,
+            arguments: {
+              'product': null,
+              'fromCart': false,
+              'productSlug': productId,
+              'from_banner': true,
+              'tag': productId,
+            },
+            parameters: {'tag': productId},
+          );
+        },
+      );
     }
   }
 
@@ -166,10 +155,7 @@ class Home_screen_fragmentController extends GetxController {
   Future<bool> GetHomeData() async {
     bool success = false;
     errorOccurred.value = false;
-    print(globalController.currentStoreId);
-    // Get.lazyPut(() => Address_managerController());
-    // var controller = Get.find<Address_managerController>();
-    // controller.GetAddresses();
+
     try {
       Map<String, dynamic> response = await api.getData({
         'token': prefs!.getString("token") ?? "",

@@ -155,15 +155,15 @@ class Ui {
 
     // --- Build message --------------------------------------------------------
     final description = unescape.convert(product.description ?? '');
-    final productUrl = "https://cms.lebanonjewelry.net/product/${product.product_id}";
+    final productUrl = "https://$applink/product/${product.product_id}";
     final variationsCount = product.variations?.length ?? 0;
     final fieldsCount = product.fields.length;
     final currency = cleanStr(sign) ?? '';
 
-    writeI("ID", product.product_id);
+    // writeI("ID", product.product_id);
     writeS("Name", product.product_name);
     writeS("Section", product.product_section); // will hide "null"
-    writeI("Category ID", product.category_id);
+    // writeI("Category ID", product.category_id);
     writeS("Description", description);
 
     // Price line (always shows base price; VAT/currency added only if present)
@@ -174,41 +174,41 @@ class Ui {
 
     writeN("After Discount", product.price_after_discount, unit: currency);
     writeS("Code", product.product_code);
-    writeS("Slug", product.slug);
-    writeI("Has Option", product.has_option);
-    writeS("In Cart (join)", product.join);
-    writeS("Quantity", product.quantity);
+    // writeS("Slug", product.slug);
+    // writeI("Has Option", product.has_option);
+    // writeS("In Cart (join)", product.join);
+    // writeS("Quantity", product.quantity);
     writeS("Main Image", product.main_image);
-    writeI("Liked", product.is_liked);
-    writeI("Ordered Before", product.is_ordered_before);
-    writeI("Opening Qty", product.opening_qty);
-    writeI("Qty Left", product.product_qty_left);
+    // writeI("Liked", product.is_liked);
+    // writeI("Ordered Before", product.is_ordered_before);
+    // writeI("Opening Qty", product.opening_qty);
+    // writeI("Qty Left", product.product_qty_left);
     writeN("Weight", product.product_weight, unit: 'g');
 
     if (product.product_kerat != null) buffer.writeln("• Karat: ${product.product_kerat}K");
 
-    writeI("Boolean % Discount", product.boolean_percent_discount);
+    // writeI("Boolean % Discount", product.boolean_percent_discount);
     writeI("Sales Discount", product.sales_discount);
     writeI("Free Shipping", product.free_shipping);
-    writeI("Flat Rate", product.flat_rate);
-    writeI("Multi Shipping", product.multi_shipping);
+    // writeI("Flat Rate", product.flat_rate);
+    // writeI("Multi Shipping", product.multi_shipping);
     writeN("Shipping Cost", product.shipping_cost, unit: currency);
-    writeI("Rating", product.rate);
+    // writeI("Rating", product.rate);
     writeI("Reviews", product.reviews_count);
-    writeI("Orders", product.orders_count);
-    writeI("Cart Button", product.cart_btn);
-    writeI("Out of Stock", product.outOfStock);
-    writeI("Express Delivery", product.express_delivery);
-    writeI("In Cart", product.in_cart);
-    writeB("Loading", product.loading);
+    // writeI("Orders", product.orders_count);
+    // writeI("Cart Button", product.cart_btn);
+    // writeI("Out of Stock", product.outOfStock);
+    // writeI("Express Delivery", product.express_delivery);
+    // writeI("In Cart", product.in_cart);
+    // writeB("Loading", product.loading);
 
-    writeS("Cart ID", product.cart_id); // hides "null"
-    writeS("Removing", product.removing);
-    writeS("City ID", product.cityId); // hides "null"
-    writeS("City Name", product.cityName);
-    writeS("Options", product.options); // hides "null"
-    writeS("Variation Found", product.variationfound); // hides "null"
-    writeS("Variant ID", product.variant_id); // hides "null"
+    // writeS("Cart ID", product.cart_id); // hides "null"
+    // writeS("Removing", product.removing);
+    // writeS("City ID", product.cityId); // hides "null"
+    // writeS("City Name", product.cityName);
+    // writeS("Options", product.options); // hides "null"
+    // writeS("Variation Found", product.variationfound); // hides "null"
+    // writeS("Variant ID", product.variant_id); // hides "null"
     writeS("Model", product.model);
 
     // Product Type (print only if something exists)
@@ -245,7 +245,7 @@ class Ui {
     // Replace with your support number
     String supportNumber = '+96176600252';
 
-    String productUrl = "https://cms.lebanonjewelry.net/product/${product.product_id}";
+    String productUrl = "https://${conVersion}product/${product.product_id}";
     String imageUrl = product.main_image.toString().replaceAll(" ", "%20");
 
     String message = '''

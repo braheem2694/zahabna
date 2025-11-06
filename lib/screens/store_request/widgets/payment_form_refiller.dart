@@ -30,10 +30,10 @@ class PaymentFormRefiller {
     // Rebuild rows
     if (data.fields.isEmpty) {
       // keep at least one empty row to avoid empty UI
-      fields.add(FieldRowController());
+      fields.add(FieldRowController(valueFocusNode: FocusNode()));
     } else {
       for (final pf in data.fields) {
-        fields.add(FieldRowController(initialTitle: pf.title, initialValue: pf.value));
+        fields.add(FieldRowController(initialTitle: pf.title, initialValue: pf.value, valueFocusNode: FocusNode()));
       }
     }
 

@@ -8,7 +8,7 @@ class StoreRequest {
   final String region;
   final String address;
   final String? email;
-  final double recordNumber;
+  final double? recordNumber;
   final double? latitude;
   final double? longitude;
   final int branchCount;
@@ -104,7 +104,7 @@ class StoreRequest {
       longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
       branchCount: map['branch_count'] ?? 0,
       address: map['address'] ?? '',
-      recordNumber: map['record_no'] != null ? (map['record_no'] as num).toDouble() : 0.0,
+      recordNumber: map['record_no'] != null ? (map['record_no'] as num).toDouble() : null,
       subscriptionMonths: map['subscription_count'] ?? 0,
       agreedToTerms: map['agreed_to_terms'] ?? false,
       createdAt: DateTime.parse(map['created_at']),

@@ -43,7 +43,9 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
   bool _error = false;
   late final AnimationController refreshController;
 
-  final Rx<ContractPDF?> contractPdf = Rx<ContractPDF?>(null);
+  final RxList<ContractPDF?> contractPdf = <ContractPDF?>[].obs;
+
+  var args;
 
   @override
   void onInit() {
@@ -54,43 +56,51 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
   }
 
   initializeScreen() async {
-    await fetchStoreRequests();
-    await fetchTransactions(filter: TxnFilter.all, useMock: false);
+    args = Get.arguments;
+    if (args["isStoreRequest"] == true) {
+      await fetchRequestById(args["storeRequestId"].toString());
+      await fetchTransactions(filter: TxnFilter.all, useMock: false, requestId: args["storeRequestId"].toString());
+    } else {
+      await fetchStoreRequests();
+      await fetchTransactions(filter: TxnFilter.all, useMock: false);
+    }
   }
+
   Future<List<StoreRequest>> disableStore(id) async {
     isLoading.value = true;
     final String token = prefs!.getString("token") ?? "";
 
     final Map<String, dynamic> response = await api.getData(
-      {'token': token,
-      "id":id,
+      {
+        'token': token,
+        "id": id,
       },
       "stores/delete-store-request",
     );
 
     try {
       if (response['success'] == true) {
-       Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-       Get.back();
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+        Get.back();
       } else {
         Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-
       }
     } catch (e) {
       Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-
     } finally {
       isLoading.value = false;
     }
     return requests;
   }
+
   Future<List<StoreRequest>> enableStore(id) async {
     isLoading.value = true;
     final String token = prefs!.getString("token") ?? "";
 
     final Map<String, dynamic> response = await api.getData(
-      {'token': token,
-        "request_id":id,
+      {
+        'token': token,
+        "request_id": id,
       },
       "stores/reactivate-request",
     );
@@ -101,11 +111,9 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
         Get.back();
       } else {
         Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-
       }
     } catch (e) {
       Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-
     } finally {
       isLoading.value = false;
     }
@@ -138,6 +146,37 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
     return requests;
   }
 
+  Future<bool> fetchRequestById(id) async {
+    isLoading.value = true;
+    bool success = false;
+    final String token = prefs!.getString("token") ?? "";
+
+    final Map<String, dynamic> response = await api.getData(
+      {
+        'token': token,
+        "request_id": id,
+      },
+      "stores/get-store-request-by-id",
+    );
+
+    try {
+      if (response['success'] == true && response['request'] != null) {
+        final data = response['request'];
+        if (data != null) {
+          requests
+            ..clear()
+            ..add(StoreRequest.fromMap(data));
+        }
+      } else {
+        success = false;
+      }
+    } catch (e) {
+    } finally {
+      isLoading.value = false;
+    }
+    return success;
+  }
+
   // ----------------- Transactions API -----------------
 
   Future<void> fetchTransactions({
@@ -149,6 +188,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
     double? minAmt,
     double? maxAmt,
     bool useMock = false,
+    String? requestId,
     bool fallbackToMockOnError = true,
   }) async {
     isLoadingTransactions.value = true;
@@ -165,7 +205,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
 
     final Map<String, dynamic> payload = {
       'token': token,
-      'request_id': requests.first.id,
+      'request_id': requestId ?? requests.first.id,
       if (dateFromStr != null) 'date_from': dateFromStr,
       if (dateToStr != null) 'date_to': dateToStr,
       if (effPaymentType.isNotEmpty) 'payment_type': effPaymentType,
@@ -191,7 +231,27 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
       final txList = response['transactions'];
 
       // Contract PDF (optional)
-      contractPdf.value = (response['contract_pdf'] != null) ? ContractPDF.fromJson(response['contract_pdf'] as Map<String, dynamic>) : null;
+      contractPdf.assignAll(
+        (response['contract_pdfs'] as List<dynamic>?)?.map((e) => ContractPDF.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+      );
+      // contractPdf.add(ContractPDF(
+      //   id: 'default',
+      //   pdfName: 'Default Contract',
+      //   pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      //   createdAt: null,
+      // ));
+      // contractPdf.add(ContractPDF(
+      //   id: 'default2',
+      //   pdfName: 'Default Contract',
+      //   pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      //   createdAt: null,
+      // ));
+      // contractPdf.add(ContractPDF(
+      //   id: 'default3',
+      //   pdfName: 'Default Contract',
+      //   pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      //   createdAt: null,
+      // ));
 
       if (success && txList is List) {
         // Prefer using your TransactionItem.fromJson directly
@@ -216,7 +276,9 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
         try {
           final response = await _loadMock();
 
-          contractPdf.value = (response['contract_pdf'] != null) ? ContractPDF.fromJson(response['contract_pdf'] as Map<String, dynamic>) : null;
+          contractPdf.assignAll(
+            (response['contract_pdf'] as List<dynamic>?)?.map((e) => ContractPDF.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+          );
 
           final txList = response['transactions'];
           if (txList is List) {

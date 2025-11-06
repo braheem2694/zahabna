@@ -5,9 +5,11 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:iq_mall/cores/math_utils.dart';
+import 'package:iq_mall/routes/app_routes.dart';
 import 'package:iq_mall/screens/store_request/widgets/map_location.dart';
 import 'package:iq_mall/screens/store_request/widgets/passport_widget.dart';
 import 'package:iq_mall/widgets/custom_button.dart';
+import 'package:iq_mall/widgets/html_widget.dart';
 import '../../main.dart';
 import '../../models/functions.dart';
 import '../../utils/ShColors.dart';
@@ -20,7 +22,7 @@ import 'store_request_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:iq_mall/widgets/Ui.dart';
 
-enum _Action { edit, cancel, save, delete }
+enum _Action { edit, cancel, save, delete, enable, transactions }
 
 class StoreRequestView extends GetView<StoreRequestController> {
   // Add FocusNodes for each TextField
@@ -56,8 +58,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
   Widget build(BuildContext context) {
     return Obx(() {
       // Read-only if we are viewing an existing request and not in edit mode
-      final bool isReadOnly =
-          controller.args != null && !controller.editing.value;
+      final bool isReadOnly = controller.args != null && !controller.editing.value;
       return Scaffold(
         bottomNavigationBar: Obx(() => controller.editing.value
             ? MyCustomButton(
@@ -92,9 +93,9 @@ class StoreRequestView extends GetView<StoreRequestController> {
             onTap: () => Get.back(),
           ),
           actions: [
-            controller.args?.status.toLowerCase() != 'deleted'
-                ? AppBarActionsDropdown(controller: controller)
-                : const SizedBox(),
+            // controller.args?.status.toLowerCase() != 'deleted' ?
+            AppBarActionsDropdown(controller: controller),
+            //  : const SizedBox(),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
@@ -110,30 +111,17 @@ class StoreRequestView extends GetView<StoreRequestController> {
               children: [
                 IgnorePointer(
                     ignoring: isReadOnly,
-                    child: _buildTextField('Subscriber Name'.tr,
-                        controller.subscriberNameController,
-                        validator: (v) => v == null || v.isEmpty
-                            ? 'This field is required'.tr
-                            : null,
-                        focusNode: subscriberNameFocus)),
+                    child: _buildTextField('Subscriber Name'.tr, controller.subscriberNameController,
+                        validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null, focusNode: subscriberNameFocus)),
                 const SizedBox(height: 12),
                 IgnorePointer(
                     ignoring: isReadOnly,
-                    child: _buildTextField(
-                        'Mother\'s Name'.tr, controller.motherNameController,
-                        validator: (v) => v == null || v.isEmpty
-                            ? 'This field is required'.tr
-                            : null,
-                        focusNode: motherNameFocus)),
+                    child: _buildTextField('Mother\'s Name'.tr, controller.motherNameController,
+                        validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null, focusNode: motherNameFocus)),
                 const SizedBox(height: 12),
                 IgnorePointer(
                     ignoring: isReadOnly,
-                    child: _buildTextField(
-                        'Store Name'.tr, controller.storeNameController,
-                        validator: (v) => v == null || v.isEmpty
-                            ? 'This field is required'.tr
-                            : null,
-                        focusNode: storeNameFocus)),
+                    child: _buildTextField('Store Name'.tr, controller.storeNameController, validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null, focusNode: storeNameFocus)),
                 const SizedBox(height: 12),
                 IgnorePointer(
                   ignoring: isReadOnly,
@@ -149,8 +137,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
                     variant: TextFormFieldVariant.logoSecondColor,
                     shape: TextFormFieldShape.RoundedBorder10,
                     padding: TextFormFieldPadding.PaddingT4,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'required'.tr : null,
+                    validator: (v) => (v == null || v.isEmpty) ? 'required'.tr : null,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -166,67 +153,38 @@ class StoreRequestView extends GetView<StoreRequestController> {
 
                 Obx(() => IgnorePointer(
                       ignoring: isReadOnly,
-                      child: _buildCountryField(
-                          'Country'.tr, globalController.countryName,
-                          focusNode: countryFocus),
+                      child: _buildCountryField('Country'.tr, globalController.countryName, focusNode: countryFocus),
                     )),
                 const SizedBox(height: 12),
                 IgnorePointer(
                     ignoring: isReadOnly,
-                    child: _buildTextField(
-                        'Region'.tr, controller.regionController,
-                        validator: (v) => v == null || v.isEmpty
-                            ? 'This field is required'.tr
-                            : null,
-                        focusNode: regionFocus)),
+                    child: _buildTextField('Region'.tr, controller.regionController, validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null, focusNode: regionFocus)),
                 const SizedBox(height: 12),
                 IgnorePointer(
                     ignoring: isReadOnly,
-                    child: _buildTextField(
-                        'Address'.tr, controller.addressController,
-                        validator: (v) => v == null || v.isEmpty
-                            ? 'This field is required'.tr
-                            : null,
-                        focusNode: addressFocus)),
+                    child: _buildTextField('Address'.tr, controller.addressController, validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null, focusNode: addressFocus)),
                 const SizedBox(height: 12),
                 // IgnorePointer(ignoring: isReadOnly, child: _buildTextField('Record Number'.tr, controller.recordNumber, focusNode: recordFocus)),
                 const SizedBox(height: 12),
-                IgnorePointer(
-                    ignoring: isReadOnly,
-                    child: _buildTextField(
-                        'email'.tr, controller.emailController,
-                        focusNode: recordFocus)),
+                IgnorePointer(ignoring: isReadOnly, child: _buildTextField('email'.tr, controller.emailController, focusNode: recordFocus)),
                 // IgnorePointer(ignoring: isReadOnly, child: _buildNumberField('Subscription Duration (Months)'.tr, controller.subscriptionMonthsController, focusNode: subscriptionMonthsFocus)),
-                IgnorePointer(
-                    ignoring: isReadOnly, child: const SizedBox(height: 16)),
+                IgnorePointer(ignoring: isReadOnly, child: const SizedBox(height: 16)),
 
                 // Pickers (they already check args; IgnorePointer will block taps in view-mode)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildFilePicker(
-                        'ID/Passport Image'.tr, controller.idImage, 0),
-                    _buildFilePicker(
-                        'Selfie Image'.tr, controller.selfieImage, 1),
-                    _buildFilePicker(
-                        'Store Image'.tr, controller.storeImage, 2),
+                    _buildFilePicker('ID/Passport Image'.tr, controller.idImage, 0),
+                    _buildFilePicker('Selfie Image'.tr, controller.selfieImage, 1),
+                    _buildFilePicker('Store Image'.tr, controller.storeImage, 2),
                     _buildFilePicker('Logo'.tr, controller.logoImage, 3),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                Text('Store Location'.tr,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: ColorConstant.black900,
-                        fontSize: getFontSize(18))),
+                Text('Store Location'.tr, style: TextStyle(fontWeight: FontWeight.bold, color: ColorConstant.black900, fontSize: getFontSize(18))),
                 const SizedBox(height: 16),
-                IgnorePointer(
-                    ignoring: isReadOnly,
-                    child: SizedBox(
-                        width: Get.width,
-                        height: Get.height * 0.5,
-                        child: StoreLocationPicker())),
+                IgnorePointer(ignoring: isReadOnly, child: SizedBox(width: Get.width, height: Get.height * 0.5, child: StoreLocationPicker())),
                 const SizedBox(height: 16),
 
                 Obx(() => IgnorePointer(
@@ -237,8 +195,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
                           if (v == true) {
                             // showTermsDialog(false, controller.args?.userTermsANdConditions ?? '');
 
-                            showTermsDialog(
-                                false, controller.termsConditions.value);
+                            showTermsDialog(false, controller.termsConditions.value);
                           } else {
                             controller.agreedToTerms.value = false;
                           }
@@ -247,8 +204,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
                         checkColor: ColorConstant.white,
                         activeColor: ColorConstant.logoFirstColor,
                         title: Text('Agree to Terms'.tr),
-                        subtitle: Text('Required to proceed'.tr,
-                            style: const TextStyle(color: Colors.red)),
+                        subtitle: Text('Required to proceed'.tr, style: const TextStyle(color: Colors.red)),
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
                     )),
@@ -263,21 +219,16 @@ class StoreRequestView extends GetView<StoreRequestController> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorConstant.logoFirstColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {
                       if (controller.isUploading.value) return;
                       if (!controller.agreedToTerms.value) {
-                        Get.snackbar(
-                            'Terms Required'.tr,
-                            'Please accept the terms and conditions to proceed'
-                                .tr,
+                        Get.snackbar('Terms Required'.tr, 'Please accept the terms and conditions to proceed'.tr,
                             snackPosition: SnackPosition.BOTTOM,
                             backgroundColor: Colors.red,
                             colorText: Colors.white,
-                            margin: const EdgeInsets.only(
-                                bottom: 10, left: 10, right: 10),
+                            margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
                             duration: const Duration(seconds: 3));
                         return;
                       }
@@ -288,10 +239,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
                         return const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white)),
+                          child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                         );
                       }
                       if (controller.isUploading.value) {
@@ -301,28 +249,17 @@ class StoreRequestView extends GetView<StoreRequestController> {
                             const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white)),
+                              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                             ),
                             const SizedBox(width: 12),
                             Obx(() => Text(
-                                  'Uploading images (${controller.uploadProgress.value}/${controller.totalImages.value})'
-                                      .tr,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                  'Uploading images (${controller.uploadProgress.value}/${controller.totalImages.value})'.tr,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                                 )),
                           ],
                         );
                       }
-                      return Text('Submit Subscription Request'.tr,
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white));
+                      return Text('Submit Subscription Request'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white));
                     }),
                   ),
 
@@ -335,20 +272,13 @@ class StoreRequestView extends GetView<StoreRequestController> {
     });
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text,
-      String? Function(String?)? validator,
-      required FocusNode focusNode}) {
+  Widget _buildTextField(String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text, String? Function(String?)? validator, required FocusNode focusNode}) {
     return TextFormField(
       focusNode: focusNode,
-      textDirection: prefs?.getString("locale") == "en"
-          ? TextDirection.ltr
-          : TextDirection.rtl,
+      textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
         filled: true,
         fillColor: Colors.grey[100],
         errorStyle: const TextStyle(color: Colors.red),
@@ -359,30 +289,22 @@ class StoreRequestView extends GetView<StoreRequestController> {
     );
   }
 
-  Widget _buildCountryField(String label, RxString controller,
-      {TextInputType keyboardType = TextInputType.text,
-      required FocusNode focusNode}) {
-    TextEditingController textController =
-        TextEditingController(text: controller.value);
+  Widget _buildCountryField(String label, RxString controller, {TextInputType keyboardType = TextInputType.text, required FocusNode focusNode}) {
+    TextEditingController textController = TextEditingController(text: controller.value);
     return TextFormField(
       focusNode: focusNode,
       controller: textController,
-      textDirection: prefs?.getString("locale") == "en"
-          ? TextDirection.ltr
-          : TextDirection.rtl,
+      textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
       readOnly: false,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
         filled: true,
         fillColor: Colors.grey[100],
         errorStyle: const TextStyle(color: Colors.red),
       ),
       keyboardType: keyboardType,
-      validator: (v) =>
-          v == null || v.isEmpty ? 'This field is required'.tr : null,
+      validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null,
       onChanged: (v) => textController.text = v,
     );
   }
@@ -403,8 +325,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
 
     // Wrap the field so taps are guaranteed to be caught
     return GestureDetector(
-      behavior:
-          HitTestBehavior.translucent, // let child paint but we still get taps
+      behavior: HitTestBehavior.translucent, // let child paint but we still get taps
       onTap: () => _pickBirthday(context), // anywhere on the field opens picker
       child: AbsorbPointer(
         // prevent inner field from consuming taps
@@ -425,15 +346,13 @@ class StoreRequestView extends GetView<StoreRequestController> {
             suffixIcon: IconButton(
               tooltip: 'Pick date'.tr,
               icon: const Icon(Icons.calendar_today_rounded, size: 16),
-              onPressed: () =>
-                  _pickBirthday(context), // anywhere on the field opens picker
+              onPressed: () => _pickBirthday(context), // anywhere on the field opens picker
               splashRadius: 18,
             ),
           ),
           keyboardType: keyboardType,
           controller: controller,
-          validator: (v) =>
-              v == null || v.isEmpty ? 'This field is required'.tr : null,
+          validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null,
         ),
       ),
     );
@@ -443,8 +362,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
     final now = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-          DateTime(now.year - 18, now.month, now.day), // default: 18 years old
+      initialDate: DateTime(now.year - 18, now.month, now.day), // default: 18 years old
       firstDate: DateTime(1900, 1, 1),
       lastDate: now,
       helpText: 'Select birthday',
@@ -462,8 +380,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
     }
   }
 
-  Widget _buildNumberField(String label, TextEditingController controller,
-      {required FocusNode focusNode}) {
+  Widget _buildNumberField(String label, TextEditingController controller, {required FocusNode focusNode}) {
     return Row(
       children: [
         Expanded(
@@ -473,23 +390,19 @@ class StoreRequestView extends GetView<StoreRequestController> {
             textDirection: TextDirection.rtl,
             decoration: InputDecoration(
               labelText: label,
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: ColorConstant.logoSecondColor)),
               filled: true,
               fillColor: Colors.grey[100],
               errorStyle: const TextStyle(color: Colors.red),
             ),
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (v) =>
-                v == null || v.isEmpty ? 'This field is required'.tr : null,
+            validator: (v) => v == null || v.isEmpty ? 'This field is required'.tr : null,
             onChanged: (v) {
               final value = int.tryParse(v) ?? 1;
               if (controller.text != value.toString()) {
                 controller.text = value.toString();
-                controller.selection = TextSelection.fromPosition(
-                    TextPosition(offset: controller.text.length));
+                controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
               }
             },
           ),
@@ -500,8 +413,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
             int value = int.tryParse(controller.text) ?? 1;
             value++;
             controller.text = value.toString();
-            controller.selection = TextSelection.fromPosition(
-                TextPosition(offset: controller.text.length));
+            controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
           },
         ),
         IconButton(
@@ -510,8 +422,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
             int value = int.tryParse(controller.text) ?? 1;
             if (value > 1) value--;
             controller.text = value.toString();
-            controller.selection = TextSelection.fromPosition(
-                TextPosition(offset: controller.text.length));
+            controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
           },
         ),
       ],
@@ -525,10 +436,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Text('Subscription Months: $months'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text('Total Amount: $total'.tr,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: ColorConstant.logoSecondColor)),
+          Text('Total Amount: $total'.tr, style: TextStyle(fontWeight: FontWeight.bold, color: ColorConstant.logoSecondColor)),
         ],
       );
     });
@@ -536,10 +444,8 @@ class StoreRequestView extends GetView<StoreRequestController> {
 
   Widget _buildFilePicker(String label, Rxn<String> fileController, int index) {
     return Obx(() {
-      final bool readOnly =
-          controller.args != null && !controller.editing.value;
-      final bool hasImage = (fileController.value != null &&
-          fileController.value!.trim().isNotEmpty);
+      final bool readOnly = controller.args != null && !controller.editing.value;
+      final bool hasImage = (fileController.value != null && fileController.value!.trim().isNotEmpty);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -551,8 +457,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
               // VIEW MODE (existing request, not editing) → open viewer if available
               if (readOnly) {
                 if (hasImage) {
-                  Get.to(() =>
-                      FullScreenImageViewer(imageUrl: fileController.value!));
+                  Get.to(() => FullScreenImageViewer(imageUrl: fileController.value!));
                 } else {
                   // Optional: show a hint that you must tap Edit to add images
                   Get.snackbar(
@@ -576,9 +481,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
               width: getSize(70),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: (!readOnly && !hasImage)
-                      ? Colors.red
-                      : ColorConstant.logoSecondColor,
+                  color: (!readOnly && !hasImage) ? Colors.red : ColorConstant.logoSecondColor,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.grey[100],
@@ -591,16 +494,12 @@ class StoreRequestView extends GetView<StoreRequestController> {
                           Icon(
                             readOnly ? Icons.image_not_supported : Icons.upload,
                             size: 32,
-                            color: (!readOnly && !hasImage)
-                                ? Colors.red
-                                : Colors.black38,
+                            color: (!readOnly && !hasImage) ? Colors.red : Colors.black38,
                           ),
                           Text(
                             readOnly ? 'No Image'.tr : 'Required'.tr,
                             style: TextStyle(
-                              color: (!readOnly && !hasImage)
-                                  ? Colors.red
-                                  : Colors.black54,
+                              color: (!readOnly && !hasImage) ? Colors.red : Colors.black54,
                               fontSize: 10,
                             ),
                           ),
@@ -635,8 +534,7 @@ class StoreRequestView extends GetView<StoreRequestController> {
     });
   }
 
-  void showDocumentPickerBottomSheet(Rxn<String> image,
-      {bool isPassport = false}) {
+  void showDocumentPickerBottomSheet(Rxn<String> image, {bool isPassport = false}) {
     unfocusAll(); // Use the new method to unfocus all fields
 
     Get.bottomSheet(
@@ -840,8 +738,7 @@ void showTermsDialog(bool isPayment, String terms) {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'Terms and Conditions'.tr,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ),
                     TermsWidget(terms: terms)
@@ -857,14 +754,12 @@ void showTermsDialog(bool isPayment, String terms) {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
-                    label: Text('Accept'.tr,
-                        style: TextStyle(fontSize: getFontSize(13))),
+                    label: Text('Accept'.tr, style: TextStyle(fontSize: getFontSize(13))),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: MainColor,
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(44),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5), // ← 5px radius
                       ),
@@ -884,14 +779,12 @@ void showTermsDialog(bool isPayment, String terms) {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    label: Text('Decline'.tr,
-                        style: TextStyle(fontSize: getFontSize(13))),
+                    label: Text('Decline'.tr, style: TextStyle(fontSize: getFontSize(13))),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(44),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5), // ← 5px radius
                       ),
@@ -919,9 +812,8 @@ void showTermsDialog(bool isPayment, String terms) {
 }
 
 class AppBarActionsDropdown extends StatefulWidget {
-  final dynamic controller; // your GetX controller type
-  const AppBarActionsDropdown({Key? key, required this.controller})
-      : super(key: key);
+  final StoreRequestController controller; // your GetX controller type
+  const AppBarActionsDropdown({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<AppBarActionsDropdown> createState() => _AppBarActionsDropdownState();
@@ -933,15 +825,12 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
   // ⬇️ Change this value to push the menu further down
   static const double _menuYOffset = 60;
 
-  Future<void> _openMenuAtButton(
-      BuildContext ctx, List<PopupMenuEntry<_Action>> items) async {
+  Future<void> _openMenuAtButton(BuildContext ctx, List<PopupMenuEntry<_Action>> items) async {
     final RenderBox button = ctx.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Overlay.of(ctx).context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(ctx).context.findRenderObject() as RenderBox;
 
     final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button
-        .localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay);
+    final Offset bottomRight = button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay);
 
     final pos = RelativeRect.fromRect(
       Rect.fromPoints(
@@ -980,8 +869,7 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
       case _Action.save:
         if (c.sendingRequest.value == true) return;
         if (c.formKey.currentState?.validate() != true) {
-          Ui.flutterToast("Please fill all required fields".tr,
-              Toast.LENGTH_SHORT, Colors.red, Colors.white);
+          Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
           return;
         }
         await c.updateRequestForm();
@@ -995,13 +883,34 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
         );
         if (confirmed == true) {
           try {
-            await c.deleteRequest();
+            await c.deleteStoreById(c.args!.id);
             if (context.mounted) Get.back();
           } catch (e) {
-            Ui.flutterToast('Delete failed'.tr, Toast.LENGTH_SHORT, Colors.red,
-                Colors.white);
+            Ui.flutterToast('Delete failed'.tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
           }
         }
+        break;
+      case _Action.enable:
+        final confirmed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder: (ctx) => _ConfirmEnableDialog(),
+        );
+        if (confirmed == true) {
+          try {
+            await c.enableStore(c.args!.id);
+
+            if (context.mounted) Get.back();
+          } catch (e) {
+            Ui.flutterToast('ُEnable failed'.tr, Toast.LENGTH_SHORT, ColorConstant.logoFirstColor, Colors.white);
+          }
+        }
+        break;
+      case _Action.transactions:
+        Get.toNamed(AppRoutes.transactionsScreen, arguments: {
+          'storeRequestId': c.args?.id,
+          'isStoreRequest': true,
+        });
         break;
     }
   }
@@ -1014,19 +923,48 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
       final hasArgs = c.args != null;
       final isEditing = c.editing.value as bool;
       final isSending = c.sendingRequest.value as bool;
+      final isDeleted = c.args?.status.toLowerCase() == 'deleted' ? true : false;
 
       // Build the dynamic menu items
       final items = <PopupMenuEntry<_Action>>[];
 
-      if (hasArgs && isEditing) {
+      items.add(
+        PopupMenuItem<_Action>(
+          value: _Action.transactions,
+          child: Row(
+            children: [
+              const Icon(Icons.account_balance_wallet, color: Colors.black87),
+              const SizedBox(width: 12),
+              Text('Transactions'.tr),
+            ],
+          ),
+        ),
+      );
+
+      if (hasArgs && isDeleted) {
+        items.add(
+          PopupMenuItem<_Action>(
+            value: _Action.enable,
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green),
+                const SizedBox(width: 12),
+                Text('Enable request'.tr),
+              ],
+            ),
+          ),
+        );
+      }
+
+      if (hasArgs && isEditing && !isDeleted) {
         items.addAll([
-          const PopupMenuItem<_Action>(
+          PopupMenuItem<_Action>(
             value: _Action.cancel,
             child: Row(
               children: [
-                Icon(Icons.close, color: Colors.red),
-                SizedBox(width: 12),
-                Text('Cancel'),
+                const Icon(Icons.close, color: Colors.red),
+                const SizedBox(width: 12),
+                Text('Cancel'.tr),
               ],
             ),
           ),
@@ -1035,15 +973,9 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
             value: _Action.save,
             child: Row(
               children: [
-                if (isSending)
-                  const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                else
-                  const Icon(Icons.check, color: Colors.green),
+                if (isSending) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) else const Icon(Icons.check, color: Colors.green),
                 const SizedBox(width: 12),
-                Text(isSending ? 'Saving…' : 'Save'),
+                Text(isSending ? 'Saving…'.tr : 'Save'.tr),
               ],
             ),
           ),
@@ -1051,35 +983,35 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
         ]);
       }
 
-      if (hasArgs && !isEditing) {
-        items.add(
-          const PopupMenuItem<_Action>(
+      if (hasArgs && !isEditing && !isDeleted) {
+        items.addAll([
+          PopupMenuItem<_Action>(
             value: _Action.edit,
             child: Row(
               children: [
-                Icon(Icons.edit, color: Colors.black87),
-                SizedBox(width: 12),
-                Text('Edit'),
+                const Icon(Icons.edit, color: Colors.black87),
+                const SizedBox(width: 12),
+                Text('Edit'.tr),
               ],
             ),
           ),
-        );
+        ]);
         items.add(const PopupMenuDivider());
       }
 
-      if (hasArgs) {
-        items.add(
-          const PopupMenuItem<_Action>(
+      if (hasArgs && !isDeleted) {
+        items.addAll([
+          PopupMenuItem<_Action>(
             value: _Action.delete,
             child: Row(
               children: [
-                Icon(Icons.delete_forever, color: Colors.red),
-                SizedBox(width: 12),
-                Text('Delete request'),
+                const Icon(Icons.delete_forever, color: Colors.red),
+                const SizedBox(width: 12),
+                Text('Delete request'.tr),
               ],
             ),
           ),
-        );
+        ]);
       }
 
       if (items.isEmpty) return const SizedBox.shrink();
@@ -1097,8 +1029,7 @@ class _AppBarActionsDropdownState extends State<AppBarActionsDropdown> {
           ),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () =>
-                _openMenuAtButton(context, items), // 👈 manual open with offset
+            onTap: () => _openMenuAtButton(context, items), // 👈 manual open with offset
             child: AnimatedRotation(
               duration: const Duration(milliseconds: 200),
               turns: _menuOpen ? 0.25 : 0.0,
@@ -1135,55 +1066,163 @@ class _ConfirmDeleteDialog extends StatelessWidget {
           children: [
             const Icon(Icons.warning_rounded, size: 40, color: Colors.red),
             const SizedBox(height: 12),
-            Text('Delete request?'.tr,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text('Delete request?'.tr, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(
-              'This action cannot be undone.'.tr,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.black54),
+            SizedBox(
+              height: Get.height * 0.4,
+              child: SingleChildScrollView(
+                  child: HtmlWidget(
+                data: globalController.homeDataList.value.deleteTermsConditions ?? '',
+              )),
             ),
             const SizedBox(height: 16),
+            Obx(() => CheckboxListTile(
+                  value: c.deleteAgreedToTerms.value,
+                  onChanged: (v) {
+                    if (v == true) {
+                      // showTermsDialog(false, controller.args?.userTermsANdConditions ?? '');
+                      c.deleteAgreedToTerms.value = true;
+                    } else {
+                      c.deleteAgreedToTerms.value = false;
+                    }
+                  },
+                  contentPadding: getPadding(all: 0),
+                  checkColor: ColorConstant.white,
+                  activeColor: ColorConstant.logoFirstColor,
+                  title: Text(
+                    'Agree to Terms'.tr,
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  subtitle: Text('Required to proceed'.tr, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                )),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12))),
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     child: Text('Cancel'.tr),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
+                  child: Obx(() => ElevatedButton(
                       onPressed: () {
-                        StoreRequestController controller =
-                            Get.find<StoreRequestController>();
-                        controller.deleteStoreById(controller.args!.id);
+                        if (!c.deleteAgreedToTerms.value) {
+                          Ui.flutterToast('Please agree to the terms to proceed'.tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+                          return;
+                        } else {
+                          StoreRequestController controller = Get.find<StoreRequestController>();
+                          controller.deleteStoreById(controller.args!.id);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: c.deleteAgreedToTerms.value ? Colors.red : Colors.grey,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Obx(
                         () => c.deletingRequest.value
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white)),
+                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                               )
                             : Text('Delete'.tr),
-                      )),
+                      ))),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfirmEnableDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    StoreRequestController c = Get.find<StoreRequestController>();
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.warning_rounded, size: 40, color: Colors.red),
+            const SizedBox(height: 12),
+            Text('Enable request?'.tr, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: Get.height * 0.4,
+              child: SingleChildScrollView(
+                  child: HtmlWidget(
+                data: globalController.homeDataList.value.requestTerms ?? '',
+              )),
+            ),
+            const SizedBox(height: 16),
+            Obx(() => CheckboxListTile(
+                  value: c.deleteAgreedToTerms.value,
+                  onChanged: (v) {
+                    if (v == true) {
+                      // showTermsDialog(false, controller.args?.userTermsANdConditions ?? '');
+                      c.deleteAgreedToTerms.value = true;
+                    } else {
+                      c.deleteAgreedToTerms.value = false;
+                    }
+                  },
+                  contentPadding: getPadding(all: 0),
+                  checkColor: ColorConstant.white,
+                  activeColor: ColorConstant.logoFirstColor,
+                  title: Text(
+                    'Agree to Terms'.tr,
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  subtitle: Text('Required to proceed'.tr, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                )),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    child: Text('Cancel'.tr),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Obx(() => ElevatedButton(
+                      onPressed: () {
+                        if (!c.deleteAgreedToTerms.value) {
+                          Ui.flutterToast('Please agree to the terms to proceed'.tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+                          return;
+                        } else {
+                          StoreRequestController controller = Get.find<StoreRequestController>();
+                          controller.enableStore(controller.args!.id);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: c.deleteAgreedToTerms.value ? Colors.red : Colors.grey,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Obx(
+                        () => c.deletingRequest.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                              )
+                            : Text('Enable'.tr),
+                      ))),
                 ),
               ],
             ),

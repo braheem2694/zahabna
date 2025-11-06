@@ -55,18 +55,21 @@ class ContractPDF {
   final String id;
   final String pdfName;
   final String pdfUrl;
+  final DateTime? createdAt;
 
   const ContractPDF({
     required this.id,
     required this.pdfName,
     required this.pdfUrl,
+    required this.createdAt,
   });
 
   factory ContractPDF.fromJson(Map<String, dynamic> json) {
     return ContractPDF(
       id: json['id'].toString(),
-      pdfName: json['pdf_name'] as String, // <-- fixed
-      pdfUrl: json['pdf_url'] as String, // <-- fixed
+      pdfName: json['pdf_name'].toString(),
+      pdfUrl: json['pdf_url'].toString(),
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
     );
   }
 

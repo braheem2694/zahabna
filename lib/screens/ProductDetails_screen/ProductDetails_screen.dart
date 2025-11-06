@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:iq_mall/Product_widget/Product_widget.dart';
+import 'package:iq_mall/cores/assets.dart';
 import 'package:iq_mall/cores/math_utils.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/controller/ProductDetails_screen_controller.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/ProductInfo.dart';
@@ -31,7 +32,9 @@ class ProductDetails_screen extends StatelessWidget {
 
   ProductDetails_screen({Key? key}) : super(key: key) {
     final tag = Get.arguments != null ? Get.arguments['tag'] ?? 'default' : prefs?.getString("tag");
-    controller = Get.isRegistered<ProductDetails_screenController>(tag: "${UniqueKey()}$tag") ? Get.find<ProductDetails_screenController>(tag: tag) : Get.put(ProductDetails_screenController(), tag: "${UniqueKey()}$tag");
+    controller = Get.isRegistered<ProductDetails_screenController>(tag: "${UniqueKey()}$tag")
+        ? Get.find<ProductDetails_screenController>(tag: tag)
+        : Get.put(ProductDetails_screenController(), tag: "${UniqueKey()}$tag");
   }
 
   @override
@@ -193,7 +196,7 @@ class ProductDetails_screen extends StatelessWidget {
                                               onTap: () async {
                                                 final box = context.findRenderObject() as RenderBox?;
                                                 await Share.shareUri(
-                                                  Uri.parse('cms.lebanonjewelry.net/product/${controller.product.value!.product_id}'),
+                                                  Uri.parse('$con/product/${controller.product.value!.product_id}'),
                                                   sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
                                                 );
 
@@ -357,7 +360,10 @@ class ProductDetails_screen extends StatelessWidget {
                                                                     ),
                                                                   ),
                                                                   Container(
-                                                                    decoration: BoxDecoration(border: Border.all(color: ColorConstant.logoFirstColor.withOpacity(0.5), width: 0.5), shape: BoxShape.rectangle, borderRadius: BorderRadius.circular(5)),
+                                                                    decoration: BoxDecoration(
+                                                                        border: Border.all(color: ColorConstant.logoFirstColor.withOpacity(0.5), width: 0.5),
+                                                                        shape: BoxShape.rectangle,
+                                                                        borderRadius: BorderRadius.circular(5)),
                                                                     child: CustomImageView(
                                                                       image: controller.product.value!.store.image,
                                                                       width: getSize(35),
@@ -772,8 +778,8 @@ class ProductDetails_screen extends StatelessWidget {
             itemCount: categories.length,
             padding: getPadding(all: 0),
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, // Two items per row
               mainAxisSpacing: 8, // Vertical spacing between rows
               crossAxisSpacing: 8, // Horizontal spacing between items

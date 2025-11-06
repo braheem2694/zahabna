@@ -42,13 +42,10 @@ class TransactionsView extends GetView<TransactionsController> {
 
           if (confirmed == true) {
             try {
-              if(!isEnabled){
+              if (!isEnabled) {
                 await c.enableStore(c.requests.first.id);
-
-              }
-              else{
+              } else {
                 await c.disableStore(c.requests.first.id);
-
               }
               if (Get.context!.mounted) Get.back();
             } catch (_) {
@@ -71,7 +68,7 @@ class TransactionsView extends GetView<TransactionsController> {
         centerTitle: false,
         actions: [
           Obx(
-            () => controller.isLoading.value
+            () => controller.isLoadingTransactions.value
                 ? const SizedBox(width: 48) // placeholder to avoid jump when loading completes
                 : ActionsDropdown(
                     menuYOffset: 40,
@@ -178,13 +175,19 @@ class _PinnedTotalAndFilters extends StatelessWidget {
           children: [
             loading
                 ? const StoreRegisterCardShimmer()
-                : StoreRegisterCard(
-                    storeName: c.requests.first.storeName,
-                    registerDate: c.requests.first.createdAt ?? DateTime.now(),
-                    endDate: c.requests.first.endDate,
-                  ),
+                : Get.find<TransactionsController>().requests.isNotEmpty
+                    ? StoreRegisterCard(
+                        storeName: c.requests.first.storeName,
+                        registerDate: c.requests.first.createdAt ?? DateTime.now(),
+                        endDate: c.requests.first.endDate,
+                      )
+                    : SizedBox(),
             const SizedBox(height: 8),
-            loading ? const TotalCardShimmer() : _buildRealTotal(theme),
+            loading
+                ? const TotalCardShimmer()
+                : Get.find<TransactionsController>().requests.isNotEmpty
+                    ? _buildRealTotal(theme)
+                    : SizedBox(),
             const SizedBox(height: 8),
             // Filters stay visible (optionally disable taps while loading)
             loading ? const FilterBarShimmer() : const Align(alignment: Alignment.centerLeft, child: _FilterBar()),
@@ -308,7 +311,9 @@ class _FilterBar extends StatelessWidget {
                 context: context,
                 firstDate: first,
                 lastDate: DateTime(now.year + 1, 12, 31),
-                initialDateRange: c.customFrom.value != null && c.customTo.value != null ? DateTimeRange(start: c.customFrom.value!, end: c.customTo.value!) : DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now),
+                initialDateRange: c.customFrom.value != null && c.customTo.value != null
+                    ? DateTimeRange(start: c.customFrom.value!, end: c.customTo.value!)
+                    : DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now),
                 helpText: 'Custom Date Range',
                 builder: (ctx, child) {
                   final baseTheme = Theme.of(ctx);
@@ -481,7 +486,7 @@ class _TxnTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  df.format(t.date),
+                  'starts: ${DateFormat('yMMMd').format(t.date)}',
                   style: const TextStyle(fontSize: 11.5, color: Colors.black54),
                 ),
                 const SizedBox(height: 1),
@@ -501,6 +506,7 @@ class _TxnTile extends StatelessWidget {
     );
   }
 }
+
 Color _getStatusColor(String status) {
   switch (status) {
     case 'Accepted':
@@ -515,7 +521,6 @@ Color _getStatusColor(String status) {
       return Colors.orange;
   }
 }
-
 
 class _PaymentTypeIcon extends StatelessWidget {
   final String type;
@@ -537,32 +542,102 @@ class _PaymentTypeIcon extends StatelessWidget {
   }
 }
 
-class StoreRegisterCard extends StatelessWidget {
+class StoreRegisterCard extends StatefulWidget {
   final String storeName;
   final DateTime registerDate;
   final DateTime? endDate;
+  final DateTime? deletedDate;
 
   const StoreRegisterCard({
     Key? key,
     required this.storeName,
     required this.registerDate,
+    this.deletedDate,
     this.endDate,
   }) : super(key: key);
 
   @override
+  State<StoreRegisterCard> createState() => _StoreRegisterCardState();
+}
+
+class _StoreRegisterCardState extends State<StoreRegisterCard> {
+  final c = Get.find<TransactionsController>();
+
+  showPdfs() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 12,
+            ),
+            child: SizedBox(
+              height: Get.height * 0.6,
+              width: Get.width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Text(
+                    'Contracts'.tr,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Flexible(
+                    child: Obx(() {
+                      return Expanded(
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final b in c.contractPdf)
+                                PdfActionsCard(
+                                  pdfUrl: b?.pdfUrl ?? "",
+                                  fileName: b?.pdfName,
+                                  viewInBrowserByDefault: true,
+                                )
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
-    final c = Get.find<TransactionsController>();
 
     return SizedBox(
       height: 110, // reduced from 150
-      child:Obx(()=>
-          Card(
+      child: Obx(() => Card(
             elevation: 0,
-            color:
-            c.requests.first.status.toLowerCase()=="deleted"?
-            Colors.red.withAlpha(180):
-            Colors.white,
+            color: c.requests.first.status.toLowerCase() == "deleted" ? Colors.red.withAlpha(180) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(color: Colors.grey.shade300),
@@ -581,35 +656,73 @@ class StoreRegisterCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       SizedBox(
                         child: Text(
-                          storeName,
+                          widget.storeName,
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87, overflow: TextOverflow.ellipsis),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Spacer(),
-                      Obx(()=>
-                      c.requests.first.status.toLowerCase()=="deleted"?
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: getPadding(left: 8,right: 8,top: 2,bottom: 2),
-                        child: Text(
-                          c.requests.first.status,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white, overflow: TextOverflow.ellipsis),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ):SizedBox(),
+                      Obx(
+                        () => c.requests.first.status.toLowerCase() == "deleted"
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: getPadding(left: 8, right: 8, top: 2, bottom: 2),
+                                child: Text(
+                                  c.requests.first.status,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white, overflow: TextOverflow.ellipsis),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            : SizedBox(),
                       ),
                       const Spacer(),
-                      Obx(()=>
-                          PdfActionsCard(
-                            pdfUrl: c.contractPdf.value?.pdfUrl ?? '',
-                            fileName: "contract".tr,
-                            viewInBrowserByDefault: true,
-                          )
-                      ),
+                      Obx(() {
+                        final c = Get.find<TransactionsController>();
+                        final count = c.contractPdf.length;
+                        if (count == 0) return const SizedBox.shrink();
+
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: showPdfs,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: const Size(0, 0), // remove default min height
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              foregroundColor: MainColor,
+                              overlayColor: MainColor.withOpacity(0.08),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                                const SizedBox(width: 5),
+                                const Text(
+                                  'View Contracts',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                _CountDot(count: count, color: MainColor),
+                              ],
+                            ),
+                          ),
+                        );
+                      })
+
+                      // Obx(() => PdfActionsCard(
+                      //       pdfUrl: c.contractPdf.value?.pdfUrl ?? '',
+                      //       fileName: "contract".tr,
+                      //       viewInBrowserByDefault: true,
+                      //     )),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -620,24 +733,30 @@ class StoreRegisterCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildDateColumn(
-                        label: 'Register',
-                        date: dateFormat.format(registerDate),
+                        label: 'Register'.tr,
+                        date: dateFormat.format(widget.registerDate),
                         icon: Icons.calendar_today_outlined,
                         color: Colors.green,
                       ),
                       _buildDateColumn(
-                        label: 'End',
-                        date: endDate != null ? dateFormat.format(endDate!) : "N/A",
+                        label: 'End'.tr,
+                        date: widget.endDate != null ? dateFormat.format(widget.endDate!) : "N/A",
                         icon: Icons.event_busy,
                         color: Colors.redAccent,
                       ),
+                      if (widget.deletedDate != null)
+                        _buildDateColumn(
+                          label: 'Deleted'.tr,
+                          date: widget.deletedDate != null ? dateFormat.format(widget.deletedDate!) : "N/A",
+                          icon: Icons.event_busy,
+                          color: Colors.redAccent,
+                        ),
                     ],
                   ),
                 ],
               ),
             ),
-          )
-      ),
+          )),
     );
   }
 
@@ -648,7 +767,7 @@ class StoreRegisterCard extends StatelessWidget {
     required Color color,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
           children: [
@@ -690,7 +809,7 @@ class RenewSubscriptionFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Get.find<TransactionsController>().isLoading.value
+    return Obx(() => Get.find<TransactionsController>().isLoadingTransactions.value
         ? const SizedBox()
         : FloatingActionButton.extended(
             heroTag: 'renew_sub_fab',
@@ -1131,6 +1250,36 @@ class ConfirmToggleStoreDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CountDot extends StatelessWidget {
+  final int count;
+  final Color color;
+  const _CountDot({super.key, required this.count, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = count > 99 ? '99+' : '$count';
+    return Container(
+      height: 16,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.45)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+          height: 1.0,
         ),
       ),
     );

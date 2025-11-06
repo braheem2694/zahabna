@@ -8,6 +8,7 @@ class FieldRowController {
   final TextEditingController value;
   final bool isRequired;
   final String? Function(String? value)? validator;
+  final FocusNode valueFocusNode;
 
   /// When true, the *title* is not editable.
   final bool isTitleLocked;
@@ -18,6 +19,7 @@ class FieldRowController {
   FieldRowController({
     this.isRequired = true,
     this.validator,
+    required this.valueFocusNode,
     String initialTitle = '',
     String initialValue = '',
     this.isTitleLocked = false,

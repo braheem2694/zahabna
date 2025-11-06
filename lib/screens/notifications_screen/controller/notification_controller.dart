@@ -1,16 +1,8 @@
 import 'package:get/get.dart';
-import 'package:iq_mall/routes/app_routes.dart';
 
 import 'package:iq_mall/main.dart';
-import 'dart:convert';
-import 'package:iq_mall/widgets/ShWidget.dart';
-import 'package:iq_mall/widgets/CommonFunctions.dart';
-import 'package:http/http.dart' as http;
-import 'package:iq_mall/cores/assets.dart';
 import 'package:iq_mall/models/Notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../utils/ShColors.dart';
 import 'package:flutter/src/widgets/scroll_controller.dart';
 
 class NotificationsController extends GetxController {
@@ -19,14 +11,11 @@ class NotificationsController extends GetxController {
 
   ScrollController mainController = ScrollController();
 
-
-
   @override
   void onInit() {
     mainController.addListener(() {
-      if (mainController.position.pixels == mainController.position.maxScrollExtent ) {
+      if (mainController.position.pixels == mainController.position.maxScrollExtent) {
         GetNotifications(true);
-
       }
     });
     GetNotifications(false);
@@ -46,7 +35,6 @@ class NotificationsController extends GetxController {
     bool success = false;
 
     try {
-
       Map<String, dynamic> response = await api.getData({
         'token': prefs!.getString("token") ?? "",
         'page': offset.toString(),
@@ -58,9 +46,8 @@ class NotificationsController extends GetxController {
         offset++;
 
         if (success) {
-          if(!isScroll){
+          if (!isScroll) {
             notificationslist.clear();
-
           }
           List notificationsInfo = response["notifications"];
           for (int i = 0; i < notificationsInfo.length; i++) {

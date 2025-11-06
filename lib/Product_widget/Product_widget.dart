@@ -3,6 +3,7 @@ import 'package:flutter_avif/flutter_avif.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:iq_mall/cores/assets.dart';
 import 'package:iq_mall/cores/math_utils.dart';
 import 'package:iq_mall/routes/app_routes.dart';
 import 'package:iq_mall/utils/ShImages.dart';
@@ -141,7 +142,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
     print(widget.product.product_name);
     print(isLiked.value);
     isReallyLiked.value = widget.product.is_liked == 0 ? false : true;
-    imageCount.value = (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) < 4 ? (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) : 4;
+    imageCount.value =
+        (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) < 4 ? (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) : 4;
     return InkWell(
       key: scaffoldKey,
       focusColor: Colors.transparent,
@@ -186,7 +188,9 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
         //
         // }
 
-        Get.toNamed(AppRoutes.Productdetails_screen, arguments: {'product': widget.product, 'fromCart': false, 'productSlug': null, 'tag': "${widget.product.product_id}"}, parameters: {'tag': "${UniqueKey()}${widget.product.product_id}"})?.then((value) {
+        Get.toNamed(AppRoutes.Productdetails_screen,
+            arguments: {'product': widget.product, 'fromCart': false, 'productSlug': null, 'tag': "${widget.product.product_id}"},
+            parameters: {'tag': "${UniqueKey()}${widget.product.product_id}"})?.then((value) {
           refreshing.value = true;
           globalController.updateCurrentRout(AppRoutes.tabsRoute);
           globalController.cartCount = 0;
@@ -510,10 +514,19 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                                       child: Text(
                                         sign.toString() + widget.product.product_price.toString(),
                                         style: TextStyle(
-                                          fontWeight: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) || widget.product.price_after_discount.toString() == 'null' ? FontWeight.bold : FontWeight.normal,
-                                          color: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ? discount_price_color : price_color,
-                                          fontSize: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) || widget.product.price_after_discount.toString() == 'null' ? getFontSize(14) : getFontSize(12),
-                                          decoration: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ? TextDecoration.lineThrough : TextDecoration.none,
+                                          fontWeight: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ||
+                                                  widget.product.price_after_discount.toString() == 'null'
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color:
+                                              (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ? discount_price_color : price_color,
+                                          fontSize: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ||
+                                                  widget.product.price_after_discount.toString() == 'null'
+                                              ? getFontSize(14)
+                                              : getFontSize(12),
+                                          decoration: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price)
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
                                         ),
                                       ),
                                     ),
@@ -608,7 +621,7 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
   onTapWhatsapp(Product product) {
     makeWhatsappContact('+96176600252',
         text: "I want to ask about this product: ${product.product_name}\n${Uri.parse(product.main_image.toString().replaceAll(" ", "%20"))}\n${product.description}\n"
-            "cms.lebanonjewelry.net/product/${product.slug}");
+            "$conVersion/product/${product.slug}");
   }
 }
 

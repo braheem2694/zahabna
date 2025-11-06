@@ -20,9 +20,11 @@ class HomeData {
   String? message;
   String? categoryType;
   String? requestTerms;
+  String? deleteTermsConditions;
   String? paymentRequestTerms;
   bool? isRetail;
   double? requestPrice;
+  double? requestFees;
   List<Category>? categories;
   RxList<ProductSection>? productSections;
   List<Product>? products;
@@ -55,7 +57,9 @@ class HomeData {
     this.productTypes,
     this.gemstoneStyles,
     this.requestPrice,
+    this.requestFees,
     this.requestTerms,
+    this.deleteTermsConditions,
   });
 
   factory HomeData.fromJson(Map<dynamic, dynamic> json) => HomeData(
@@ -63,7 +67,9 @@ class HomeData {
         message: json["message"],
         isRetail: json["is_retail"],
         requestPrice: double.parse(json["request_price"].toString()),
+        requestFees: double.parse(json["request_fees"].toString()),
         requestTerms: json["request_terms_conditions"],
+        deleteTermsConditions: json["delete_terms_conditions"],
         paymentRequestTerms: json["payment_request_terms_conditions"],
         categoryType: json["categoryType"],
         categories: List<Category>.from(json["categories"]?.map((x) => Category.fromJson(x)) ?? []),

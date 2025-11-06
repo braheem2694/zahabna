@@ -19,7 +19,7 @@ class HtmlWidget extends StatelessWidget {
     var unescape = HtmlUnescape();
     String text = unescape.convert(data ?? '');
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(15)),
+      // decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(15)),
       constraints: BoxConstraints(
         minHeight: getVerticalSize(80),
       ),

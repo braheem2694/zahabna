@@ -1,6 +1,7 @@
 import 'package:iq_mall/cores/math_utils.dart';
 import 'package:iq_mall/screens/bill_screen/controller/bill_controller.dart';
 import 'package:iq_mall/screens/bill_screen/widgets/d.dart';
+// ignore: unused_import
 import 'package:iq_mall/widgets/CommonFunctions.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_mall/cores/assets.dart';
@@ -25,7 +26,9 @@ class ProductDetailsSection extends GetView<BillController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 5.0,),
+          padding: const EdgeInsets.only(
+            top: 5.0,
+          ),
           child: DataTable(
             headingRowColor: MaterialStateColor.resolveWith((states) => MainColor),
             columns: <DataColumn>[
@@ -43,19 +46,14 @@ class ProductDetailsSection extends GetView<BillController> {
                       DataCell(
                         SizedBox(
                           width: getHorizontalSize(340),
-                          child: Text(data.product_name.toString(),
-                              maxLines: 2, style: TextStyle(fontSize: getFontSize(11))),
+                          child: Text(data.product_name.toString(), maxLines: 2, style: TextStyle(fontSize: getFontSize(11))),
                         ),
                       ),
                       DataCell(Text(data.quantity!, style: secondaryTextStyle())),
                       DataCell(Text(
                         data.sales_discount.toString() == 'null'
                             ? "$sign ${formatter.format(double.parse((data.product_price).toString()) * int.parse(data.quantity!))}"
-                            : sign +
-                                " " +
-                                (double.parse(data.sales_discount.toString()) *
-                                        int.parse(data.quantity.toString()))
-                                    .toString(),
+                            : sign + " " + (double.parse(data.sales_discount.toString()) * int.parse(data.quantity.toString())).toString(),
                         maxLines: 1,
                         style: secondaryTextStyle(),
                       )),
@@ -77,10 +75,8 @@ class ProductDetailsSection extends GetView<BillController> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('Shipping amount'.tr,
-                                    style: TextStyle(fontSize: getFontSize(20), color: Colors.black)),
-                                Text("${sign.value}${formatter.format(globalController.sum.value)}",
-                                    style: TextStyle(fontSize: getFontSize(20), color: Colors.black)),
+                                Text('Shipping amount'.tr, style: TextStyle(fontSize: getFontSize(20), color: Colors.black)),
+                                Text("${sign.value}${formatter.format(globalController.sum.value)}", style: TextStyle(fontSize: getFontSize(20), color: Colors.black)),
                               ],
                             ),
                           )
@@ -96,8 +92,7 @@ class ProductDetailsSection extends GetView<BillController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text('Delivery amount'.tr, style: TextStyle(fontSize: getFontSize(15), color: Colors.black)),
-                    Text("${sign.value}${formatter.format(double.parse(prefs!.getString('delivery_cost')!))}",
-                        style: const TextStyle(fontSize: 20, color: Colors.black)),
+                    Text("${sign.value}${formatter.format(double.parse(prefs!.getString('delivery_cost')!))}", style: const TextStyle(fontSize: 20, color: Colors.black)),
                   ],
                 ),
               ),
@@ -123,8 +118,7 @@ class ProductDetailsSection extends GetView<BillController> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text('Total Amount + shipment'.tr, style: TextStyle(fontSize: getFontSize(15), color: Colors.black)),
-                  Obx(() => Text(
-                      "$sign ${(double.parse(Get.context!.read<Counter>().calculateTotal(0.0).toString()) + globalController.sum.value).toString()}",
+                  Obx(() => Text("$sign ${(double.parse(Get.context!.read<Counter>().calculateTotal(0.0).toString()) + globalController.sum.value).toString()}",
                       style: const TextStyle(fontSize: 20, color: Colors.black))),
                 ],
               ),
@@ -141,8 +135,7 @@ class ProductDetailsSection extends GetView<BillController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text('Coupon code %'.tr, style: const TextStyle(fontSize: 20, color: Colors.black)),
-                        Text("${SummaryController.coupon_percentage}${'%'}",
-                            style: const TextStyle(fontSize: 20, color: Colors.black)),
+                        Text("${SummaryController.coupon_percentage}${'%'}", style: const TextStyle(fontSize: 20, color: Colors.black)),
                       ],
                     ),
                   );
@@ -157,8 +150,7 @@ class ProductDetailsSection extends GetView<BillController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text('Discounted Total Amount'.tr, style: const TextStyle(fontSize: 20, color: Colors.black)),
-                    Text(
-                        "$sign${formatter.format(double.parse((Get.context!.read<Counter>().calculateTotal(SummaryController.coupon_percentage.value) + (globalController.sum.value)).toString()))}",
+                    Text("$sign${formatter.format(double.parse((Get.context!.read<Counter>().calculateTotal(SummaryController.coupon_percentage.value) + (globalController.sum.value)).toString()))}",
                         style: const TextStyle(fontSize: 20, color: Colors.black)),
                   ],
                 ),

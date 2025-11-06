@@ -1,24 +1,18 @@
-import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:animated_icon/animated_icon.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/ticker_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:iq_mall/models/HomeData.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/animated_icon_widget.dart';
 import 'package:iq_mall/widgets/ui.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../cores/math_utils.dart';
 import '../../../main.dart';
 import '../../../utils/ShColors.dart';
-import '../../../utils/ShImages.dart';
-import '../../../widgets/custom_image_view.dart';
 import '../controller/ProductDetails_screen_controller.dart';
 
 class AddToCartButtons extends StatefulWidget {
@@ -30,7 +24,8 @@ class AddToCartButtons extends StatefulWidget {
   final bool animatingAddToCardTick;
   final ProductDetails_screenController productDetailsController;
 
-  AddToCartButtons({required this.onTap, this.isText = true, this.text = "Continue", this.product, this.addingToCard = false, required this.animatingAddToCardTick, required this.productDetailsController});
+  AddToCartButtons(
+      {required this.onTap, this.isText = true, this.text = "Continue", this.product, this.addingToCard = false, required this.animatingAddToCardTick, required this.productDetailsController});
 
   @override
   _ContinueButtonWidgetState createState() => _ContinueButtonWidgetState();
@@ -97,7 +92,7 @@ class _ContinueButtonWidgetState extends State<AddToCartButtons> with TickerProv
           children: [
             if (widget.isText ?? true)
               Padding(
-                padding: getPadding(left: 16.0),
+                padding: getPadding(left: 20.0, bottom: 3),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

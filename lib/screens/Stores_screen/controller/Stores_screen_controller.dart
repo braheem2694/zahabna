@@ -1,14 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
-import '../../../cores/math_utils.dart';
 import '../../../main.dart';
 import '../../../models/Stores.dart';
 import '../../../routes/app_routes.dart';
 import '../../../utils/ShColors.dart';
 import '../../Cart_List_screen/controller/Cart_List_controller.dart';
-import '../../HomeScreenPage/ShHomeScreen.dart';
 import '../../Home_screen_fragment/controller/Home_screen_fragment_controller.dart';
 import '../../OrderSummaryScreen/widgets/PaymentMethodsWidets/PaymentMethodsWidget.dart';
 import '../../Wishlist_screen/controller/Wishlist_controller.dart';
@@ -20,32 +17,30 @@ class StoreController extends GetxController {
   RxBool loading = true.obs;
   RxBool loadingMore = false.obs;
   RxBool refreshStores = false.obs;
-  Rx<String?> selectedCity= Rxn();
-  Rx<String?> selectedCityId= Rxn();
+  Rx<String?> selectedCity = Rxn();
+  Rx<String?> selectedCityId = Rxn();
 
   RxList<Rx<StoreClass>> stores = <Rx<StoreClass>>[].obs;
   RxInt offset = 1.obs;
   ScrollController scrollController = ScrollController();
-  RxList<Map<String,String>> cities = <Map<String,String>>[].obs;
+  RxList<Map<String, String>> cities = <Map<String, String>>[].obs;
 
   @override
   void onInit() {
-
     storeList.clear();
-    fetchStores(false,true);
+    fetchStores(false, true);
 
-     scrollController.addListener(() {
-        if (scrollController.position.pixels > (scrollController.position.maxScrollExtent-450) && !loadingMore.value ) {
-          fetchStores(true,false);
-        }
-      });
+    scrollController.addListener(() {
+      if (scrollController.position.pixels > (scrollController.position.maxScrollExtent - 450) && !loadingMore.value) {
+        fetchStores(true, false);
+      }
+    });
 
     super.onInit();
   }
 
   ChangeStroredStore(store, newsLetterChoosen) async {
     try {
-
       Get.delete<Home_screen_fragmentController>();
       Get.delete<CategoriesController>();
       Get.delete<WishlistController>();
@@ -98,36 +93,29 @@ class StoreController extends GetxController {
 
   Future<bool> fetchStores(bool isScroll, bool init, {bool fromInfo = false}) async {
     bool success = false;
-    if(isScroll){
-      loadingMore.value=true;
-
+    if (isScroll) {
+      loadingMore.value = true;
+    } else if (init) {
+      offset.value = 1;
+      loading.value = true;
+    } else {
+      offset.value = 1;
     }
-    else if(init){
-      offset.value=1;
-      loading.value=true;
-    }
-    else{
-      offset.value=1;
-
-    }
-
 
     Map<String, dynamic> response = await api.getData({
       'token': prefs?.getString("token") ?? "",
       'page': offset.value.toString(),
-      'city':selectedCityId.value,
+      'city': selectedCityId.value,
     }, "stores/get-stores");
 
     if (response.isNotEmpty) {
       offset.value++;
 
-      if(!isScroll){
+      if (!isScroll) {
         stores.clear();
+      }
 
-
-    }
-
-      List storesInfo = response["stores"]??[];
+      List storesInfo = response["stores"] ?? [];
 
       success = response["succeeded"];
       prefs!.setString('stp_key', response["stp_key"].toString());
@@ -144,11 +132,10 @@ class StoreController extends GetxController {
         for (int i = 0; i < storesInfo.length; i++) {
           stores.add(StoreClass.userFromJson(storesInfo[i]).obs);
         }
-        if(isScroll){
+        if (isScroll) {
           offset.value++;
-
         }
-        if(init){
+        if (init) {
           for (int i = 0; i < storesInfo.length; i++) {
             String cityId = stores[i].value.cityId.toString();
             String cityName = stores[i].value.cityName.toString();
@@ -159,17 +146,13 @@ class StoreController extends GetxController {
             if (!cityExists) {
               cities.add({cityId: cityName});
             }
-
           }
-          cities.insert(0, {"0":"Select City"});
-
+          cities.insert(0, {"0": "Select City"});
         }
-        if(isScroll){
-          loadingMore.value=false;
-
-        }
-        else{
-          loading.value=false;
+        if (isScroll) {
+          loadingMore.value = false;
+        } else {
+          loading.value = false;
         }
 
         prefs!.setBool('multi_store', true);
@@ -182,40 +165,35 @@ class StoreController extends GetxController {
           prefs!.setString('gif_image', response['section'][0]['gif_image'] ?? 'default_value');
         }
 
-        payment_methods = response["payment_types"]??[];
+        payment_methods = response["payment_types"] ?? [];
 
         for (int i = 0; i < storesInfo.length; i++) {
           stores.add(StoreClass.fromJson(storesInfo[i]).obs);
         }
 
-        if(!fromInfo && !isScroll){
-          if(stores.isNotEmpty){
+        if (!fromInfo && !isScroll) {
+          if (stores.isNotEmpty) {
             ChangeStroredStore(stores[0].value, response["newsLetters"]);
-
           }
-
         }
-
       }
 
       loading.value = false;
-    if(isScroll){
-      loadingMore.value=false;
-
-    }
+      if (isScroll) {
+        loadingMore.value = false;
+      }
     }
 
     return success;
   }
+
   saveStoreView(storeId) async {
-globalController.currentStoreId= storeId.toString();
+    globalController.currentStoreId = storeId.toString();
     await api.getData({
-      'token': prefs!.getString("token")!=""?prefs!.getString("token"):null,
+      'token': prefs!.getString("token") != "" ? prefs!.getString("token") : null,
       'store_id': storeId,
     }, "stores/save-store-view").then((value) {
       print(value);
     });
-
   }
-
 }

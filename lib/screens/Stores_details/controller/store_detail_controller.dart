@@ -1,27 +1,18 @@
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/multipart/form_data.dart';
 import 'package:get/get_rx/get_rx.dart';
 import '../../../cores/assets.dart';
 import '../../../main.dart';
 import '../../../models/HomeData.dart';
 import '../../../models/HomeData.dart' as cat;
 import '../../../models/Stores.dart';
-import '../../../utils/ShColors.dart';
-import '../../../widgets/ShWidget.dart';
-import '../../../widgets/ui.dart';
-import '../../OrderSummaryScreen/widgets/PaymentMethodsWidets/PaymentMethodsWidget.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/material/scaffold.dart';
 import 'package:flutter/src/widgets/scroll_controller.dart';
-import 'package:flutter/src/animation/curves.dart';
-import 'package:flutter/src/material/colors.dart';
 
 import '../../tabs_screen/models/SocialMedia.dart';
 import '../models/MainSlider.dart';
-import 'package:flutter/src/widgets/editable_text.dart';
 import 'package:dio/dio.dart' as dio;
 
 class StoreDetailController extends GetxController {
@@ -35,14 +26,14 @@ class StoreDetailController extends GetxController {
   RxInt offset = 0.obs;
   RxInt page = 1.obs;
   RxString count = "0".obs;
-  RxList<Product> products= <Product>[].obs;
+  RxList<Product> products = <Product>[].obs;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   int previousNbOfImages = 0;
   int nbOfImages = 0;
   int countImages = 0;
-  ScrollController scrollController =  ScrollController();
+  ScrollController scrollController = ScrollController();
   late RxList<MainSlider> storeImages = <MainSlider>[].obs;
-   Rx<StoreClass> store = StoreClass().obs;
+  Rx<StoreClass> store = StoreClass().obs;
   Rx<int> sliderIndex = 0.obs;
   String? workingTime;
   RxInt sectionIndex = 0.obs;
@@ -61,24 +52,21 @@ class StoreDetailController extends GetxController {
   @override
   void onInit() {
     args = Get.arguments;
-    store.value=args["store"];
+    store.value = args["store"];
     socialMedia.addAll(store.value.socials!);
-    categories.addAll(store.value.categories!.where((element) => element.parent==null && element.hasProduct));
+    categories.addAll(store.value.categories!.where((element) => element.parent == null && element.hasProduct));
     StoreClass? temp;
-    try{
-     if(store.value.ownerId.toString()==  prefs!.getString("user_id")){
-       isOwner.value=true;
-
-     }
-
-    }catch(e){
-      isOwner.value=false;
+    try {
+      if (store.value.ownerId.toString() == prefs!.getString("user_id")) {
+        isOwner.value = true;
+      }
+    } catch (e) {
+      isOwner.value = false;
     }
     storeImages.addAll(args["store"].images);
 
     Future.delayed(Duration(milliseconds: 600)).then((value) {
-      loading.value=false;
-
+      loading.value = false;
     });
     tempStoreImage = store.value.main_image ?? '';
 
@@ -86,9 +74,11 @@ class StoreDetailController extends GetxController {
 
     super.onInit();
   }
+
   void toggleExpand(bool newValue) {
-    isExpanded.value=newValue;
+    isExpanded.value = newValue;
   }
+
   // getCategoriesFromApi() async {
   //   loading.value = true;
   //   Map<String, dynamic> response = await api.getData({
@@ -126,7 +116,7 @@ class StoreDetailController extends GetxController {
 
     if (response.isNotEmpty) {
       if (response['categories'] is List) {
-        categories =List<cat.Category>.from(response["categories"].map((x) => cat.Category.fromJson(x))).obs;
+        categories = List<cat.Category>.from(response["categories"].map((x) => cat.Category.fromJson(x))).obs;
         savingWorkingTime.value = false;
         return categories;
       } else {
@@ -138,6 +128,7 @@ class StoreDetailController extends GetxController {
       savingWorkingTime.value = false;
     }
   }
+
   uploadImage(table_name, row_id, file_name, String? image, int type) async {
     if (image != null) {
       dio.FormData data = dio.FormData.fromMap({
@@ -165,9 +156,8 @@ class StoreDetailController extends GetxController {
             },
           ),
           onSendProgress: (count, total) {
-              imageUploadPercent.value = count / total;
-              if (imageUploadPercent.value == 1.0) {
-              }
+            imageUploadPercent.value = count / total;
+            if (imageUploadPercent.value == 1.0) {}
           },
         );
 
@@ -188,7 +178,4 @@ class StoreDetailController extends GetxController {
       }
     }
   }
-
-
-
 }

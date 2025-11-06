@@ -24,56 +24,50 @@ class _WhshPaymentViewState extends State<WhshPaymentView> {
   bool _isLoading = true; // Flag to track if the page is loading
   bool updatingTransaction = false; // Flag to track if the page is loading
 
-
   Future<void> updateTransAction(BuildContext context, String transactionId) async {
-
-
-    try{
-      updatingTransaction=true;
+    try {
+      updatingTransaction = true;
       final Map<String, dynamic> response = await api.getData(
         {
-          "external_id":transactionId,
-          "token":prefs?.getString("token"),
+          "external_id": transactionId,
+          "token": prefs?.getString("token"),
         },
         "stores/update-transaction",
       );
 
-
-
-
       if (response["success"] == true) {
-        updatingTransaction=false;
+        updatingTransaction = false;
 
-        await Get.to(
-                () => PaymentResultScreen(isPaymentSuccessful: true,requestId: widget.requestId,wishPaymentKey:
-                transactionId,transactionFailed: false,
-                  subscriptionStartDate: response["subscription_start_date"].toString(),
-          subscriptionEndDate:  response["subscription_end_date"].toString(),
-        ))?.then((value) {
-          Get.back(result: value);
-
-        },);
-
+        await Get.to(() => PaymentResultScreen(
+              isPaymentSuccessful: true,
+              requestId: widget.requestId,
+              wishPaymentKey: transactionId,
+              transactionFailed: false,
+              subscriptionStartDate: response["subscription_start_date"].toString(),
+              subscriptionEndDate: response["subscription_end_date"].toString(),
+            ))?.then(
+          (value) {
+            Get.back(result: value);
+          },
+        );
       } else {
-        updatingTransaction=false;
+        updatingTransaction = false;
 
-        await Get.to(
-              () => PaymentResultScreen(isPaymentSuccessful: false,requestId: widget.requestId,wishPaymentKey:
-          transactionId,transactionFailed:true,
-
-            )
-        )?.then((value) {
-          Get.back(result: value);
-
-        },);
+        await Get.to(() => PaymentResultScreen(
+              isPaymentSuccessful: false,
+              requestId: widget.requestId,
+              wishPaymentKey: transactionId,
+              transactionFailed: true,
+            ))?.then(
+          (value) {
+            Get.back(result: value);
+          },
+        );
         // Handle error
       }
-    }catch(e){
-      updatingTransaction=false;
-
-
+    } catch (e) {
+      updatingTransaction = false;
     }
-
   }
 
   @override
@@ -106,21 +100,24 @@ class _WhshPaymentViewState extends State<WhshPaymentView> {
           onNavigationRequest: (NavigationRequest request) async {
             // Check if the URL contains "success" or "fail"
             if (request.url.contains("success")) {
-
-              await updateTransAction(context,request.url.split("/").last);
+              await updateTransAction(context, request.url.split("/").last);
               // Navigate to the success page
 
               return NavigationDecision.prevent; // Prevent WebView from navigating
             } else if (request.url.contains("fail")) {
               // Navigate to the failure page
               await Get.to(
-                    () => PaymentResultScreen(isPaymentSuccessful: true,requestId: widget.requestId,wishPaymentKey:
-                    request.url.split("/").last,transactionFailed: false
-                  ,),
-              )?.then((value) {
-                Get.back(result: value);
-
-              },);
+                () => PaymentResultScreen(
+                  isPaymentSuccessful: true,
+                  requestId: widget.requestId,
+                  wishPaymentKey: request.url.split("/").last,
+                  transactionFailed: false,
+                ),
+              )?.then(
+                (value) {
+                  Get.back(result: value);
+                },
+              );
 
               return NavigationDecision.prevent; // Prevent WebView from navigating
             }
@@ -165,97 +162,95 @@ class _WhshPaymentViewState extends State<WhshPaymentView> {
       body: Column(
         children: [
           // Show shimmer effect while loading
-          _isLoading?
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Logo
-                  Center(
-                    child: Container(
-                      width: 120,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
+          _isLoading
+              ? Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Logo
+                        Center(
+                          child: Container(
+                            width: 120,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
 
-                      ),
+                        // Payment to title
+                        Container(
+                          width: 150,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Payment Details (INV-15 and amount)
+                        Container(
+                          width: double.infinity,
+                          height: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          height: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          height: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          height: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Phone input field placeholder
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Button
+                        Center(
+                          child: Container(
+                            width: double.infinity,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  // Payment to title
-                  Container(
-                    width: 150,
-                    height: 20,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Payment Details (INV-15 and amount)
-                  Container(
-                    width: double.infinity,
-                    height: 18,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    height: 18,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    height: 18,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    height: 18,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Phone input field placeholder
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Button
-                  Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: 55,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ):
-        Expanded(
-        child: WebViewWidget(controller: _controller),
-    ),
-
+                )
+              : Expanded(
+                  child: WebViewWidget(controller: _controller),
+                ),
         ],
       ),
     );

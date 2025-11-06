@@ -13,49 +13,38 @@ class LocationWidget extends StatefulWidget {
   final double? lat;
   final double? long;
 
-  const LocationWidget({super.key,  this.store, this.lat, this.long});
+  const LocationWidget({super.key, this.store, this.lat, this.long});
   @override
   _LocationWidgetState createState() => _LocationWidgetState();
 }
 
-
-
 class _LocationWidgetState extends State<LocationWidget> {
   String _locationString = " unknown Store Location ";
 
-
   @override
-  void initState(){
+  void initState() {
     convertLocation();
     super.initState();
-
-
   }
 
-  convertLocation()async{
-   try{
-     List<Placemark> placemarks;
-     if(widget.store!=null){
-       placemarks = await placemarkFromCoordinates(
-           double.parse( widget.store!.latitude.toString()), double.parse(widget.store!.longitude.toString()));
+  convertLocation() async {
+    try {
+      List<Placemark> placemarks;
+      if (widget.store != null) {
+        placemarks = await placemarkFromCoordinates(double.parse(widget.store!.latitude.toString()), double.parse(widget.store!.longitude.toString()));
+      } else {
+        placemarks = await placemarkFromCoordinates(widget.lat ?? 0, widget.long ?? 0);
+      }
 
-     }
-     else{
-       placemarks = await placemarkFromCoordinates(
-           widget.lat??0, widget.long??0);
-     }
+      Placemark place = placemarks[0];
 
-     Placemark place = placemarks[0];
-
-     // Update the location string with the address
-     setState(() {
-       _locationString =
-       "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-     });
-   }catch(e){
-     print(e);
-
-   }
+      // Update the location string with the address
+      setState(() {
+        _locationString = "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   launchMap() async {
@@ -68,15 +57,14 @@ class _LocationWidgetState extends State<LocationWidget> {
     if (isGoogleMapAvailable) {
       await MapLauncher.showMarker(
         mapType: MapType.google,
-        coords: Coords(double.parse(widget.store!.latitude??"00"),double.parse(widget.store!.longitude??"00")),
-
+        coords: Coords(double.parse(widget.store!.latitude ?? "00"), double.parse(widget.store!.longitude ?? "00")),
         title: widget.store?.store_name ?? '',
         description: widget.store?.description ?? '',
       );
     } else if (isAppleMapAvailable) {
       await MapLauncher.showMarker(
         mapType: MapType.apple,
-        coords: Coords(double.parse(widget.store!.latitude??"00"),double.parse(widget.store!.longitude??"00")),
+        coords: Coords(double.parse(widget.store!.latitude ?? "00"), double.parse(widget.store!.longitude ?? "00")),
         title: widget.store?.store_name ?? '',
         description: widget.store?.description ?? '',
       );
@@ -84,8 +72,6 @@ class _LocationWidgetState extends State<LocationWidget> {
       print("No Map application is available.");
     }
   }
-
-
 
   Future<void> _getLocation() async {
     try {
@@ -112,26 +98,22 @@ class _LocationWidgetState extends State<LocationWidget> {
 
       if (permission == LocationPermission.deniedForever) {
         setState(() {
-          _locationString =
-          "Location permissions are permanently denied, we cannot request permissions.";
+          _locationString = "Location permissions are permanently denied, we cannot request permissions.";
         });
         return;
       }
 
       // Get the current position
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
       // Convert the position to an address
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
 
       Placemark place = placemarks[0];
 
       // Update the location string with the address
       setState(() {
-        _locationString =
-        "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        _locationString = "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
       });
     } catch (e) {
       setState(() {
@@ -143,7 +125,7 @@ class _LocationWidgetState extends State<LocationWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap:  launchMap,
+      onTap: launchMap,
       behavior: HitTestBehavior.translucent,
       child: Container(
         decoration: BoxDecoration(boxShadow: [
@@ -171,9 +153,10 @@ class _LocationWidgetState extends State<LocationWidget> {
                 SizedBox(
                   width: 10,
                 ),
+                // Text("Open onMap: ".tr, style: TextStyle(fontSize: getFontSize(18), color: ColorConstant.logoSecondColor)),
                 Expanded(
                   child: RichText(
-                    softWrap: true,
+                      softWrap: true,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                       text: TextSpan(children: [

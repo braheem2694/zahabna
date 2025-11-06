@@ -36,8 +36,7 @@ class StoreDetails extends StatelessWidget {
         if (controller.isEdit.value && controller.store.value.ownerId.toString() == prefs?.getString("user_id")) {
           showAlert(context);
           return false;
-        }
-        else {
+        } else {
           return true;
         }
       },
@@ -106,7 +105,6 @@ class StoreDetails extends StatelessWidget {
                     )
                   : SizedBox();
             }),
-            
           ],
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(1),
@@ -120,442 +118,441 @@ class StoreDetails extends StatelessWidget {
           return controller.loading.value
               ? Ui.circularIndicator(color: ColorConstant.logoFirstColor)
               : SingleChildScrollView(
-            padding: EdgeInsets.only(top: 8, bottom: getBottomPadding() + getSize(45)),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: double.maxFinite,
+                  padding: EdgeInsets.only(top: 8, bottom: getBottomPadding() + getSize(45)),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Obx(
-                            () =>
-                        controller.loading.value
-                            ? SizedBox(height: controller.categories.isNotEmpty ? getVerticalSize(200) : 0, child: Ui.circularIndicator(width: 40, height: 40, color: ColorConstant.logoFirstColor))
-                            :
-                        // controller.store.value.storeSliderImages!.isNotEmpty
-                        //     ? ClipRRect(
-                        //   borderRadius: BorderRadius.circular(10),
-                        //   child: CarouselSlider.builder(
-                        //     options: CarouselOptions(
-                        //       height: controller.categories.isNotEmpty ? getVerticalSize(200) : 0,
-                        //       initialPage: 0,
-                        //       autoPlay: true,
-                        //       viewportFraction: 1,
-                        //       animateToClosest: true,
-                        //       enlargeCenterPage: true,
-                        //       enableInfiniteScroll: false,
-                        //       scrollDirection: Axis.horizontal,
-                        //       onPageChanged: (index, reason) {
-                        //         controller.sliderIndex.value = index;
-                        //       },
-                        //     ),
-                        //     itemCount: controller.store.value.storeSliderImages?.length,
-                        //     itemBuilder: (context, index, realIndex) {
-                        //       StoreSliderImage model = controller.store.value.storeSliderImages![index];
-                        //
-                        //       return Padding(
-                        //         padding: getPadding(left: 8.0, right: 8),
-                        //         child: GestureDetector(
-                        //           behavior: HitTestBehavior.translucent,
-                        //           onTap: () {
-                        //             Uuid uuid = Uuid();
-                        //             String userID = uuid.v4();
-                        //             // Get.toNamed(AppRoutes.newsDetails, arguments: model, parameters: {"tag": "$userID${model.id}", "fromKey": 'news_hor'});
-                        //           },
-                        //           child: sliderItem(
-                        //             model,
-                        //           ),
-                        //         ),
-                        //       );
-                        //     },
-                        //   ),
-                        // )
-                        //     :
-                        Stack(
-                          alignment: Alignment.topRight,
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: Column(
                           children: [
-                            ClipRRect(
-                              child: CustomImageView(
-                                image: controller.store.value.main_image,
-                                height: getVerticalSize(180),
-                                placeHolder: AssetPaths.placeholder,
-                                width: getHorizontalSize(390),
-                                fit: BoxFit.cover,
-                                borderRadius: BorderRadius.circular(0),
-                              ),
-                            ),
-                            Obx(() {
-                              return controller.store.value.ownerId.toString() == prefs?.getString("user_id")
-                                  ? Padding(
-                                padding: getPadding(right: 8.0, top: 8.0),
-                                child: InkWell(
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () {
-                                      _pickMainImage();
-                                      // updateWorkingTime();
-                                    },
-                                    child: Obx(() {
-                                      return AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 200),
-                                        transitionBuilder: (Widget child, Animation<double> animation) {
-                                          return ScaleTransition(scale: animation, child: child);
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            color: Colors.white,
-                                            border: Border.all(
-                                              color: ColorConstant.logoSecondColor,
-                                            ),
-                                          ),
-                                          padding: getPadding(all: 2),
-                                          child: Icon(
-                                            Icons.image,
-                                            color: ColorConstant.logoSecondColor,
-                                            size: getSize(25),
+                            Obx(
+                              () => controller.loading.value
+                                  ? SizedBox(
+                                      height: controller.categories.isNotEmpty ? getVerticalSize(200) : 0, child: Ui.circularIndicator(width: 40, height: 40, color: ColorConstant.logoFirstColor))
+                                  :
+                                  // controller.store.value.storeSliderImages!.isNotEmpty
+                                  //     ? ClipRRect(
+                                  //   borderRadius: BorderRadius.circular(10),
+                                  //   child: CarouselSlider.builder(
+                                  //     options: CarouselOptions(
+                                  //       height: controller.categories.isNotEmpty ? getVerticalSize(200) : 0,
+                                  //       initialPage: 0,
+                                  //       autoPlay: true,
+                                  //       viewportFraction: 1,
+                                  //       animateToClosest: true,
+                                  //       enlargeCenterPage: true,
+                                  //       enableInfiniteScroll: false,
+                                  //       scrollDirection: Axis.horizontal,
+                                  //       onPageChanged: (index, reason) {
+                                  //         controller.sliderIndex.value = index;
+                                  //       },
+                                  //     ),
+                                  //     itemCount: controller.store.value.storeSliderImages?.length,
+                                  //     itemBuilder: (context, index, realIndex) {
+                                  //       StoreSliderImage model = controller.store.value.storeSliderImages![index];
+                                  //
+                                  //       return Padding(
+                                  //         padding: getPadding(left: 8.0, right: 8),
+                                  //         child: GestureDetector(
+                                  //           behavior: HitTestBehavior.translucent,
+                                  //           onTap: () {
+                                  //             Uuid uuid = Uuid();
+                                  //             String userID = uuid.v4();
+                                  //             // Get.toNamed(AppRoutes.newsDetails, arguments: model, parameters: {"tag": "$userID${model.id}", "fromKey": 'news_hor'});
+                                  //           },
+                                  //           child: sliderItem(
+                                  //             model,
+                                  //           ),
+                                  //         ),
+                                  //       );
+                                  //     },
+                                  //   ),
+                                  // )
+                                  //     :
+                                  Stack(
+                                      alignment: Alignment.topRight,
+                                      children: [
+                                        ClipRRect(
+                                          child: CustomImageView(
+                                            image: controller.store.value.main_image,
+                                            height: getVerticalSize(180),
+                                            placeHolder: AssetPaths.placeholder,
+                                            width: getHorizontalSize(390),
+                                            fit: BoxFit.cover,
+                                            borderRadius: BorderRadius.circular(0),
                                           ),
                                         ),
-                                      );
-                                    })),
-                              )
-                                  : SizedBox();
-                            })
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: getPadding(bottom: 5.0, left: 10, top: 10),
-                        child: Obx(
-                              () =>
-                          controller.loading.value
-                              ? SizedBox()
-                              : controller.storeImages.length > 1
-                              ? Container(
-                            height: getVerticalSize(9),
-                            margin: getPadding(bottom: 5),
-                            child: AnimatedSmoothIndicator(
-                              activeIndex: controller.sliderIndex.value,
-                              count: controller.store.value.storeSliderImages!.length > 5 ? 5 : controller.storeImages.length,
-                              axisDirection: Axis.horizontal,
-                              effect: ScrollingDotsEffect(
-                                spacing: 7,
-                                activeDotColor: ColorConstant.logoSecondColor,
-                                dotColor: ColorConstant.logoFirstColor,
-                                dotHeight: 6,
-                                dotWidth: 6,
-                              ),
+                                        Obx(() {
+                                          return controller.store.value.ownerId.toString() == prefs?.getString("user_id")
+                                              ? Padding(
+                                                  padding: getPadding(right: 8.0, top: 8.0),
+                                                  child: InkWell(
+                                                      splashColor: Colors.transparent,
+                                                      highlightColor: Colors.transparent,
+                                                      onTap: () {
+                                                        _pickMainImage();
+                                                        // updateWorkingTime();
+                                                      },
+                                                      child: Obx(() {
+                                                        return AnimatedSwitcher(
+                                                          duration: const Duration(milliseconds: 200),
+                                                          transitionBuilder: (Widget child, Animation<double> animation) {
+                                                            return ScaleTransition(scale: animation, child: child);
+                                                          },
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius.circular(10),
+                                                              color: Colors.white,
+                                                              border: Border.all(
+                                                                color: ColorConstant.logoSecondColor,
+                                                              ),
+                                                            ),
+                                                            padding: getPadding(all: 2),
+                                                            child: Icon(
+                                                              Icons.image,
+                                                              color: ColorConstant.logoSecondColor,
+                                                              size: getSize(25),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      })),
+                                                )
+                                              : SizedBox();
+                                        })
+                                      ],
+                                    ),
                             ),
-                          )
-                              : SizedBox(),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                    height: controller.categories.isNotEmpty ? Get.height * 0.17 : 0,
-                    child: Obx(() {
-                      return controller.loading.value
-                          ? SizedBox()
-                          : ListView.builder(
-                          padding: getPadding(left: 8, top: 11, bottom: 0),
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: controller.categories.length,
-                          itemBuilder: (context, index) {
-                            Category model = controller.categories[index];
-                            return Padding(
-                              padding: getPadding(right: 10.0),
-                              child: InkWell(
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () {
-                                  var f = {
-                                    "categories": [
-                                      model.id.toString(),
-                                    ],
-                                  };
-
-                                  String jsonString = jsonEncode(f);
-                                  Get.toNamed(AppRoutes.Filter_products, arguments: {
-                                    'title': model.categoryName,
-                                    'id': model.id,
-                                    'type': jsonString,
-                                    'store_id': controller.store.value.id.toString(),
-                                  }, parameters: {
-                                    'tag': "${int.parse(model.id.toString())}:${model.categoryName.toString()}"
-                                  })?.then((value) async {});
-                                },
-                                child: storeCategory(model: model),
+                            Padding(
+                              padding: getPadding(bottom: 5.0, left: 10, top: 10),
+                              child: Obx(
+                                () => controller.loading.value
+                                    ? SizedBox()
+                                    : controller.storeImages.length > 1
+                                        ? Container(
+                                            height: getVerticalSize(9),
+                                            margin: getPadding(bottom: 5),
+                                            child: AnimatedSmoothIndicator(
+                                              activeIndex: controller.sliderIndex.value,
+                                              count: controller.store.value.storeSliderImages!.length > 5 ? 5 : controller.storeImages.length,
+                                              axisDirection: Axis.horizontal,
+                                              effect: ScrollingDotsEffect(
+                                                spacing: 7,
+                                                activeDotColor: ColorConstant.logoSecondColor,
+                                                dotColor: ColorConstant.logoFirstColor,
+                                                dotHeight: 6,
+                                                dotWidth: 6,
+                                              ),
+                                            ),
+                                          )
+                                        : SizedBox(),
                               ),
-                            );
-                          });
-                    })),
-                SocialMediaScreen(
-                  sideMenu: false,
-                  padding: getPadding(
-                    left: 8,
-                    right: 8,
-                  ),
-                  isStore: true,
-                ),
-                Padding(
-                  padding: getPadding(left: 12.0, right: 12),
-                  child: Container(
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(
-                        color: ColorConstant.black900.withOpacity(0.15),
-                        blurRadius: 4.0,
-                        spreadRadius: 0.0,
-                        offset: const Offset(0, 3.0),
-                      )
-                    ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
-                    padding: getPadding(all: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          color: ColorConstant.logoSecondColor,
-                          size: getSize(25),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "${controller.store.value.address}",
-                            style: TextStyle(fontSize: getFontSize(18)),
-                            softWrap: true,
-                            overflow: TextOverflow.visible,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Obx(() {
-                  return Padding(
-                    padding: getPadding(
-                      left: 12.0,
-                      right: 12,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: LocationWidget(
-                        store: controller.store.value,
-                      ),
-                    ),
-                  );
-                }),
-                Obx(() {
-                  return controller.store.value.storeWorkingDays!.isEmpty
-                      ? SizedBox(
-                    height: 10,
-                  )
-                      : Padding(
-                    padding: getPadding(left: 12.0, right: 12, top: 10, bottom: 20),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: ExpansionPanelList(
-                        dividerColor: ColorConstant.whiteA700,
-                        elevation: 2,
-                        expansionCallback: (int index, bool isExpanded) {
-                          controller.toggleExpand(isExpanded);
-                        },
-                        children: List<ExpansionPanel>.generate(1, (int mainIndex) {
-                          return ExpansionPanel(
-                            canTapOnHeader: true,
-                            backgroundColor: ColorConstant.whiteA700,
-                            headerBuilder: (BuildContext context, bool isExpanded) {
-                              return Padding(
-                                padding: getPadding(left: 8.0),
-                                child: SizedBox(
-                                  width: getHorizontalSize(344),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_month,
-                                        color: ColorConstant.logoSecondColor,
-                                        size: getSize(25),
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      RichText(
-                                          text: TextSpan(children: [
-                                            TextSpan(text: "Work Days".tr, style: TextStyle(fontSize: getFontSize(18), color: ColorConstant.logoFirstColor)),
-                                          ]),
-                                          textAlign: TextAlign.left),
-                                      Spacer(),
-                                      Obx(() {
-                                        return controller.store.value.ownerId.toString() == prefs?.getString("user_id")
-                                            ? InkWell(
-                                            splashColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () {
-                                              updateWorkingTime();
-                                            },
-                                            child: Obx(() {
-                                              return AnimatedSwitcher(
-                                                duration: const Duration(milliseconds: 200),
-                                                transitionBuilder: (Widget child, Animation<double> animation) {
-                                                  return ScaleTransition(scale: animation, child: child);
-                                                },
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(10),
-                                                    border: Border.all(
-                                                      color: ColorConstant.logoSecondColor,
-                                                    ),
-                                                  ),
-                                                  padding: getPadding(all: 2),
-                                                  child: Icon(
-                                                    controller.isEdit.value ? Icons.check : Icons.edit,
-                                                    color: ColorConstant.logoSecondColor,
-                                                    size: getSize(25),
-                                                  ),
-                                                ),
-                                              );
-                                            }))
-                                            : SizedBox();
-                                      })
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            body: ListView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: [
-                                Padding(
-                                  padding: getPadding(bottom: 12.0),
-                                  child: SizedBox(
-                                      height: Get.height * 0.17,
-                                      child: Obx(() {
-                                        return controller.loading.value
-                                            ? SizedBox()
-                                            : ListView.builder(
-                                            padding: getPadding(left: 8, top: 11),
-                                            scrollDirection: Axis.horizontal,
-                                            physics: const BouncingScrollPhysics(),
-                                            itemCount: controller.store.value.storeWorkingDays?.length,
-                                            itemBuilder: (context, index) {
-                                              controller.store.value.storeWorkingDays![index];
-
-                                              return Padding(
-                                                padding: getPadding(right: 10.0),
-                                                child: InkWell(
-                                                  splashColor: Colors.transparent,
-                                                  focusColor: Colors.transparent,
-                                                  highlightColor: Colors.transparent,
-                                                  onTap: () {},
-                                                  child: Stack(
-                                                    alignment: Alignment.topCenter,
-                                                    children: [
-                                                      storeWorkTime(index: index),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            });
-                                      })),
-                                ),
-                              ],
-                            ),
-                            isExpanded: controller.isExpanded.value,
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  );
-                }),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    Ui.launchWhatsApp(controller.store.value.phone_number.toString(), controller.store.value.store_name ?? '');
-                  },
-                  child: Padding(
-                    padding: getPadding(left: 12.0, right: 12),
-                    child: Container(
-                      decoration: BoxDecoration(boxShadow: [
-                        BoxShadow(
-                          color: ColorConstant.black900.withOpacity(0.15),
-                          blurRadius: 4.0,
-                          spreadRadius: 0.0,
-                          offset: const Offset(0, 3.0),
-                        )
-                      ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
-                      padding: getPadding(all: 8),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.phone_android,
-                            color: ColorConstant.logoSecondColor,
-                            size: getSize(25),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            controller.store.value.phone_number.toString(),
-                            style: TextStyle(fontSize: getFontSize(18)),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: getPadding(left: 12.0, right: 12),
-                  child: Container(
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(
-                        color: ColorConstant.black900.withOpacity(0.15),
-                        blurRadius: 4.0,
-                        spreadRadius: 0.0,
-                        offset: const Offset(0, 3.0),
-                      )
-                    ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
-                    padding: getPadding(all: 8),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "About Store",
-                              style: TextStyle(fontSize: getFontSize(18), color: ColorConstant.logoSecondColor),
                             )
                           ],
                         ),
-                        Padding(
-                          padding: getPadding(top: 12),
+                      ),
+                      SizedBox(
+                          height: controller.categories.isNotEmpty ? Get.height * 0.17 : 0,
+                          child: Obx(() {
+                            return controller.loading.value
+                                ? SizedBox()
+                                : ListView.builder(
+                                    padding: getPadding(left: 8, top: 11, bottom: 0),
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: controller.categories.length,
+                                    itemBuilder: (context, index) {
+                                      Category model = controller.categories[index];
+                                      return Padding(
+                                        padding: getPadding(right: 10.0),
+                                        child: InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () {
+                                            var f = {
+                                              "categories": [
+                                                model.id.toString(),
+                                              ],
+                                            };
+
+                                            String jsonString = jsonEncode(f);
+                                            Get.toNamed(AppRoutes.Filter_products, arguments: {
+                                              'title': model.categoryName,
+                                              'id': model.id,
+                                              'type': jsonString,
+                                              'store_id': controller.store.value.id.toString(),
+                                            }, parameters: {
+                                              'tag': "${int.parse(model.id.toString())}:${model.categoryName.toString()}"
+                                            })?.then((value) async {});
+                                          },
+                                          child: storeCategory(model: model),
+                                        ),
+                                      );
+                                    });
+                          })),
+                      SocialMediaScreen(
+                        sideMenu: false,
+                        padding: getPadding(
+                          left: 8,
+                          right: 8,
+                        ),
+                        isStore: true,
+                      ),
+                      Padding(
+                        padding: getPadding(left: 12.0, right: 12),
+                        child: Container(
+                          decoration: BoxDecoration(boxShadow: [
+                            BoxShadow(
+                              color: ColorConstant.black900.withOpacity(0.15),
+                              blurRadius: 4.0,
+                              spreadRadius: 0.0,
+                              offset: const Offset(0, 3.0),
+                            )
+                          ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
+                          padding: getPadding(all: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: ColorConstant.logoSecondColor,
+                                size: getSize(25),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "${controller.store.value.address}",
+                                  style: TextStyle(fontSize: getFontSize(18)),
+                                  softWrap: true,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Obx(() {
+                        return Padding(
+                          padding: getPadding(
+                            left: 12.0,
+                            right: 12,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: LocationWidget(
+                              store: controller.store.value,
+                            ),
+                          ),
+                        );
+                      }),
+                      Obx(() {
+                        return controller.store.value.storeWorkingDays!.isEmpty
+                            ? SizedBox(
+                                height: 10,
+                              )
+                            : Padding(
+                                padding: getPadding(left: 12.0, right: 12, top: 10, bottom: 20),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: ExpansionPanelList(
+                                    dividerColor: ColorConstant.whiteA700,
+                                    elevation: 2,
+                                    expansionCallback: (int index, bool isExpanded) {
+                                      controller.toggleExpand(isExpanded);
+                                    },
+                                    children: List<ExpansionPanel>.generate(1, (int mainIndex) {
+                                      return ExpansionPanel(
+                                        canTapOnHeader: true,
+                                        backgroundColor: ColorConstant.whiteA700,
+                                        headerBuilder: (BuildContext context, bool isExpanded) {
+                                          return Padding(
+                                            padding: getPadding(left: 8.0),
+                                            child: SizedBox(
+                                              width: getHorizontalSize(344),
+                                              child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                    Icons.calendar_month,
+                                                    color: ColorConstant.logoSecondColor,
+                                                    size: getSize(25),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  RichText(
+                                                      text: TextSpan(children: [
+                                                        TextSpan(text: "Work Days".tr, style: TextStyle(fontSize: getFontSize(18), color: ColorConstant.logoFirstColor)),
+                                                      ]),
+                                                      textAlign: TextAlign.left),
+                                                  Spacer(),
+                                                  Obx(() {
+                                                    return controller.store.value.ownerId.toString() == prefs?.getString("user_id")
+                                                        ? InkWell(
+                                                            splashColor: Colors.transparent,
+                                                            highlightColor: Colors.transparent,
+                                                            onTap: () {
+                                                              updateWorkingTime();
+                                                            },
+                                                            child: Obx(() {
+                                                              return AnimatedSwitcher(
+                                                                duration: const Duration(milliseconds: 200),
+                                                                transitionBuilder: (Widget child, Animation<double> animation) {
+                                                                  return ScaleTransition(scale: animation, child: child);
+                                                                },
+                                                                child: Container(
+                                                                  decoration: BoxDecoration(
+                                                                    borderRadius: BorderRadius.circular(10),
+                                                                    border: Border.all(
+                                                                      color: ColorConstant.logoSecondColor,
+                                                                    ),
+                                                                  ),
+                                                                  padding: getPadding(all: 2),
+                                                                  child: Icon(
+                                                                    controller.isEdit.value ? Icons.check : Icons.edit,
+                                                                    color: ColorConstant.logoSecondColor,
+                                                                    size: getSize(25),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }))
+                                                        : SizedBox();
+                                                  })
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        body: ListView(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          children: [
+                                            Padding(
+                                              padding: getPadding(bottom: 12.0),
+                                              child: SizedBox(
+                                                  height: Get.height * 0.17,
+                                                  child: Obx(() {
+                                                    return controller.loading.value
+                                                        ? SizedBox()
+                                                        : ListView.builder(
+                                                            padding: getPadding(left: 8, top: 11),
+                                                            scrollDirection: Axis.horizontal,
+                                                            physics: const BouncingScrollPhysics(),
+                                                            itemCount: controller.store.value.storeWorkingDays?.length,
+                                                            itemBuilder: (context, index) {
+                                                              controller.store.value.storeWorkingDays![index];
+
+                                                              return Padding(
+                                                                padding: getPadding(right: 10.0),
+                                                                child: InkWell(
+                                                                  splashColor: Colors.transparent,
+                                                                  focusColor: Colors.transparent,
+                                                                  highlightColor: Colors.transparent,
+                                                                  onTap: () {},
+                                                                  child: Stack(
+                                                                    alignment: Alignment.topCenter,
+                                                                    children: [
+                                                                      storeWorkTime(index: index),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+                                                  })),
+                                            ),
+                                          ],
+                                        ),
+                                        isExpanded: controller.isExpanded.value,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                      }),
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          Ui.launchWhatsApp(controller.store.value.phone_number.toString(), controller.store.value.store_name ?? '');
+                        },
+                        child: Padding(
+                          padding: getPadding(left: 12.0, right: 12),
                           child: Container(
-                              padding: getPadding(all: 5),
-                              width: Get.width,
-                              child: HtmlWidget(
-                                data: controller.store.value.description,
-                              )),
-                        )
-                      ],
-                    ),
+                            decoration: BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                color: ColorConstant.black900.withOpacity(0.15),
+                                blurRadius: 4.0,
+                                spreadRadius: 0.0,
+                                offset: const Offset(0, 3.0),
+                              )
+                            ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
+                            padding: getPadding(all: 8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.phone_android,
+                                  color: ColorConstant.logoSecondColor,
+                                  size: getSize(25),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  controller.store.value.phone_number.toString(),
+                                  style: TextStyle(fontSize: getFontSize(18)),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: getPadding(left: 12.0, right: 12),
+                        child: Container(
+                          decoration: BoxDecoration(boxShadow: [
+                            BoxShadow(
+                              color: ColorConstant.black900.withOpacity(0.15),
+                              blurRadius: 4.0,
+                              spreadRadius: 0.0,
+                              offset: const Offset(0, 3.0),
+                            )
+                          ], color: Colors.white, borderRadius: BorderRadius.circular(5)),
+                          padding: getPadding(all: 8),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "About Store",
+                                    style: TextStyle(fontSize: getFontSize(18), color: ColorConstant.logoSecondColor),
+                                  )
+                                ],
+                              ),
+                              Padding(
+                                padding: getPadding(top: 12),
+                                child: Container(
+                                    padding: getPadding(all: 5),
+                                    width: Get.width,
+                                    child: HtmlWidget(
+                                      data: controller.store.value.description,
+                                    )),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          );
+                );
         }),
       ),
     );
@@ -876,9 +873,7 @@ class StoreDetails extends StatelessWidget {
                                           controller.store.update((val) => val?..main_image = value.path);
                                           if (!controller.savingImage.value) {
                                             controller.savingImage.value = true;
-                                            await controller.uploadImage("141", controller.store.value.id, controller.store.value.main_image
-                                                ?.split("/")
-                                                .last, controller.store.value.main_image, 1);
+                                            await controller.uploadImage("141", controller.store.value.id, controller.store.value.main_image?.split("/").last, controller.store.value.main_image, 1);
 
                                             if (globalController.currentStoreId == controller.store.value.id) {
                                               prefs!.setString('main_image', controller.store.value.main_image ?? '');
@@ -906,12 +901,12 @@ class StoreDetails extends StatelessWidget {
                                           padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                                           alignment: Alignment.center,
                                           child: Obx(() {
-                                            return
-                                              controller.savingImage.value?Ui.circularIndicator():
-                                              Text(
-                                              "Yes".tr,
-                                              style: TextStyle(color: Colors.white),
-                                            );
+                                            return controller.savingImage.value
+                                                ? Ui.circularIndicator()
+                                                : Text(
+                                                    "Yes".tr,
+                                                    style: TextStyle(color: Colors.white),
+                                                  );
                                           }),
                                         ),
                                       ),
@@ -926,7 +921,6 @@ class StoreDetails extends StatelessWidget {
                       barrierDismissible: true,
                       barrierColor: Colors.black.withOpacity(0.3),
                     );
-
 
                     // Get.dialog(AlertDialog(
                     //   title: Text("Are you sure you want to change the image?".tr),
@@ -1047,9 +1041,7 @@ class StoreDetails extends StatelessWidget {
                                           controller.store.update((val) => val?..main_image = value.path);
                                           if (!controller.savingImage.value) {
                                             controller.savingImage.value = true;
-                                            await controller.uploadImage("141", controller.store.value.id, controller.store.value.main_image
-                                                ?.split("/")
-                                                .last, controller.store.value.main_image, 1);
+                                            await controller.uploadImage("141", controller.store.value.id, controller.store.value.main_image?.split("/").last, controller.store.value.main_image, 1);
 
                                             if (globalController.currentStoreId == controller.store.value.id) {
                                               prefs!.setString('main_image', controller.store.value.main_image ?? '');
@@ -1077,12 +1069,12 @@ class StoreDetails extends StatelessWidget {
                                           padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                                           alignment: Alignment.center,
                                           child: Obx(() {
-                                            return
-                                              controller.savingImage.value?Ui.circularIndicator():
-                                              Text(
-                                                "Yes".tr,
-                                                style: TextStyle(color: Colors.white),
-                                              );
+                                            return controller.savingImage.value
+                                                ? Ui.circularIndicator()
+                                                : Text(
+                                                    "Yes".tr,
+                                                    style: TextStyle(color: Colors.white),
+                                                  );
                                           }),
                                         ),
                                       ),
