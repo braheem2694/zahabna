@@ -13,7 +13,8 @@ import '../SignIn_screen/controller/SignIn_controller.dart';
 
 class StoreRequestController extends GetxController {
   // Form fields
-  final TextEditingController subscriberNameController = TextEditingController();
+  final TextEditingController subscriberNameController =
+      TextEditingController();
   final TextEditingController motherNameController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
@@ -24,7 +25,8 @@ class StoreRequestController extends GetxController {
   final TextEditingController recordNumber = TextEditingController();
   final TextEditingController branchCountController = TextEditingController();
   final TextEditingController birthDay = TextEditingController();
-  final TextEditingController subscriptionMonthsController = TextEditingController(text: "3");
+  final TextEditingController subscriptionMonthsController =
+      TextEditingController(text: "3");
   final agreedToTerms = false.obs;
   LatLng markerPosition = const LatLng(33.8886, 35.4955); // Beirut
   GoogleMapController? mapController;
@@ -114,7 +116,8 @@ class StoreRequestController extends GetxController {
       'name': subscriberNameController.text,
       'mother_name': motherNameController.text,
       'store_name': storeNameController.text,
-      'phone_number': "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+      'phone_number':
+          "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
@@ -124,18 +127,22 @@ class StoreRequestController extends GetxController {
       'birth_date': birthDay.text,
       'latitude': latController.text,
       'longitude': lngController.text,
-      'terms_conditions': termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms,
+      'terms_conditions': termsConditions.value != ""
+          ? termsConditions.value
+          : globalController.homeDataList.value.requestTerms,
       'branch_count': branchCountController.text,
       'subscription_count': subscriptionMonthsController.text,
     };
 
     try {
-      final response = await api.getData(formData, "stores/update-store-request");
+      final response =
+          await api.getData(formData, "stores/update-store-request");
 
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
-        Ui.flutterToast("Changes saved".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
+        Ui.flutterToast(
+            "Changes saved".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
 
         // Update local args with current edits
         args = StoreRequest(
@@ -143,7 +150,8 @@ class StoreRequestController extends GetxController {
           subscriberName: subscriberNameController.text,
           motherName: motherNameController.text,
           storeName: storeNameController.text,
-          phoneNumber: "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+          phoneNumber:
+              "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
           country: globalController.countryName.value,
           region: regionController.text,
           address: addressController.text,
@@ -155,11 +163,16 @@ class StoreRequestController extends GetxController {
           startDate: args!.startDate,
           registerDate: args!.registerDate,
           status: args!.status,
-          recordNumber: recordNumber.text != "" ? double.tryParse(recordNumber.text) ?? 0.0 : 0.0,
+          recordNumber: recordNumber.text != ""
+              ? double.tryParse(recordNumber.text) ?? 0.0
+              : 0.0,
           branchCount: int.tryParse(branchCountController.text) ?? 1,
-          subscriptionMonths: int.tryParse(subscriptionMonthsController.text) ?? 1,
+          subscriptionMonths:
+              int.tryParse(subscriptionMonthsController.text) ?? 1,
           agreedToTerms: agreedToTerms.value,
-          userTermsANdConditions: termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms ?? '',
+          userTermsANdConditions: termsConditions.value != ""
+              ? termsConditions.value
+              : globalController.homeDataList.value.requestTerms ?? '',
           latitude: double.tryParse(latController.text),
           longitude: double.tryParse(lngController.text),
           images: args!.images,
@@ -174,11 +187,13 @@ class StoreRequestController extends GetxController {
 
         editing.value = false; // exit edit mode
       } else {
-        Ui.flutterToast(response['message'] ?? "Update failed".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+        Ui.flutterToast(response['message'] ?? "Update failed".tr,
+            Toast.LENGTH_LONG, Colors.red, Colors.white);
       }
     } catch (e) {
       sendingRequest.value = false;
-      Ui.flutterToast("Update error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+      Ui.flutterToast(
+          "Update error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
     }
   }
 
@@ -196,13 +211,16 @@ class StoreRequestController extends GetxController {
 
     try {
       if (response['success'] == true) {
-        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG,
+            ColorConstant.logoFirstColor, whiteA700);
         Get.back();
       } else {
-        Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+        Ui.flutterToast(response["message"], Toast.LENGTH_LONG,
+            ColorConstant.logoFirstColor, whiteA700);
       }
     } catch (e) {
-      Ui.flutterToast(response["message"], Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+      Ui.flutterToast(response["message"], Toast.LENGTH_LONG,
+          ColorConstant.logoFirstColor, whiteA700);
     } finally {
       enablingRequest.value = false;
     }
@@ -231,13 +249,15 @@ class StoreRequestController extends GetxController {
 
         Get.back();
         Get.back(result: args);
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT, Colors.black45, Colors.white);
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
+            Colors.black45, Colors.white);
 
         return true;
       } else {
         deletingRequest.value = false;
 
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT, Colors.black45, Colors.white);
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
+            Colors.black45, Colors.white);
 
         return false;
       }
@@ -375,7 +395,8 @@ class StoreRequestController extends GetxController {
     }
   }
 
-  Future<void> uploadImage(String tableName, String rowId, String fileName, String filePath, int type) async {
+  Future<void> uploadImage(String tableName, String rowId, String fileName,
+      String filePath, int type) async {
     final token = prefs!.getString("token") ?? "";
 
     try {
@@ -410,7 +431,8 @@ class StoreRequestController extends GetxController {
         //   throw Exception(responseData['message'] ?? 'Upload failed');
         // }
       } else {
-        throw Exception('Upload failed with status code: ${response.statusCode}');
+        throw Exception(
+            'Upload failed with status code: ${response.statusCode}');
       }
     } catch (e) {
       rethrow;
@@ -420,11 +442,13 @@ class StoreRequestController extends GetxController {
 
   bool _hasExistingImageType(int type) {
     if (args == null) return false;
-    return args!.images.any((img) => img.type == type && (img.filePath).toString().isNotEmpty);
+    return args!.images
+        .any((img) => img.type == type && (img.filePath).toString().isNotEmpty);
   }
 
   void submitRequest() {
-    if (isUploading.value) return; // Prevent multiple submissions while uploading
+    if (isUploading.value)
+      return; // Prevent multiple submissions while uploading
 
     List<String> validationErrors = [];
 
@@ -484,10 +508,13 @@ class StoreRequestController extends GetxController {
     branchCountController.text = request.branchCount.toString();
     subscriptionMonthsController.text = request.subscriptionMonths.toString();
     agreedToTerms.value = request.userTermsANdConditions != "" ? true : false;
-    termsConditions.value = request.userTermsANdConditions != "" ? request.userTermsANdConditions : globalController.homeDataList.value.requestTerms ?? '';
+    termsConditions.value = request.userTermsANdConditions != ""
+        ? request.userTermsANdConditions
+        : globalController.homeDataList.value.requestTerms ?? '';
 
     if (request.status.toLowerCase() == "deleted") {
-      Ui.flutterToast("This request is deleted".tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+      Ui.flutterToast("This request is deleted".tr, Toast.LENGTH_SHORT,
+          Colors.red, Colors.white);
     }
 
     // Clear all image observables
@@ -499,7 +526,8 @@ class StoreRequestController extends GetxController {
     int idCounter = 0;
     latController.text = request.latitude.toString();
     lngController.text = request.longitude.toString();
-    markerPosition = LatLng(request.latitude ?? 33.8886, request.longitude ?? 35.4955);
+    markerPosition =
+        LatLng(request.latitude ?? 33.8886, request.longitude ?? 35.4955);
     mapController?.animateCamera(CameraUpdate.newLatLng(markerPosition));
 
     // Assign images by type
@@ -509,13 +537,13 @@ class StoreRequestController extends GetxController {
           idImage.value = img.filePath;
           break;
         case 202:
-          if (idCounter == 0) {
-            idImage.value = img.filePath;
-            idCounter++;
-          } else if (idCounter == 1) {
-            id2Image.value = img.filePath;
-            idCounter++;
-          }
+          // if (idCounter == 0) {
+          //   idImage.value = img.filePath;
+          //   idCounter++;
+          // } else if (idCounter == 1) {
+          //   id2Image.value = img.filePath;
+          //   idCounter++;
+          // }
           // Second ID/Passport image
           id2Image.value = img.filePath;
           break;
@@ -540,7 +568,8 @@ class StoreRequestController extends GetxController {
       'name': subscriberNameController.text,
       'mother_name': motherNameController.text,
       'store_name': storeNameController.text,
-      'phone_number': "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+      'phone_number':
+          "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
@@ -549,18 +578,22 @@ class StoreRequestController extends GetxController {
       'latitude': latController.text,
       'longitude': lngController.text,
       'birth_date': birthDay.text,
-      'terms_conditions': termsConditions != "" ? termsConditions : globalController.homeDataList.value.requestTerms,
+      'terms_conditions': termsConditions != ""
+          ? termsConditions
+          : globalController.homeDataList.value.requestTerms,
       'branch_count': branchCountController.text,
       'subscription_count': subscriptionMonthsController.text,
     };
 
     if (formKey.currentState?.validate() != true) {
-      Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+      Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT,
+          Colors.red, Colors.white);
       return;
     }
 
     try {
-      final response = await api.getData(formData, "stores/create-store-request");
+      final response =
+          await api.getData(formData, "stores/create-store-request");
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
@@ -571,13 +604,16 @@ class StoreRequestController extends GetxController {
           'token': token,
         });
 
-        Ui.flutterToast("Subscription submitted successfully".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
+        Ui.flutterToast("Subscription submitted successfully".tr,
+            Toast.LENGTH_LONG, Colors.green, Colors.white);
         Get.back();
       } else {
-        Ui.flutterToast(response['message'] ?? "Submission failed".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+        Ui.flutterToast(response['message'] ?? "Submission failed".tr,
+            Toast.LENGTH_LONG, Colors.red, Colors.white);
       }
     } catch (e) {
-      Ui.flutterToast("Request error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+      Ui.flutterToast(
+          "Request error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
     }
   }
 
@@ -588,7 +624,8 @@ class StoreRequestController extends GetxController {
     if (args != null) {
       fillFromStoreRequest(args!);
     } else {
-      termsConditions.value = globalController.homeDataList.value.requestTerms ?? '';
+      termsConditions.value =
+          globalController.homeDataList.value.requestTerms ?? '';
     }
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:iq_mall/cores/math_utils.dart';
 import 'package:iq_mall/screens/Home_screen_fragment/widgets/CategoriesWidget.dart';
@@ -20,7 +18,8 @@ import 'controller/Home_screen_fragment_controller.dart';
 // ignore_for_file: must_be_immutable
 
 class Home_screen_fragmentscreen extends StatelessWidget {
-  Home_screen_fragmentController controller = Get.put(Home_screen_fragmentController());
+  Home_screen_fragmentController controller =
+      Get.put(Home_screen_fragmentController());
 
   Home_screen_fragmentscreen({super.key});
 
@@ -64,11 +63,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                           shrinkWrap: true,
                           slivers: <Widget>[
                             SliverPadding(
-                              padding: EdgeInsets.only(top: AppBar().preferredSize.height + getTopPadding()),
+                              padding: EdgeInsets.only(
+                                  top: AppBar().preferredSize.height +
+                                      getTopPadding()),
                               sliver: SliverToBoxAdapter(
                                 child: Obx(() {
                                   return BannerWidget(
-                                    gridElements: globalController.homeDataList.value.gridElements ?? [],
+                                    gridElements: globalController
+                                            .homeDataList.value.gridElements ??
+                                        [],
                                   );
                                 }),
                               ),
@@ -84,13 +87,8 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                               sliver: SliverToBoxAdapter(
                                 child: MiniGoldPriceCard(
                                   title: 'Gold (XAU/USD)',
-                                  refreshEvery: const Duration(seconds: 20),
-                                  fetchPrice: () async {
-                                    // Example static value or real API call
-                                    await Future.delayed(const Duration(milliseconds: 3000));
-                                    return 2450 + Random().nextDouble() * 10; // simulate live fluctuation
-                                  },
-                                  // or: () => fetchGoldFromGoldApi('<YOUR_KEY>'),
+                                  refreshEvery: const Duration(seconds: 58),
+                                  fetchPrice: controller.fetchGoldPrice,
                                 ),
                               ),
                             ),
@@ -119,11 +117,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                                 () => controller.loadingMore.value
                                     ? Container(
                                         padding: getPadding(top: 10),
-                                        height: getSize(90) + getBottomPadding(),
+                                        height:
+                                            getSize(90) + getBottomPadding(),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
                                           children: [
-                                            Ui.circularIndicator(color: ColorConstant.logoFirstColor),
+                                            Ui.circularIndicator(
+                                                color: ColorConstant
+                                                    .logoFirstColor),
                                           ],
                                         ))
                                     : const SizedBox(),
@@ -177,7 +179,8 @@ class Home_screen_fragmentscreen extends StatelessWidget {
                     },
                     shape: const CircleBorder(),
                     backgroundColor: ColorConstant.logoSecondColor,
-                    child: Icon(Icons.store, color: ColorConstant.whiteA700, size: getSize(25)),
+                    child: Icon(Icons.store,
+                        color: ColorConstant.whiteA700, size: getSize(25)),
                   ))
               : const SizedBox()),
     );
@@ -201,7 +204,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'Alert'.tr,
                 style: TextStyle(
@@ -211,7 +216,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               ),
             ),
             Directionality(
-              textDirection: prefs?.getString("locale") != "ar" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") != "ar"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 "Do you want to return to main store?".tr,
                 textAlign: TextAlign.justify,
@@ -245,7 +252,8 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 "Yes".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.whiteA700),
+                style: TextStyle(
+                    fontSize: getFontSize(16), color: ColorConstant.whiteA700),
               ),
             ),
           ),
@@ -263,12 +271,15 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: ColorConstant.whiteA700,
-                border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
+                border:
+                    Border.all(color: ColorConstant.logoSecondColor, width: 1),
               ),
               alignment: Alignment.center,
               child: Text(
                 "No".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.logoSecondColor),
+                style: TextStyle(
+                    fontSize: getFontSize(16),
+                    color: ColorConstant.logoSecondColor),
               ),
             ),
           ),
@@ -304,7 +315,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'تحذير'.tr,
                 style: TextStyle(
@@ -314,7 +327,9 @@ class Home_screen_fragmentscreen extends StatelessWidget {
               ),
             ),
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'lbl_terms_and_conditions'.tr,
                 textAlign: TextAlign.justify,

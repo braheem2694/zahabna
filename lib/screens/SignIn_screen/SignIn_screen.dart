@@ -81,16 +81,17 @@ class SignInScreen extends GetView<SignInController> {
                     },
                     onSignIn: () async {
                       if (!controller.loggin_in.value) {
-
                         if (prefs?.getString('terms_accepted') != 'true') {
                           _showTermsDialog(context);
                         } else {
-                          if (controller.emailcontroller.text.isNotEmpty && controller.passwordcontroller.text.isNotEmpty) {
+                          if (controller.emailcontroller.text.isNotEmpty &&
+                              controller.passwordcontroller.text.isNotEmpty) {
                             controller.emailFocusNode.unfocus();
                             controller.passwordFocusNode.unfocus();
                             controller.Login();
                           } else {
-                            toaster(context, 'Fill both username and password'.tr);
+                            toaster(
+                                context, 'Fill both username and password'.tr);
                           }
                         }
                       }
@@ -103,13 +104,20 @@ class SignInScreen extends GetView<SignInController> {
                       if (prefs?.getString('terms_accepted') != 'true') {
                         _showTermsDialog(context);
                       } else {
-                        final credential = await SignInWithApple.getAppleIDCredential(
+                        final credential =
+                            await SignInWithApple.getAppleIDCredential(
                           scopes: [
                             AppleIDAuthorizationScopes.email,
                             AppleIDAuthorizationScopes.fullName,
                           ],
                         );
-                        controller.applelogin(context, credential.email.toString(), credential.givenName.toString(), credential.familyName.toString(), '4', credential.userIdentifier.toString(),
+                        controller.applelogin(
+                            context,
+                            credential.email.toString(),
+                            credential.givenName.toString(),
+                            credential.familyName.toString(),
+                            '4',
+                            credential.userIdentifier.toString(),
                             credential.userIdentifier);
                       }
                     },
@@ -139,7 +147,8 @@ class SignInScreen extends GetView<SignInController> {
       dialogType: DialogType.info,
       body: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: Get.height * 0.7, // Increased max height to prevent cut-off
+          maxHeight:
+              Get.height * 0.7, // Increased max height to prevent cut-off
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -156,16 +165,28 @@ class SignInScreen extends GetView<SignInController> {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           'Warning'.tr,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ),
                       Html(
-                        data: languages.firstWhere((element) => element.shortcut?.toLowerCase()==( prefs?.getString("locale").toString().toLowerCase()??"en"),).termsAndConditions,
+                        data: languages
+                            .firstWhere(
+                              (element) =>
+                                  element.shortcut?.toLowerCase() ==
+                                  (prefs
+                                          ?.getString("locale")
+                                          .toString()
+                                          .toLowerCase() ??
+                                      "en"),
+                            )
+                            .termsAndConditions,
                         shrinkWrap: true,
                         style: {
                           "body": Style(
-                            padding: HtmlPaddings.zero,  // Remove unnecessary padding
-                            margin: Margins.zero,   // Remove unnecessary margins
+                            padding:
+                                HtmlPaddings.zero, // Remove unnecessary padding
+                            margin: Margins.zero, // Remove unnecessary margins
                           ),
                         },
                       )
@@ -189,7 +210,8 @@ class SignInScreen extends GetView<SignInController> {
                       prefs?.setString('terms_accepted', 'true');
                       Get.back();
                     },
-                    child: Text('Accept'.tr, style: const TextStyle(color: Colors.white)),
+                    child: Text('Accept'.tr,
+                        style: const TextStyle(color: Colors.white)),
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
@@ -212,16 +234,14 @@ class SignInScreen extends GetView<SignInController> {
         ),
       ),
     ).show();
-
   }
+
   Future<void> updateLocaleAndShowDialog() async {
-    String? locale = (prefs?.getString("locale") != null && prefs?.getString("locale") != "")
-        ? prefs?.getString("locale")!
-        : "EN";
+    String? locale =
+        (prefs?.getString("locale") != null && prefs?.getString("locale") != "")
+            ? prefs?.getString("locale")!
+            : "EN";
 
-    Get.updateLocale(Locale(locale??'EN')); // ✅ Update Locale
-
-
+    Get.updateLocale(Locale(locale ?? 'EN')); // ✅ Update Locale
   }
-
 }

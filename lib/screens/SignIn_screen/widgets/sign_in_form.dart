@@ -2,31 +2,22 @@ import 'dart:io';
 import 'package:iq_mall/cores/language_model.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iq_mall/routes/app_routes.dart';
 import 'package:iq_mall/screens/Home_screen_fragment/controller/Home_screen_fragment_controller.dart';
 import 'package:iq_mall/screens/SignIn_screen/controller/SignIn_controller.dart';
-import 'package:iq_mall/screens/Wishlist_screen/controller/Wishlist_controller.dart';
 import 'package:iq_mall/utils/ShColors.dart';
 import 'package:iq_mall/utils/ShConstant.dart';
-import 'package:iq_mall/widgets/ShWidget.dart';
 import 'package:iq_mall/main.dart';
-import 'package:iq_mall/screens/HomeScreenPage/ShHomeScreen.dart';
 import 'package:iq_mall/utils/ShImages.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../cores/math_utils.dart';
-import '../../../utils/validation_functions.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../widgets/custom_text_form_field.dart';
 import '../../TermsAndConditions_screen/terms_widget.dart';
-import '../../tabs_screen/tabs_view_screen.dart';
 import 'package:flutter/services.dart';
 
-import '../SignIn_screen.dart';
 import 'package:flutter/src/foundation/constants.dart';
 
 class SignInForm extends StatelessWidget {
@@ -95,7 +86,10 @@ class SignInForm extends StatelessWidget {
                     children: [
                       Text(
                         "Select language".tr,
-                        style: TextStyle(fontSize: getFontSize(14), color: ColorConstant.logoFirstColor, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: getFontSize(14),
+                            color: ColorConstant.logoFirstColor,
+                            fontWeight: FontWeight.w600),
                       ),
                       SizedBox(width: getHorizontalSize(10)),
                       typeDropDown(context),
@@ -146,10 +140,13 @@ class SignInForm extends StatelessWidget {
                     ),
                     suffix: IconButton(
                         onPressed: () {
-                          controller.obscureText.value = !controller.obscureText.value;
+                          controller.obscureText.value =
+                              !controller.obscureText.value;
                         },
                         icon: Icon(
-                          !controller.obscureText.value ? Icons.remove_red_eye : Icons.visibility_off,
+                          !controller.obscureText.value
+                              ? Icons.remove_red_eye
+                              : Icons.visibility_off,
                           color: MainColor,
                           size: 18,
                         )),
@@ -168,7 +165,10 @@ class SignInForm extends StatelessWidget {
                   padding: getPadding(top: 12.0),
                   child: InkWell(
                     onTap: onForgotPassword,
-                    child: SizedBox(width: getHorizontalSize(250), height: getSize(50), child: Center(child: Text('Forget password?'.tr))),
+                    child: SizedBox(
+                        width: getHorizontalSize(250),
+                        height: getSize(50),
+                        child: Center(child: Text('Forget password?'.tr))),
                   ),
                 ),
                 Obx(() => MyCustomButton(
@@ -202,11 +202,13 @@ class SignInForm extends StatelessWidget {
                 !isIOS
                     ? Container()
                     : Padding(
-                        padding: const EdgeInsets.only(top: spacing_standard_new),
+                        padding:
+                            const EdgeInsets.only(top: spacing_standard_new),
                         child: SignInWithAppleButton(
                           style: SignInWithAppleButtonStyle.black,
                           onPressed: () async {
-                            final credential = await SignInWithApple.getAppleIDCredential(
+                            final credential =
+                                await SignInWithApple.getAppleIDCredential(
                               scopes: [
                                 AppleIDAuthorizationScopes.email,
                                 AppleIDAuthorizationScopes.fullName,
@@ -251,20 +253,24 @@ class SignInForm extends StatelessWidget {
                         child: SignInWithAppleButton(
                           style: SignInWithAppleButtonStyle.whiteOutlined,
                           onPressed: () async {
-                            final credential = await SignInWithApple.getAppleIDCredential(
+                            final credential =
+                                await SignInWithApple.getAppleIDCredential(
                               scopes: [
                                 AppleIDAuthorizationScopes.email,
                                 AppleIDAuthorizationScopes.fullName,
                               ],
                             );
-                            final String? userIdentifier = credential.identityToken;
-                            final String userIdentifier2 = credential.authorizationCode;
+                            final String? userIdentifier =
+                                credential.identityToken;
+                            final String userIdentifier2 =
+                                credential.authorizationCode;
                             print(userIdentifier);
                             print(userIdentifier2);
                             print(credential);
                             controller.emailFocusNode.unfocus();
                             controller.passwordFocusNode.unfocus();
-                            controller.socialmedialogin('apple', credential.userIdentifier, "");
+                            controller.socialmedialogin(
+                                'apple', credential.userIdentifier, "");
 
                             // controller.applelogin(context, credential.email.toString(), credential.givenName.toString(), credential.familyName.toString(), '4', credential.userIdentifier.toString(),
                             //     credential.userIdentifier);
@@ -283,7 +289,8 @@ class SignInForm extends StatelessWidget {
                       } else {
                         prefs?.setString('logged_in', 'false');
                         LoadingDrawer.value = false;
-                        if (Get.isRegistered<Home_screen_fragmentController>()) {
+                        if (Get.isRegistered<
+                            Home_screen_fragmentController>()) {
                           Get.back();
                         } else {
                           Get.offAllNamed(AppRoutes.tabsRoute);
@@ -299,10 +306,13 @@ class SignInForm extends StatelessWidget {
                           Row(
                             children: [
                               Padding(
-                                padding:  EdgeInsets.only(bottom: getBottomPadding()),
+                                padding:
+                                    EdgeInsets.only(bottom: getBottomPadding()),
                                 child: Text(
                                   'Skip'.tr,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700),
                                 ),
                               ),
                               Icon(
@@ -350,7 +360,8 @@ class SignInForm extends StatelessWidget {
                           children: [
                             Text(
                               'Warning'.tr,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             const SizedBox(
                               height: 5,
@@ -373,7 +384,8 @@ class SignInForm extends StatelessWidget {
                             prefs?.setString('terms_accepted', 'true');
                             Navigator.of(context).pop();
                           },
-                          child: Text('Accept'.tr, style: const TextStyle(color: Colors.white)),
+                          child: Text('Accept'.tr,
+                              style: const TextStyle(color: Colors.white)),
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
@@ -451,7 +463,8 @@ class SignInForm extends StatelessWidget {
                 if (kDebugMode) {
                   print(newValue.toString());
                 }
-                controller.selectedLanguage.value = languages.firstWhere((element) => element.shortcut == newValue);
+                controller.selectedLanguage.value = languages
+                    .firstWhere((element) => element.shortcut == newValue);
                 Get.updateLocale(Locale(newValue!));
                 // controller.locale = Locale(value);
                 prefs?.setString('locale', newValue);

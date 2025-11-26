@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:http/http.dart' as http;
 
 import 'package:app_links/app_links.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -18,6 +21,7 @@ import '../../../utils/ShColors.dart';
 import '../../TermsAndConditions_screen/terms_widget.dart';
 import '../../tabs_screen/models/SocialMedia.dart';
 import '../widgets/NewsLetter.dart';
+import 'package:iq_mall/widgets/gold_price_indicator.dart';
 
 // Rx<HomeData> globalController.homeDataList = HomeData().obs;
 
@@ -36,6 +40,8 @@ class Home_screen_fragmentController extends GetxController {
   var isInitialized = false.obs;
   late RxList<SocialMedia> socialMedia = <SocialMedia>[].obs;
   final GlobalKey<ScaffoldState> homeScaffoldKey = GlobalKey<ScaffoldState>();
+  double? lastGoldPrice;
+  double? lastSilverPrice;
 
   @override
   void onInit() {
@@ -73,7 +79,13 @@ class Home_screen_fragmentController extends GetxController {
         Future.delayed(Duration(milliseconds: 600)).then((value) {
           Get.offNamed(
             AppRoutes.Productdetails_screen,
-            arguments: {'product': null, 'fromCart': false, 'productSlug': propertyId, 'from_banner': true, 'tag': "${UniqueKey()}$propertyId"},
+            arguments: {
+              'product': null,
+              'fromCart': false,
+              'productSlug': propertyId,
+              'from_banner': true,
+              'tag': "${UniqueKey()}$propertyId"
+            },
             parameters: {'tag': "$propertyId"},
           );
         });
@@ -96,14 +108,17 @@ class Home_screen_fragmentController extends GetxController {
     LoadingDrawer.value = false;
     await GetHomeData();
     Future.delayed(const Duration(seconds: 15), () {
-      if (news?.show_hide == 1 && prefs!.getString('seen').toString() != 'true') {
+      if (news?.show_hide == 1 &&
+          prefs!.getString('seen').toString() != 'true') {
         prefs?.setString('seen', 'true');
         showNewsLetterDetails(Get.context!, news!);
       }
     });
 
     ScrollListenerHOME.addListener(() async {
-      if (ScrollListenerHOME.position.pixels > (ScrollListenerHOME.position.maxScrollExtent - 450) && !loadingMore.value) {
+      if (ScrollListenerHOME.position.pixels >
+              (ScrollListenerHOME.position.maxScrollExtent - 450) &&
+          !loadingMore.value) {
         getProductSections();
       }
     });
@@ -125,7 +140,8 @@ class Home_screen_fragmentController extends GetxController {
   }
 
   void _handle(Uri uri) {
-    final productId = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
+    final productId =
+        uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
     if (productId != null && uri.pathSegments.first == 'product') {
       Future.delayed(Duration(seconds: 10)).then(
         (value) {
@@ -167,7 +183,8 @@ class Home_screen_fragmentController extends GetxController {
         prefs?.setString("category_grid", response["category_grid"]);
         loading.value = true;
         await globalController.refreshHomeScreen(false, response: response);
-        socialMedia.value = globalController.homeDataList.value.socialMedia ?? <SocialMedia>[];
+        socialMedia.value =
+            globalController.homeDataList.value.socialMedia ?? <SocialMedia>[];
         // globalController.homeDataList = (HomeData.fromJson(response)).obs;
         onlineaddslist.clear();
         ChangeStroredStore(
@@ -242,7 +259,8 @@ class Home_screen_fragmentController extends GetxController {
       dialogType: DialogType.info,
       body: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: Get.height * 0.7, // Increased max height to prevent cut-off
+          maxHeight:
+              Get.height * 0.7, // Increased max height to prevent cut-off
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -259,7 +277,8 @@ class Home_screen_fragmentController extends GetxController {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           'Warning'.tr,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ),
                       TermsWidget()
@@ -283,7 +302,8 @@ class Home_screen_fragmentController extends GetxController {
                       prefs?.setString('terms_accepted', 'true');
                       Get.back();
                     },
-                    child: Text('Accept'.tr, style: const TextStyle(color: Colors.white)),
+                    child: Text('Accept'.tr,
+                        style: const TextStyle(color: Colors.white)),
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
@@ -378,6 +398,57 @@ class Home_screen_fragmentController extends GetxController {
     } catch (ex) {
       // Handle the exception
       // print('An error occurred: $ex');
+    }
+  }
+
+  Future<GoldPriceData> fetchGoldPrice() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://zahabna.com/priceData/prices.json'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data != null) {
+          double currentPrice = 0.0;
+          double currentSilverPrice = 0.0;
+
+          if (data['XAUUSD'] != null) {
+            currentPrice = (data['XAUUSD'] as num).toDouble();
+          }
+          if (data['XAGUSD'] != null) {
+            currentSilverPrice = (data['XAGUSD'] as num).toDouble();
+          }
+
+          double change = 0.0;
+          if (lastGoldPrice != null) {
+            change = currentPrice - lastGoldPrice!;
+          }
+          lastGoldPrice = currentPrice;
+
+          double silverChange = 0.0;
+          if (lastSilverPrice != null) {
+            silverChange = currentSilverPrice - lastSilverPrice!;
+          }
+          lastSilverPrice = currentSilverPrice;
+
+          return GoldPriceData(
+            price: currentPrice,
+            change: change,
+            silverPrice: currentSilverPrice,
+            silverChange: silverChange,
+          );
+        }
+        return GoldPriceData(
+            price: 0.0, change: 0.0, silverPrice: 0.0, silverChange: 0.0);
+      } else {
+        return GoldPriceData(
+            price: 0.0, change: 0.0, silverPrice: 0.0, silverChange: 0.0);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching gold price: $e');
+      }
+      return GoldPriceData(
+          price: 0.0, change: 0.0, silverPrice: 0.0, silverChange: 0.0);
     }
   }
 }

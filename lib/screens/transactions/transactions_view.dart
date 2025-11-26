@@ -18,13 +18,15 @@ enum _Action { cancel, save, edit, delete }
 
 // If you have your own colors, replace these two lines with your constants.
 const _appBarColor = Colors.white; // Title bar color (no purple)
-Color _accentColor = ColorConstant.logoSecondColorConstant; // Accents (icons, chips highlights)
+Color _accentColor =
+    ColorConstant.logoSecondColorConstant; // Accents (icons, chips highlights)
 
 class TransactionsView extends GetView<TransactionsController> {
   const TransactionsView({super.key});
 
 // Build defaults exactly like your current logic
-  List<AppBarMenuItem<_Action>> defaultTxnMenuItems(TransactionsController c, bool isEnabled) {
+  List<AppBarMenuItem<_Action>> defaultTxnMenuItems(
+      TransactionsController c, bool isEnabled) {
     final items = <AppBarMenuItem<_Action>>[];
 
     items.add(
@@ -49,7 +51,8 @@ class TransactionsView extends GetView<TransactionsController> {
               }
               if (Get.context!.mounted) Get.back();
             } catch (_) {
-              Ui.flutterToast('Disable failed'.tr, Toast.LENGTH_SHORT, Colors.red, Colors.white);
+              Ui.flutterToast('Disable failed'.tr, Toast.LENGTH_SHORT,
+                  Colors.red, Colors.white);
             }
           }
         },
@@ -69,12 +72,20 @@ class TransactionsView extends GetView<TransactionsController> {
         actions: [
           Obx(
             () => controller.isLoadingTransactions.value
-                ? const SizedBox(width: 48) // placeholder to avoid jump when loading completes
+                ? const SizedBox(
+                    width:
+                        48) // placeholder to avoid jump when loading completes
                 : ActionsDropdown(
                     menuYOffset: 40,
                     itemsBuilder: () {
-                      final c = Get.find<TransactionsController>(); // same controller
-                      return defaultTxnMenuItems(c, controller.requests.first.status.toLowerCase() == "deleted" ? false : true);
+                      final c =
+                          Get.find<TransactionsController>(); // same controller
+                      return defaultTxnMenuItems(
+                          c,
+                          controller.requests.first.status.toLowerCase() ==
+                                  "deleted"
+                              ? false
+                              : true);
                     },
                   ),
           ),
@@ -85,7 +96,8 @@ class TransactionsView extends GetView<TransactionsController> {
         ),
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           tooltip: 'Back',
         ),
       ),
@@ -143,7 +155,8 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       elevation: overlapsContent ? 2 : 0,
       color: Colors.white,
@@ -153,7 +166,9 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return oldDelegate.maxExtent != maxExtent || oldDelegate.minExtent != minExtent || oldDelegate.child != child;
+    return oldDelegate.maxExtent != maxExtent ||
+        oldDelegate.minExtent != minExtent ||
+        oldDelegate.child != child;
   }
 }
 
@@ -166,31 +181,24 @@ class _PinnedTotalAndFilters extends StatelessWidget {
 
     return Obx(() {
       final c = Get.find<TransactionsController>();
-      final loading = c.isLoading.value;
 
       return Container(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         color: Colors.white,
         child: Column(
           children: [
-            loading
-                ? const StoreRegisterCardShimmer()
-                : Get.find<TransactionsController>().requests.isNotEmpty
-                    ? StoreRegisterCard(
-                        storeName: c.requests.first.storeName,
-                        registerDate: c.requests.first.createdAt ?? DateTime.now(),
-                        endDate: c.requests.first.endDate,
-                      )
-                    : SizedBox(),
+            c.requests.isNotEmpty
+                ? StoreRegisterCard(
+                    storeName: c.requests.first.storeName,
+                    registerDate: c.requests.first.createdAt ?? DateTime.now(),
+                    endDate: c.requests.first.endDate,
+                  )
+                : SizedBox(),
             const SizedBox(height: 8),
-            loading
-                ? const TotalCardShimmer()
-                : Get.find<TransactionsController>().requests.isNotEmpty
-                    ? _buildRealTotal(theme)
-                    : SizedBox(),
+            c.requests.isNotEmpty ? _buildRealTotal(theme) : SizedBox(),
             const SizedBox(height: 8),
             // Filters stay visible (optionally disable taps while loading)
-            loading ? const FilterBarShimmer() : const Align(alignment: Alignment.centerLeft, child: _FilterBar()),
+            const Align(alignment: Alignment.centerLeft, child: _FilterBar()),
           ],
         ),
       );
@@ -218,16 +226,20 @@ class _PinnedTotalAndFilters extends StatelessWidget {
               Expanded(
                 child: Obx(() {
                   final c = Get.find<TransactionsController>();
-                  final total = c.filteredTxns.fold<double>(0, (p, e) => p + e.amount);
+                  final total =
+                      c.filteredTxns.fold<double>(0, (p, e) => p + e.amount);
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total', style: theme.textTheme.labelMedium?.copyWith(color: Colors.black54)),
+                      Text('Total',
+                          style: theme.textTheme.labelMedium
+                              ?.copyWith(color: Colors.black54)),
                       const SizedBox(height: 2),
                       Text(
                         '${c.currency.value}${c.money.format(total)}',
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                     ],
                   );
@@ -238,11 +250,14 @@ class _PinnedTotalAndFilters extends StatelessWidget {
                 return RotationTransition(
                   turns: c.refreshController,
                   child: IconButton(
-                    onPressed: c.isLoadingTransactions.value ? null : c.refreshData,
+                    onPressed:
+                        c.isLoadingTransactions.value ? null : c.refreshData,
                     icon: Icon(
                       Icons.refresh_rounded,
                       size: getSize(20),
-                      color: c.isLoadingTransactions.value ? Colors.grey : Colors.black87,
+                      color: c.isLoadingTransactions.value
+                          ? Colors.grey
+                          : Colors.black87,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -297,10 +312,22 @@ class _FilterBar extends StatelessWidget {
         spacing: 8,
         runSpacing: 8,
         children: [
-          _Chip(label: 'All', selected: f == TxnFilter.all, onTap: () => c.applyFilter(TxnFilter.all)),
-          _Chip(label: '1D', selected: f == TxnFilter.day, onTap: () => c.applyFilter(TxnFilter.day)),
-          _Chip(label: '1W', selected: f == TxnFilter.week, onTap: () => c.applyFilter(TxnFilter.week)),
-          _Chip(label: '1M', selected: f == TxnFilter.month, onTap: () => c.applyFilter(TxnFilter.month)),
+          _Chip(
+              label: 'All',
+              selected: f == TxnFilter.all,
+              onTap: () => c.applyFilter(TxnFilter.all)),
+          _Chip(
+              label: '1D',
+              selected: f == TxnFilter.day,
+              onTap: () => c.applyFilter(TxnFilter.day)),
+          _Chip(
+              label: '1W',
+              selected: f == TxnFilter.week,
+              onTap: () => c.applyFilter(TxnFilter.week)),
+          _Chip(
+              label: '1M',
+              selected: f == TxnFilter.month,
+              onTap: () => c.applyFilter(TxnFilter.month)),
           _Chip(
             label: customLabel,
             selected: f == TxnFilter.custom,
@@ -311,9 +338,13 @@ class _FilterBar extends StatelessWidget {
                 context: context,
                 firstDate: first,
                 lastDate: DateTime(now.year + 1, 12, 31),
-                initialDateRange: c.customFrom.value != null && c.customTo.value != null
-                    ? DateTimeRange(start: c.customFrom.value!, end: c.customTo.value!)
-                    : DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now),
+                initialDateRange:
+                    c.customFrom.value != null && c.customTo.value != null
+                        ? DateTimeRange(
+                            start: c.customFrom.value!, end: c.customTo.value!)
+                        : DateTimeRange(
+                            start: now.subtract(const Duration(days: 7)),
+                            end: now),
                 helpText: 'Custom Date Range',
                 builder: (ctx, child) {
                   final baseTheme = Theme.of(ctx);
@@ -335,11 +366,13 @@ class _FilterBar extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 18,
                         ),
-                        systemOverlayStyle: SystemUiOverlayStyle.dark, // dark status bar icons
+                        systemOverlayStyle:
+                            SystemUiOverlayStyle.dark, // dark status bar icons
                       ),
                       dialogBackgroundColor: Colors.white,
                       textButtonTheme: TextButtonThemeData(
-                        style: TextButton.styleFrom(foregroundColor: _accentColor),
+                        style:
+                            TextButton.styleFrom(foregroundColor: _accentColor),
                       ),
                     ),
                     child: child!,
@@ -348,7 +381,8 @@ class _FilterBar extends StatelessWidget {
               );
 
               if (picked != null) {
-                c.applyFilter(TxnFilter.custom, from: picked.start, to: picked.end);
+                c.applyFilter(TxnFilter.custom,
+                    from: picked.start, to: picked.end);
               }
             },
           ),
@@ -378,7 +412,10 @@ class _Chip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(fontWeight: FontWeight.w800, color: selected ? _accentColor : Colors.black87, fontSize: getFontSize(12)),
+          style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: selected ? _accentColor : Colors.black87,
+              fontSize: getFontSize(12)),
         ),
       ),
     );
@@ -393,17 +430,6 @@ class _TransactionsSliverList extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Obx(() {
-      if (c.isLoadingTransactions.value || c.isLoading.value) {
-        return SliverPadding(
-          padding: EdgeInsets.fromLTRB(4, 2, 4, getBottomPadding() + 5),
-          sliver: SliverList.separated(
-            itemCount: 6,
-            separatorBuilder: (_, __) => const SizedBox(height: 0),
-            itemBuilder: (_, __) => const TxnTileShimmer(),
-          ),
-        );
-      }
-
       final items = c.filteredTxns;
       if (items.isEmpty) {
         return SliverFillRemaining(
@@ -412,25 +438,26 @@ class _TransactionsSliverList extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.inbox_outlined, size: 48, color: theme.disabledColor),
+                Icon(Icons.inbox_outlined,
+                    size: 48, color: theme.disabledColor),
                 const SizedBox(height: 8),
-                Text('No transactions found', style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+                Text('No transactions found',
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: theme.disabledColor)),
               ],
             ),
           ),
         );
       }
 
-      return c.isLoadingTransactions.value
-          ? SizedBox()
-          : SliverPadding(
-              padding: EdgeInsets.fromLTRB(4, 2, 4, getBottomPadding() + 5),
-              sliver: SliverList.separated(
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 0),
-                itemBuilder: (_, i) => _TxnTile(index: i),
-              ),
-            );
+      return SliverPadding(
+        padding: EdgeInsets.fromLTRB(4, 2, 4, getBottomPadding() + 5),
+        sliver: SliverList.separated(
+          itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 0),
+          itemBuilder: (_, i) => _TxnTile(index: i),
+        ),
+      );
     });
   }
 }
@@ -468,7 +495,8 @@ class _TxnTile extends StatelessWidget {
           ],
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
           dense: true,
           horizontalTitleGap: 10,
           leading: _PaymentTypeIcon(type: t.paymentType),
@@ -637,7 +665,9 @@ class _StoreRegisterCardState extends State<StoreRegisterCard> {
       height: 110, // reduced from 150
       child: Obx(() => Card(
             elevation: 0,
-            color: c.requests.first.status.toLowerCase() == "deleted" ? Colors.red.withAlpha(180) : Colors.white,
+            color: c.requests.first.status.toLowerCase() == "deleted"
+                ? Colors.red.withAlpha(180)
+                : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(color: Colors.grey.shade300),
@@ -657,7 +687,11 @@ class _StoreRegisterCardState extends State<StoreRegisterCard> {
                       SizedBox(
                         child: Text(
                           widget.storeName,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87, overflow: TextOverflow.ellipsis),
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              overflow: TextOverflow.ellipsis),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -669,10 +703,15 @@ class _StoreRegisterCardState extends State<StoreRegisterCard> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                padding: getPadding(left: 8, right: 8, top: 2, bottom: 2),
+                                padding: getPadding(
+                                    left: 8, right: 8, top: 2, bottom: 2),
                                 child: Text(
                                   c.requests.first.status,
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white, overflow: TextOverflow.ellipsis),
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      overflow: TextOverflow.ellipsis),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               )
@@ -689,18 +728,22 @@ class _StoreRegisterCardState extends State<StoreRegisterCard> {
                           child: TextButton(
                             onPressed: showPdfs,
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              minimumSize: const Size(0, 0), // remove default min height
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              minimumSize:
+                                  const Size(0, 0), // remove default min height
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               foregroundColor: MainColor,
                               overlayColor: MainColor.withOpacity(0.08),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                                const Icon(Icons.picture_as_pdf_outlined,
+                                    size: 16),
                                 const SizedBox(width: 5),
                                 const Text(
                                   'View Contracts',
@@ -740,14 +783,18 @@ class _StoreRegisterCardState extends State<StoreRegisterCard> {
                       ),
                       _buildDateColumn(
                         label: 'End'.tr,
-                        date: widget.endDate != null ? dateFormat.format(widget.endDate!) : "N/A",
+                        date: widget.endDate != null
+                            ? dateFormat.format(widget.endDate!)
+                            : "N/A",
                         icon: Icons.event_busy,
                         color: Colors.redAccent,
                       ),
                       if (widget.deletedDate != null)
                         _buildDateColumn(
                           label: 'Deleted'.tr,
-                          date: widget.deletedDate != null ? dateFormat.format(widget.deletedDate!) : "N/A",
+                          date: widget.deletedDate != null
+                              ? dateFormat.format(widget.deletedDate!)
+                              : "N/A",
                           icon: Icons.event_busy,
                           color: Colors.redAccent,
                         ),
@@ -809,15 +856,19 @@ class RenewSubscriptionFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Get.find<TransactionsController>().isLoadingTransactions.value
+    return Obx(() => Get.find<TransactionsController>()
+            .isLoadingTransactions
+            .value
         ? const SizedBox()
         : FloatingActionButton.extended(
             heroTag: 'renew_sub_fab',
             backgroundColor: ColorConstant.logoSecondColor,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // 👈 smaller, sharper corners (was pill shape)
+              borderRadius: BorderRadius.circular(
+                  10), // 👈 smaller, sharper corners (was pill shape)
               side: BorderSide(
-                color: Colors.white.withOpacity(0.3), // optional thin border outline
+                color: Colors.white
+                    .withOpacity(0.3), // optional thin border outline
                 width: 1.0,
               ),
             ),
@@ -839,13 +890,15 @@ class RenewSubscriptionFab extends StatelessWidget {
                 builder: (ctx) => Dialog(
                   insetPadding: const EdgeInsets.symmetric(horizontal: 28),
                   backgroundColor: ColorConstant.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.autorenew_rounded, size: 40, color: Colors.black),
+                        const Icon(Icons.autorenew_rounded,
+                            size: 40, color: Colors.black),
                         const SizedBox(height: 12),
                         Text(
                           'Renew Subscription?',
@@ -855,24 +908,31 @@ class RenewSubscriptionFab extends StatelessWidget {
                         Text(
                           'Are you sure you want to renew your subscription now?',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.black54),
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(false),
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red,
-                                  side: const BorderSide(color: Colors.red, width: 1), // ✅ red border
+                                  side: const BorderSide(
+                                      color: Colors.red,
+                                      width: 1), // ✅ red border
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                                 child: const Text(
                                   'Cancel',
-                                  style: TextStyle(color: Colors.red), // ✅ red text
+                                  style: TextStyle(
+                                      color: Colors.red), // ✅ red text
                                 ),
                               ),
                             ),
@@ -883,16 +943,21 @@ class RenewSubscriptionFab extends StatelessWidget {
                                   Navigator.of(context).pop(false);
                                   Get.to(
                                       () => PaymentImagePickerScreen(
-                                            request: Get.find<TransactionsController>().requests.first,
+                                            request: Get.find<
+                                                    TransactionsController>()
+                                                .requests
+                                                .first,
                                             isReneu: true,
                                           ),
                                       transition: Transition.rightToLeft,
-                                      duration: const Duration(milliseconds: 200));
+                                      duration:
+                                          const Duration(milliseconds: 200));
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: _accentColor,
                                   foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
                                 ),
                                 child: const Text('Yes, Renew'),
                               ),
@@ -919,7 +984,10 @@ class RenewSubscriptionFab extends StatelessWidget {
 class Shimmer extends StatefulWidget {
   final Widget child;
   final Duration duration;
-  const Shimmer({super.key, required this.child, this.duration = const Duration(milliseconds: 1200)});
+  const Shimmer(
+      {super.key,
+      required this.child,
+      this.duration = const Duration(milliseconds: 1200)});
 
   @override
   State<Shimmer> createState() => _ShimmerState();
@@ -1008,7 +1076,8 @@ class StoreRegisterCardShimmer extends StatelessWidget {
                     child: Container(
                       width: 18,
                       height: 18,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.grey),
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.grey),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -1024,16 +1093,20 @@ class StoreRegisterCardShimmer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    shimmerBox(height: 12, width: 80, radius: 4),
-                    const SizedBox(height: 6),
-                    shimmerBox(height: 14, width: 120, radius: 4),
-                  ]),
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    shimmerBox(height: 12, width: 60, radius: 4),
-                    const SizedBox(height: 6),
-                    shimmerBox(height: 14, width: 110, radius: 4),
-                  ]),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        shimmerBox(height: 12, width: 80, radius: 4),
+                        const SizedBox(height: 6),
+                        shimmerBox(height: 14, width: 120, radius: 4),
+                      ]),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        shimmerBox(height: 12, width: 60, radius: 4),
+                        const SizedBox(height: 6),
+                        shimmerBox(height: 14, width: 110, radius: 4),
+                      ]),
                 ],
               ),
             ],
@@ -1098,7 +1171,10 @@ class TxnTileShimmer extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.black12.withOpacity(0.08)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: ListTile(
@@ -1214,9 +1290,15 @@ class ConfirmToggleStoreDialog extends StatelessWidget {
             Text(title.tr, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
-              isEnabled ? 'This action will disable the store and cannot be undone.'.tr : 'This action will enable the store for operations.'.tr,
+              isEnabled
+                  ? 'This action will disable the store and cannot be undone.'
+                      .tr
+                  : 'This action will enable the store for operations.'.tr,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black54),
             ),
             const SizedBox(height: 16),
             Row(
