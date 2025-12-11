@@ -21,7 +21,7 @@ class StoreController extends GetxController {
   Rx<String?> selectedCityId = Rxn();
 
   RxList<Rx<StoreClass>> stores = <Rx<StoreClass>>[].obs;
-  RxInt offset = 1.obs;
+  RxInt offset = 2.obs;
   ScrollController scrollController = ScrollController();
   RxList<Map<String, String>> cities = <Map<String, String>>[].obs;
 
@@ -136,6 +136,7 @@ class StoreController extends GetxController {
           offset.value++;
         }
         if (init) {
+          cities.clear();
           for (int i = 0; i < storesInfo.length; i++) {
             String cityId = stores[i].value.cityId.toString();
             String cityName = stores[i].value.cityName.toString();
@@ -143,7 +144,7 @@ class StoreController extends GetxController {
 // Check if the cityId is already present in the list
             bool cityExists = cities.any((city) => city.keys.first == cityId);
 
-            if (!cityExists) {
+            if (!cityExists && cityId != "null" && cityName != "null") {
               cities.add({cityId: cityName});
             }
           }

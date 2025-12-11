@@ -716,6 +716,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
             ),
           ),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
         floatingActionButton: Obx(() => Align(
               alignment: Alignment.bottomCenter,
               child: MyCustomButton(

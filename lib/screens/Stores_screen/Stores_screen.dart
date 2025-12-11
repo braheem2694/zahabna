@@ -192,7 +192,7 @@ class Storesscreen extends StatelessWidget {
 
                 return RefreshIndicator(
                   onRefresh: () {
-                    return controller.fetchStores(false, false);
+                    return controller.fetchStores(false, true);
                   },
                   child: GridView.builder(
                     padding: EdgeInsets.only(bottom: getBottomPadding() + getSize(60), right: 12, left: 12, top: 12),

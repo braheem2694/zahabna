@@ -30,6 +30,37 @@ import 'package:bottom_navbar_with_indicator/bottom_navbar_with_indicator.dart';
 class TabsPage extends GetView<TabsController> {
   const TabsPage({Key? key}) : super(key: key);
 
+  List<CustomBottomBarItems> _buildBottomBarItems() {
+    return [
+      CustomBottomBarItems(
+        label: 'Home'.tr,
+        icon: Icons.home_outlined,
+        isAssetsImage: false,
+      ),
+      CustomBottomBarItems(
+        label: 'Categories'.tr,
+        icon: Icons.category_outlined,
+        isAssetsImage: false,
+      ),
+      if (globalController.stores.isNotEmpty && prefs?.getString('logged_in') == 'true')
+        CustomBottomBarItems(
+          label: 'Add Item'.tr,
+          icon: Icons.add_circle_outlined,
+          isAssetsImage: false,
+        ),
+      CustomBottomBarItems(
+        label: 'Favorites'.tr,
+        icon: Icons.favorite_border,
+        isAssetsImage: false,
+      ),
+      CustomBottomBarItems(
+        label: 'Stores'.tr,
+        icon: Icons.store_outlined,
+        isAssetsImage: false,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -184,39 +215,7 @@ class TabsPage extends GetView<TabsController> {
                       // gradient: LinearGradient(
                       //   colors: [Colors.pink, Colors.yellow],
                       // ),
-                      customBottomBarItems: [
-                        CustomBottomBarItems(
-                          label: 'Home'.tr,
-                          icon: Icons.home_outlined,
-                          // assetsImagePath: accountImage,
-                          isAssetsImage: false,
-                        ),
-                        CustomBottomBarItems(
-                          label: 'Categories'.tr,
-                          icon: Icons.category_outlined,
-                          // assetsImagePath: accountImage,
-                          isAssetsImage: false,
-                        ),
-                        if (globalController.stores.isNotEmpty && prefs?.getString('logged_in') == 'true')
-                          CustomBottomBarItems(
-                            label: 'Add Item'.tr,
-                            icon: Icons.add_circle_outlined,
-
-                            // assetsImagePath: accountImage,
-                            isAssetsImage: false,
-                          ),
-                        CustomBottomBarItems(
-                          label: 'Favorites'.tr,
-                          icon: Icons.favorite_border,
-                          // assetsImagePath: accountImage,
-                          isAssetsImage: false,
-                        ),
-                        CustomBottomBarItems(
-                          label: 'Stores'.tr,
-                          icon: Icons.store_outlined,
-                          isAssetsImage: false,
-                        ),
-                      ],
+                      customBottomBarItems: _buildBottomBarItems(),
                     ),
                   ),
                 ],

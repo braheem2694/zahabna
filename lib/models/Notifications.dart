@@ -42,11 +42,32 @@ class notificationsclass {
   });
 
   notificationsclass.fromJson(Map<String, dynamic> json) {
+    // Convert UTC datetime to local datetime
+    DateTime? parsedDate;
+    String? localDateTime;
+    if (json['created_at'] != null && json['created_at'].toString() != 'null') {
+      try {
+        // Parse as UTC and convert to local
+        String dateStr = json['created_at'].toString();
+        // Add 'Z' suffix if not present to indicate UTC
+        if (!dateStr.endsWith('Z') && !dateStr.contains('+')) {
+          dateStr = dateStr + 'Z';
+        }
+        parsedDate = DateTime.parse(dateStr).toLocal();
+        // Format: yyyy-MM-dd HH:mm:ss
+        localDateTime = parsedDate.toString().substring(0, 19);
+      } catch (e) {
+        localDateTime = json['created_at'].toString();
+      }
+    } else {
+      localDateTime = json['created_at'].toString();
+    }
+
     notificationslist.add(notificationsclass(
       notification_id: json['notification_id'].toString(),
       subject: json['subject'].toString(),
       body: json['body'].toString(),
-      created_at: json['created_at'].toString(),
+      created_at: localDateTime,
       is_seen: json['is_seen'].toString(),
       row_id: json['row_id'].toString(),
       table_id: json['table_id'].toString(),
