@@ -32,8 +32,7 @@ import '../../Cart_List_screen/controller/Cart_List_controller.dart';
 import '../../Home_screen_fragment/controller/Home_screen_fragment_controller.dart';
 import '../../SignUp_screen/controller/SignUp_controller.dart';
 import '../../Wishlist_screen/controller/Wishlist_controller.dart';
-import"package:iq_mall/cores/language_model.dart";
-
+import "package:iq_mall/cores/language_model.dart";
 
 import 'package:country_picker/src/country_parser.dart';
 import 'package:country_picker/src/utils.dart';
@@ -59,10 +58,7 @@ class SignInController extends GetxController {
   GoogleSignInAccount? _currentUser;
   Map userObj = {};
   bool isIOS = false;
-  var height = MediaQuery
-      .of(Get.context!)
-      .size
-      .height;
+  var height = MediaQuery.of(Get.context!).size.height;
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   Rx<Language> selectedLanguage = Language().obs;
   RxList<Language> appLanguages = <Language>[].obs;
@@ -101,16 +97,17 @@ class SignInController extends GetxController {
       }
 
       temp = languages.firstWhere(
-              (element) => element.shortcut == (prefs?.getString("locale") ?? locale.languageCode),
+          (element) =>
+              element.shortcut ==
+              (prefs?.getString("locale") ?? locale.languageCode),
           orElse: () => languages[0]);
       selectedLanguage.value = temp ?? languages[0];
-
 
       for (int i = 0; i < languages.length; i++) {
         Language? temp2;
         try {
           temp2 = languages.firstWhere(
-                (element) => element.shortcut == languages[i].shortcut,
+            (element) => element.shortcut == languages[i].shortcut,
           );
         } catch (_) {}
         if (temp2 != null) {
@@ -132,7 +129,9 @@ class SignInController extends GetxController {
     String? idToken = await user.getIdToken();
 
     return {
-      'federatedId': user.providerData[0].providerId == 'google.com' ? 'http://google.com/${user.uid}' : 'http://facebook.com/${user.uid}', // Adjust based on the provider
+      'federatedId': user.providerData[0].providerId == 'google.com'
+          ? 'http://google.com/${user.uid}'
+          : 'http://facebook.com/${user.uid}', // Adjust based on the provider
       'providerId': user.providerData[0].providerId,
       'emailVerified': user.emailVerified,
       'email': user.email,
@@ -157,10 +156,12 @@ class SignInController extends GetxController {
     } else {
       try {
         final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-        final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser!.authentication;
         Finalidtoken = googleAuth.idToken;
         signing.value = true;
-        final AuthCredential credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+        final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
         signing.value = true;
         user = (await auth.signInWithCredential(credential)).user;
       } catch (e) {
@@ -180,8 +181,7 @@ class SignInController extends GetxController {
       var displayName = user.displayName;
       var name = displayName!.split(" ");
       var last = " ";
-      for (int i = 0; i < name.length; i++)
-        if (i != 0) last += name[i] + " ";
+      for (int i = 0; i < name.length; i++) if (i != 0) last += name[i] + " ";
 
       socialmedialogin('google', user, "");
     } catch (e) {
@@ -223,17 +223,19 @@ class SignInController extends GetxController {
     } else if (type != "apple") {
       Finalidtoken = Facebooktoken;
       resp['idToken'] = Finalidtoken;
-    }
-    else {
+    } else {
       Finalidtoken = resp;
     }
 
     Map<String, dynamic> pram = {
-      'response': type == 'google' ? jsonString.toString() : type != 'apple' ? jsonEncode(transformFacebookResponse(resp)) : "",
+      'response': type == 'google'
+          ? jsonString.toString()
+          : type != 'apple'
+              ? jsonEncode(transformFacebookResponse(resp))
+              : "",
       'device_data': data.toString(),
       'idToken': Finalidtoken.toString(),
-      if(type == "apple")
-        'apple_identifier': Finalidtoken,
+      if (type == "apple") 'apple_identifier': Finalidtoken,
       'type': type,
       'token': prefs!.getString("token") ?? "",
     };
@@ -246,7 +248,8 @@ class SignInController extends GetxController {
       globalController.stores.clear();
 
       if (allStores != null) {
-        globalController.stores.addAll(allStores.map((store) => StoreClass.userFromJson(store)).toList());
+        globalController.stores.addAll(
+            allStores.map((store) => StoreClass.userFromJson(store)).toList());
       }
       if (success) {
         prefs?.setInt('selectedaddress', 0);
@@ -256,14 +259,15 @@ class SignInController extends GetxController {
         prefs?.setString("user_email", info['email'].toString());
         prefs?.setString("gender", info['gender'].toString());
         prefs?.setString("last_name", info['last_name'].toString());
-        prefs?.setString("user_name", "${info['first_name']}_${info['last_name']}");
+        prefs?.setString(
+            "user_name", "${info['first_name']}_${info['last_name']}");
         prefs?.setString("country_code", info['country_code'].toString());
         prefs?.setString("user_id", info['id'].toString());
         prefs?.setString("user_role", info['user_role'].toString());
         prefs?.setString("phone_number", info['phone_number_one'].toString());
-        prefs?.setString("login_method", info['registration_type_id'].toString());
+        prefs?.setString(
+            "login_method", info['registration_type_id'].toString());
         prefs?.setString('logged_in', 'true');
-
 
         signing.value = false;
         loggin_in.value = false;
@@ -290,7 +294,8 @@ class SignInController extends GetxController {
       signing.value = false;
       loggin_in.value = false;
       prefs?.setString('logged_in', 'false');
-      Ui.flutterToast('Incorrect credentials'.tr, Toast.LENGTH_LONG, MainColor, whiteA700);
+      Ui.flutterToast(
+          'Incorrect credentials'.tr, Toast.LENGTH_LONG, MainColor, whiteA700);
 
       // toaster(Get.context!, 'Incorrect credentials');
     }
@@ -324,9 +329,10 @@ class SignInController extends GetxController {
           globalController.stores.clear();
 
           if (allStores != null) {
-            globalController.stores.addAll(allStores.map((store) => StoreClass.userFromJson(store)).toList());
+            globalController.stores.addAll(allStores
+                .map((store) => StoreClass.userFromJson(store))
+                .toList());
           }
-
 
           var info = response['user'];
           prefs?.setString("first_name", info['first_name'].toString());
@@ -334,12 +340,14 @@ class SignInController extends GetxController {
           prefs?.setString("user_email", info['email'].toString());
           prefs?.setString("gender", info['gender'].toString());
           prefs?.setString("last_name", info['last_name'].toString());
-          prefs?.setString("user_name", "${info['first_name']}_${info['last_name']}");
+          prefs?.setString(
+              "user_name", "${info['first_name']}_${info['last_name']}");
           prefs?.setString("country_code", info['country_code'].toString());
           prefs?.setString("user_id", info['id'].toString());
           prefs?.setString("user_role", info['user_role'].toString());
           prefs?.setString("phone_number", info['phone_number_one'].toString());
-          prefs?.setString("login_method", info['registration_type_id'].toString());
+          prefs?.setString(
+              "login_method", info['registration_type_id'].toString());
           prefs?.setString('logged_in', 'true');
 
           signing.value = false;
@@ -375,9 +383,8 @@ class SignInController extends GetxController {
         } else {
           signing.value = false;
           loggin_in.value = false;
-          Ui.flutterToast(response["message"]
-              .toString()
-              .tr, Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
+          Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_LONG,
+              ColorConstant.logoFirstColor, whiteA700);
 
           prefs?.setString('logged_in', 'false');
         }
@@ -386,7 +393,6 @@ class SignInController extends GetxController {
         loggin_in.value = false;
         prefs?.setString('logged_in', 'false');
         // Ui.flutterToast( 'Error occurred'.tr, Toast.LENGTH_LONG, ColorConstant.logoFirstColor, whiteA700);
-
       }
     } catch (e) {
       signing.value = false;
@@ -394,7 +400,8 @@ class SignInController extends GetxController {
     }
   }
 
-  Future<int?> applelogin(BuildContext context, email, first_name, last_name, type, password, apple_id) async {
+  Future<int?> applelogin(BuildContext context, email, first_name, last_name,
+      type, password, apple_id) async {
     if (kIsWeb) {
       client_token = generateToken();
       prefs?.setString("token", client_token!);
@@ -424,19 +431,20 @@ class SignInController extends GetxController {
 
       var info = json.decode(response.body);
 
-
       try {
         prefs?.setString("first_name", info['first_name'].toString());
         prefs?.setString("Profile_image", info['image'].toString());
         prefs?.setString("user_email", info['email'].toString());
         prefs?.setString("gender", info['gender'].toString());
         prefs?.setString("last_name", info['last_name'].toString());
-        prefs?.setString("user_name", "${info['first_name']}_${info['last_name']}");
+        prefs?.setString(
+            "user_name", "${info['first_name']}_${info['last_name']}");
         prefs?.setString("country_code", info['country_code'].toString());
         prefs?.setString("user_id", info['id'].toString());
         prefs?.setString("user_role", info['user_role'].toString());
         prefs?.setString("phone_number", info['phone_number_one'].toString());
-        prefs?.setString("login_method", info['registration_type_id'].toString());
+        prefs?.setString(
+            "login_method", info['registration_type_id'].toString());
         prefs?.setString('logged_in', 'true');
 
         signing.value = true;
@@ -465,13 +473,11 @@ CodePicker(BuildContext context, {RxString? countryCode}) {
           if (countryCode != null) {
             countryCode.value = '+${country.phoneCode}';
             globalController.countryName.value = country.name;
-            globalController.updateFlag( country.flagEmoji);
+            globalController.updateFlag(country.flagEmoji);
             print(country.flagEmoji);
-          }
-          else {
+          } else {
             country_code.value = '+${country.phoneCode}';
-            globalController.updateFlag( country.flagEmoji);
-
+            globalController.updateFlag(country.flagEmoji);
           }
         },
         countryListTheme: CountryListThemeData(
@@ -493,21 +499,30 @@ CodePicker(BuildContext context, {RxString? countryCode}) {
       );
     },
     child: Padding(
-      padding: const EdgeInsets.only(left: 8.0, right: 8),
+      padding: const EdgeInsets.only(left: 4.0, right: 4),
       child: Container(
-        width: getHorizontalSize(85),
+        width: getHorizontalSize(90),
+        height: 50,
+        alignment: Alignment.center,
         child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4.0, right: 4),
-              child: Container(
-                child: Obx(() => country_code.toString() == 'null' ? Text('') : Text(country_code.toString())),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 2.0, right: 2),
+                child: Obx(() => country_code.toString() == 'null'
+                    ? const Text('')
+                    : Text(
+                        country_code.toString(),
+                        overflow: TextOverflow.ellipsis,
+                      )),
               ),
             ),
             Obx(() {
               return Text(globalController.countryFlag.value);
             }),
-            const Icon(Icons.keyboard_arrow_down_sharp),
+            const Icon(Icons.keyboard_arrow_down_sharp, size: 18),
           ],
         ),
       ),
@@ -527,9 +542,11 @@ Future<void> switchtoaccount() async {
 }
 
 generateToken() {
-  const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   Random _rnd = Random();
 
-  String? getRandomString(int length) => String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  String? getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   return getRandomString.toString();
 }

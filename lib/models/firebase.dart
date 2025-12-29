@@ -11,7 +11,8 @@ import '../screens/tabs_screen/controller/tabs_controller.dart';
 import '../utils/ShColors.dart';
 
 class FirebaseInitialize {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   Future<void> initializeFirebase() async {
     // Initialize Awesome Notifications
@@ -45,12 +46,15 @@ class FirebaseInitialize {
     });
 
     // Initialize Firebase Messaging
-    await FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    await FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
       if (message != null) {
         // Store the initial message to handle navigation after app initialization
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-            Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
+            Get.toNamed(AppRoutes.NotificationsScreen,
+                arguments: {'reload': true});
           }
         });
       }
@@ -73,34 +77,45 @@ class FirebaseInitialize {
   }
 
   @pragma('vm:entry-point')
-  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     // Use WidgetsBinding to ensure navigation happens after app initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-      Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
+        Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
       }
     });
   }
 
   @pragma('vm:entry-point')
-  static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
+  static Future<void> onNotificationCreatedMethod(
+      ReceivedNotification receivedNotification) async {
     // Handle notification creation if needed
   }
 
   @pragma('vm:entry-point')
-  static Future<void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {
+  static Future<void> onNotificationDisplayedMethod(
+      ReceivedNotification receivedNotification) async {
     // Handle notification display if needed
   }
 
   @pragma('vm:entry-point')
-  static Future<void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onDismissActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     // Handle notification dismissal if needed
   }
 
   Future createNotification(RemoteMessage message) async {
     TabsController _controller = Get.find();
     _controller.unreadednotification();
-    
+    try {
+      if (message.data["isStore"] == true) {
+        FetchStores();
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 10,
@@ -125,7 +140,7 @@ class FirebaseInitialize {
   Future onSelectNotification(String? payload) async {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-      Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
+        Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
       }
     });
   }
@@ -172,8 +187,6 @@ class FirebaseInitialize {
   Future<void> sendPasswordResetEmail(String? email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email!);
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 }

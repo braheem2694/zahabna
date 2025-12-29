@@ -17,10 +17,12 @@ class StoreController extends GetxController {
   RxBool loading = true.obs;
   RxBool loadingMore = false.obs;
   RxBool refreshStores = false.obs;
+  RxBool isFiltering = false.obs; // For city filter loading state
   Rx<String?> selectedCity = Rxn();
   Rx<String?> selectedCityId = Rxn();
 
   RxList<Rx<StoreClass>> stores = <Rx<StoreClass>>[].obs;
+  RxList<Rx<StoreClass>> allStores = <Rx<StoreClass>>[].obs; // Cache all stores for local filtering
   RxInt offset = 2.obs;
   ScrollController scrollController = ScrollController();
   RxList<Map<String, String>> cities = <Map<String, String>>[].obs;
@@ -91,21 +93,21 @@ class StoreController extends GetxController {
     } on Exception catch (_) {}
   }
 
-  Future<bool> fetchStores(bool isScroll, bool init, {bool fromInfo = false}) async {
+  Future<bool> fetchStores(bool isScroll, bool init, {bool fromInfo = false, bool isFilterChange = false}) async {
     bool success = false;
     if (isScroll) {
       loadingMore.value = true;
     } else if (init) {
       offset.value = 1;
       loading.value = true;
-    } else {
+    } else if (!isFilterChange) {
       offset.value = 1;
     }
 
     Map<String, dynamic> response = await api.getData({
       'token': prefs?.getString("token") ?? "",
       'page': offset.value.toString(),
-      'city': selectedCityId.value,
+      'city': isFilterChange ? null : selectedCityId.value, // Fetch all for filter changes
     }, "stores/get-stores");
 
     if (response.isNotEmpty) {
@@ -129,19 +131,35 @@ class StoreController extends GetxController {
           prefs!.setString('gif_image', response['section'][0]['gif_image'] ?? 'default_value');
         }
         payment_methods = response["payment_types"];
-        for (int i = 0; i < storesInfo.length; i++) {
-          stores.add(StoreClass.userFromJson(storesInfo[i]).obs);
+        
+        // Cache all stores for local filtering
+        if (!isScroll && !isFilterChange) {
+          allStores.clear();
         }
+        
+        for (int i = 0; i < storesInfo.length; i++) {
+          final store = StoreClass.userFromJson(storesInfo[i]).obs;
+          stores.add(store);
+          if (!isScroll && !isFilterChange) {
+            allStores.add(store);
+          }
+        }
+        
+        // Apply local filter if city is selected
+        if (isFilterChange && selectedCityId.value != null) {
+          _applyLocalFilter();
+        }
+        
         if (isScroll) {
           offset.value++;
         }
         if (init) {
           cities.clear();
-          for (int i = 0; i < storesInfo.length; i++) {
+          for (int i = 0; i < stores.length; i++) {
             String cityId = stores[i].value.cityId.toString();
             String cityName = stores[i].value.cityName.toString();
 
-// Check if the cityId is already present in the list
+            // Check if the cityId is already present in the list
             bool cityExists = cities.any((city) => city.keys.first == cityId);
 
             if (!cityExists && cityId != "null" && cityName != "null") {
@@ -196,5 +214,64 @@ class StoreController extends GetxController {
     }, "stores/save-store-view").then((value) {
       print(value);
     });
+  }
+
+  /// Filter stores by city - Fast local filtering with background refresh
+  void filterByCity(String? cityValue) async {
+    // Check if clearing filter
+    final isClearingFilter = cityValue == null || cityValue == "Select City";
+    
+    // Update selected city immediately
+    selectedCity.value = isClearingFilter ? null : cityValue;
+    
+    // Find city ID
+    if (isClearingFilter) {
+      selectedCityId.value = null;
+    } else {
+      for (var element in cities) {
+        if (element.values.first == selectedCity.value) {
+          selectedCityId.value = element.keys.first;
+          break;
+        }
+      }
+    }
+
+    // Start filtering animation
+    isFiltering.value = true;
+
+    // Apply local filter immediately for instant feedback
+    if (allStores.isNotEmpty) {
+      _applyLocalFilter();
+    }
+
+    // Small delay for visual feedback
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // If clearing filter, refetch all stores fresh from server
+    if (isClearingFilter) {
+      await fetchStores(false, false); // Fetch all stores
+    } else {
+      // Fetch filtered data from server
+      await fetchStores(false, false, isFilterChange: true);
+    }
+    
+    // Stop filtering animation
+    isFiltering.value = false;
+  }
+
+  /// Apply local filter to cached stores
+  void _applyLocalFilter() {
+    if (selectedCityId.value == null || allStores.isEmpty) {
+      // Show all stores from cache, or keep current if cache empty
+      if (allStores.isNotEmpty) {
+        stores.value = List.from(allStores);
+      }
+    } else {
+      // Filter by city ID
+      stores.value = allStores
+          .where((store) => store.value.cityId.toString() == selectedCityId.value)
+          .toList();
+    }
+    stores.refresh();
   }
 }

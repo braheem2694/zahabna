@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-
 import 'package:iq_mall/screens/ProductDetails_screen/controller/ProductDetails_screen_controller.dart';
 import 'package:iq_mall/utils/ShColors.dart';
 import 'package:iq_mall/utils/ShConstant.dart';
 import 'package:iq_mall/widgets/ShWidget.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:iq_mall/main.dart';
 import 'package:get/get.dart';
-
-import '../../../cores/math_utils.dart';
-import '../../Wishlist_screen/controller/Wishlist_controller.dart';
-import 'flutter_rating_bar.dart';
 import 'package:iq_mall/models/functions.dart';
+import 'flutter_rating_bar.dart';
+import 'package:iq_mall/cores/math_utils.dart';
+import '../../Wishlist_screen/controller/Wishlist_controller.dart';
 
 class ProductInfo extends StatefulWidget {
   final ProductDetails_screenController controller;
@@ -25,522 +22,425 @@ class ProductInfo extends StatefulWidget {
 class _ProductInfoState extends State<ProductInfo> {
   onLikeButtonTapped() async {
     widget.controller.liked.value = !widget.controller.liked.value;
-    widget.controller.product.value?.is_liked = widget.controller.liked.value ? 1 : 0;
+    widget.controller.product.value?.is_liked =
+        widget.controller.liked.value ? 1 : 0;
     globalController.isLiked.value = widget.controller.liked.value;
 
-    print("1 : ${widget.controller.liked.value}");
-    print("2 : ${widget.controller.product.value?.is_liked}");
-
-    function.setFavorite(widget.controller.product.value!, true, widget.controller.liked.value).then(
+    function
+        .setFavorite(widget.controller.product.value!, true,
+            widget.controller.liked.value)
+        .then(
       (value) {
-        WishlistController _controller = Get.find();
-        _controller.GetFavorite();
+        if (Get.isRegistered<WishlistController>()) {
+          WishlistController _controller = Get.find();
+          _controller.GetFavorite();
+        }
       },
     );
   }
 
   @override
   void initState() {
-    // TODO: implement initState
-    widget.controller.liked.value = widget.controller.product.value?.is_liked == 0 ? false : true;
+    widget.controller.liked.value =
+        widget.controller.product.value?.is_liked == 0 ? false : true;
     globalController.isLiked.value = widget.controller.liked.value;
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 4, left: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          // Header Row: Name & Like
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Obx(
-                () => widget.controller.product.value?.product_price == 0
-                    ? Text(
-                        'Contact us for price'.tr,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: price_color,
-                          fontSize: getFontSize(15),
-                          decoration: TextDecoration.none,
-                        ),
-                      )
-                    : widget.controller.product.value?.price_after_discount != null && widget.controller.product.value?.price_after_discount != widget.controller.product.value?.product_price
-                        ? Padding(
-                            padding: getPadding(right: 4.0),
-                            child: Text(
-                              widget.controller.updatingProductInfo.value
-                                  ? ""
-                                  : (widget.controller.product.value?.price_after_discount != null && widget.controller.product.value?.price_after_discount != widget.controller.product.value?.product_price)
-                                      ? '${sign.value}${widget.controller.product.value?.price_after_discount ?? 0}' // Show discounted price if available
-                                      : '${sign.value}${widget.controller.product.value?.product_price ?? 0}',
-                              textAlign: TextAlign.center, // Else, show the product price
-
-                              // Else, show the product price
-                              style: TextStyle(
-                                color: price_color,
-                                fontWeight: FontWeight.w700,
-                                fontSize: getFontSize(25),
-                                decoration: TextDecoration.none, // Else, show plain text
-                              ),
-                            ),
-                          )
-                        : SizedBox(),
-              ),
-              Obx(() {
-                return Text(
-                  '${sign.value}${widget.controller.product.value?.product_price} ',
-                  textAlign: TextAlign.center, // Else, show the product price
-                  style: TextStyle(
-                    color: (widget.controller.product.value?.price_after_discount != null && widget.controller.product.value?.price_after_discount != widget.controller.product.value?.product_price) ? discount_price_color : price_color,
-                    fontWeight: FontWeight.w700,
-
-                    fontSize: (widget.controller.product.value?.price_after_discount != null && widget.controller.product.value?.price_after_discount != widget.controller.product.value?.product_price) ? getFontSize(15) : getFontSize(23),
-                    decoration: (widget.controller.product.value?.price_after_discount != null && widget.controller.product.value?.price_after_discount != widget.controller.product.value?.product_price)
-                        ? TextDecoration.lineThrough // If there's a discount, strikethrough the original price
-                        : TextDecoration.none, // Else, show plain text
+              Expanded(
+                child: Obx(
+                  () => Text(
+                    widget.controller.product.value?.product_name ?? '',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w700,
+                      fontSize: getFontSize(20),
+                      height: 1.3,
+                      letterSpacing: 0.5,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                );
-              }),
-              Expanded(child: SizedBox()),
+                ),
+              ),
+              const SizedBox(width: 16),
               Obx(
                 () => widget.controller.updatingProductInfo.value
-                    ? Container()
-                    : prefs!.getString("token").toString() == 'null'
-                        ? Container()
-                        : Padding(
-                            padding: const EdgeInsets.only(top: 0.0, right: 15),
-                            child: GestureDetector(
-                              onTap: () => onLikeButtonTapped(),
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                transitionBuilder: (Widget child, Animation<double> animation) {
-                                  return ScaleTransition(scale: animation, child: child);
-                                },
-                                child: Icon(
-                                  widget.controller.liked.value ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                  key: ValueKey<bool>(widget.controller.liked.value),
-                                  color: ColorConstant.logoSecondColor,
-                                  size: getSize(27),
+                    ? const SizedBox()
+                    : (prefs?.getString("token") == null ||
+                            prefs?.getString("token") == 'null')
+                        ? const SizedBox()
+                        : Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(50),
+                              onTap: onLikeButtonTapped,
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey[100],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ],
+                                ),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  transitionBuilder: (Widget child,
+                                      Animation<double> animation) {
+                                    return ScaleTransition(
+                                        scale: animation, child: child);
+                                  },
+                                  child: Icon(
+                                    widget.controller.liked.value
+                                        ? Icons.favorite_rounded
+                                        : Icons.favorite_border_rounded,
+                                    key: ValueKey<bool>(
+                                        widget.controller.liked.value),
+                                    color: widget.controller.liked.value
+                                        ? Colors.redAccent
+                                        : Colors.grey[400],
+                                    size: getSize(22),
+                                  ),
                                 ),
                               ),
-                            )
-                            // IconButton(
-                            //   icon: Obx(() => Icon(
-                            //         widget.controller.liked.value ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                            //         size: getSize(30),
-                            //       )),
-                            //   color: ColorConstant.logoSecondColor,
-                            //   onPressed: () => onLikeButtonTapped(),
-                            // )
-                            // LikeButton(
-                            //   size: 30,
-                            //   onTap: onLikeButtonTapped,
-                            //   isLiked: widget.controller.product.value?.isLiked.toString() == '0' ? false : true,
-                            //   likeCountAnimationType:
-                            //       199 < 1000 ? LikeCountAnimationType.all : LikeCountAnimationType.part,
-                            //   product: widget.controller.product.value,
-                            // ),
                             ),
+                          ),
               )
             ],
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              // parse(widget.controller.product.value?.product_name).body!.text,
-              widget.controller.product.value?.product_name ?? '',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: getFontSize(18),
-              ),
-              textAlign: TextAlign.start,
-              maxLines: 1,
-            ),
-          ),
 
-          widget.controller.product.value?.product_price != 0
-              ? Align(
-                  alignment: Alignment.centerLeft,
+          const SizedBox(height: 16),
+
+          // Price Section
+          Obx(() {
+            if (widget.controller.updatingProductInfo.value) {
+              return const SizedBox();
+            }
+            final product = widget.controller.product.value;
+            if (product == null) return const SizedBox();
+
+            bool hasDiscount = product.price_after_discount != null &&
+                product.price_after_discount != product.product_price;
+
+            // Contact for price case
+            if (product.product_price == 0) {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: ColorConstant.logoFirstColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Contact us for price'.tr,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ColorConstant.logoFirstColor,
+                    fontSize: getFontSize(16),
+                  ),
+                ),
+              );
+            }
+
+            return Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 4,
+              children: [
+                Text(
+                  hasDiscount
+                      ? '${sign.value}${product.price_after_discount ?? 0}'
+                      : '${sign.value}${product.product_price ?? 0}',
+                  style: TextStyle(
+                    color: ColorConstant.logoFirstColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: getFontSize(24),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                if (hasDiscount)
+                  Text(
+                    '${sign.value}${product.product_price}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.lineThrough,
+                      fontSize: getFontSize(16),
+                    ),
+                  ),
+                if (hasDiscount)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      "Sale",
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: getFontSize(10),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+
+          // Disclaimer (subtle)
+          Obx(() => widget.controller.product.value?.product_price != 0
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 6.0),
                   child: Text(
                     'The displayed price is not final'.tr,
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: price_color,
-                      fontSize: getFontSize(15),
-                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[500],
+                      fontSize: getFontSize(11),
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 )
-              : const SizedBox(),
-          Obx(
-            () => widget.controller.updatingProductInfo.value
-                ? Container()
-                : widget.controller.product.value?.is_ordered_before == 1
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 8.0, bottom: 0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                showDialog<ConfirmAction>(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    builder: (context) {
-                                      return Scaffold(
-                                        backgroundColor: Colors.transparent,
-                                        body: Container(
-                                          alignment: Alignment.center,
-                                          padding: const EdgeInsets.all(16),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                Container(
-                                                  color: Colors.white,
-                                                  alignment: Alignment.center,
-                                                  width: MediaQuery.of(context).size.width - 40,
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(10.0),
-                                                        child: text("Review and Rate".tr, fontSize: 24, fontFamily: fontBold, textColor: Colors.black),
-                                                      ),
-                                                      const Divider(
-                                                        thickness: 0.5,
-                                                      ),
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(spacing_large),
-                                                        child: Row(
-                                                          children: [
-                                                            Obx(() => RatingBar(
-                                                                  initialRating: widget.controller.rating.value.toDouble(),
-                                                                  direction: Axis.horizontal,
-                                                                  allowHalfRating: true,
-                                                                  tapOnlyMode: true,
-                                                                  itemCount: 5,
-                                                                  itemSize: 30,
-                                                                  itemBuilder: (context, _) => const Icon(
-                                                                    Icons.star,
-                                                                    color: Colors.amber,
-                                                                    size: 25,
-                                                                  ),
-                                                                  onRatingUpdate: (rating) {
-                                                                    widget.controller.rateNumber = rating;
-                                                                  },
-                                                                )),
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  widget.controller.product.value!.rate.toString(),
-                                                                  style: const TextStyle(fontSize: 10, color: Colors.grey),
-                                                                ),
-                                                                const Icon(
-                                                                  Icons.star,
-                                                                  color: Colors.green,
-                                                                  size: 14,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding: const EdgeInsets.only(left: spacing_large, right: spacing_large),
-                                                        child: Form(
-                                                          key: widget.controller.formKey,
-                                                          child: TextFormField(
-                                                            controller: widget.controller.Reviewcontroller,
-                                                            keyboardType: TextInputType.multiline,
-                                                            maxLines: 5,
-                                                            validator: (value) {
-                                                              return "Review Filed Required!".tr;
-                                                            },
-                                                            style: const TextStyle(fontFamily: fontRegular, fontSize: textSizeNormal, color: sh_textColorPrimary),
-                                                            decoration: InputDecoration(
-                                                              hintText: 'Describe your experience'.tr,
-                                                              border: InputBorder.none,
-                                                              enabledBorder: const OutlineInputBorder(
-                                                                borderSide: BorderSide(color: Colors.grey, width: 1),
-                                                              ),
-                                                              focusedBorder: const OutlineInputBorder(
-                                                                borderSide: BorderSide(color: Colors.grey, width: 1),
-                                                              ),
-                                                              filled: false,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(spacing_large),
-                                                        child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                          children: <Widget>[
-                                                            Expanded(
-                                                              child: MaterialButton(
-                                                                textColor: MainColor,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.circular(5.0),
-                                                                  side: BorderSide(color: MainColor),
-                                                                ),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop(ConfirmAction.CANCEL);
-                                                                },
-                                                                child: text('Cancel'.tr, fontSize: textSizeNormal, textColor: MainColor),
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: spacing_standard_new,
-                                                            ),
-                                                            Expanded(
-                                                              child: MaterialButton(
-                                                                color: MainColor,
-                                                                textColor: Colors.white,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.circular(5.0),
-                                                                ),
-                                                                onPressed: () async {
-                                                                  if (widget.controller.Reviewcontroller.text.toString() == '') {
-                                                                    toaster(context, 'Review it first please'.tr);
-                                                                  } else {
-                                                                    widget.controller.Review_Rate();
-                                                                    Navigator.of(context).pop(ConfirmAction.CANCEL);
-                                                                  }
-                                                                },
-                                                                child: text('Submit'.tr, fontSize: textSizeNormal, textColor: sh_white),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    });
-                              },
-                              child: AbsorbPointer(
-                                child: Obx(() => RatingBar(
-                                      initialRating: widget.controller.rating.value.toDouble(),
-                                      direction: Axis.horizontal,
-                                      allowHalfRating: true,
-                                      tapOnlyMode: true,
-                                      itemCount: 5,
-                                      itemSize: getSize(20),
-                                      itemBuilder: (context, _) => Icon(
-                                        Icons.star,
-                                        size: getSize(30),
-                                        color: Colors.amber,
-                                      ),
-                                    )),
-                              ),
-                            ),
-                            Padding(
-                              padding: getPadding(
-                                left: 12.0,
-                              ),
-                              child: Obx(() => Text(
-                                    widget.controller.updatingProductInfo.value ? "" : "${widget.controller.product.value!.orders_count}${" sold".tr}",
-                                    style: TextStyle(
-                                      color: ColorConstant.logoFirstColor,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: getFontSize(15),
-                                    ),
-                                  )),
-                            ),
-                            Padding(
-                              padding: getPadding(left: 6.0, right: 6),
-                              child: Text(
-                                "/",
-                                style: TextStyle(
-                                  color: ColorConstant.logoFirstColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: getFontSize(15),
-                                ),
-                              ),
-                            ),
+              : const SizedBox()),
 
-                            // Padding(
-                            //   padding: const EdgeInsets.only(left: 4.0,right: 4),
-                            //   child: Container(color: ColorConstant.logoFirstColor,width: 2,height: 15,
-                            //   alignment: Alignment.topCenter,),
-                            // ),
-                            Obx(() => Text(
-                                  widget.controller.product.value!.product_qty_left.toString() + " remaining".tr,
-                                  style: TextStyle(
-                                    color: ColorConstant.logoFirstColor,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: getFontSize(15),
-                                  ),
-                                ))
+          const SizedBox(height: 20),
+
+          // Stats / Info Chips
+          Obx(
+            () {
+              if (widget.controller.updatingProductInfo.value) {
+                return const SizedBox();
+              }
+              final product = widget.controller.product.value;
+              if (product == null) return const SizedBox();
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  // Rating Pill
+                  if (product.is_ordered_before == 1)
+                    InkWell(
+                      onTap: () => _showReviewDialog(context),
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star_rounded,
+                                color: Colors.amber, size: getSize(18)),
+                            const SizedBox(width: 4),
+                            Text(
+                              "${product.rate}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: getFontSize(13),
+                                color: Colors.black87,
+                              ),
+                            ),
                           ],
                         ),
-                      )
-                    : Container(),
+                      ),
+                    ),
+
+                  // Sold Count
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Text(
+                      "${product.orders_count} ${"sold".tr}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: getFontSize(13),
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+
+                  // Remaining Stock
+                  if ((product.product_qty_left ?? 0) > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: (product.product_qty_left ?? 0) < 5
+                            ? Colors.red.withOpacity(0.05)
+                            : Colors.green.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                            color: (product.product_qty_left ?? 0) < 5
+                                ? Colors.red.withOpacity(0.2)
+                                : Colors.green.withOpacity(0.2)),
+                      ),
+                      child: Text(
+                        "${product.product_qty_left} ${"remaining".tr}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: getFontSize(13),
+                          color: (product.product_qty_left ?? 0) < 5
+                              ? Colors.red
+                              : Colors.green[700],
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.start,
-          //   children: [
-          //     Padding(
-          //       padding: getPadding(right: 8.0),
-          //       child: Container(
-          //         width: getHorizontalSize(110),
-          //         alignment: Alignment.center,
-          //         child: buildInfoItem(
-          //           icon: Icons.monetization_on,
-          //           title: "Price ".tr // If there's a discount, show original price
-          //           , // Else, just show the product price
-          //           content: Row(
-          //             mainAxisAlignment: MainAxisAlignment.center,
-          //             children: [
-          //               Obx(
-          //                 () => widget.controller.product.value?.price_after_discount != null
-          //                     ? Padding(
-          //                         padding: getPadding(right: 4.0),
-          //                         child: Text(
-          //                           widget.controller.updatingProductInfo.value
-          //                               ? ""
-          //                               : widget.controller.product.value?.price_after_discount != null
-          //                                   ? '${sign.value}${widget.controller.product.value?.price_after_discount ?? 0}' // Show discounted price if available
-          //                                   : '${sign.value}${widget.controller.product.value?.product_price ?? 0}',
-          //                           textAlign: TextAlign.center, // Else, show the product price
-          //
-          //                           // Else, show the product price
-          //                           style: TextStyle(
-          //                             color: price_color,
-          //                             fontWeight: FontWeight.w700,
-          //                             fontSize: getFontSize(15),
-          //                             decoration: TextDecoration.none, // Else, show plain text
-          //                           ),
-          //                         ),
-          //                       )
-          //                     : SizedBox(),
-          //               ),
-          //               Obx(() {
-          //                 return Text(
-          //                   '${sign.value}${widget.controller.product.value?.product_price} ',
-          //                   textAlign: TextAlign.center, // Else, show the product price
-          //                   style: TextStyle(
-          //                     color: widget.controller.product.value?.price_after_discount != null ? discount_price_color : price_color,
-          //                     fontWeight: FontWeight.w700,
-          //
-          //                     fontSize: getFontSize(15),
-          //                     decoration: widget.controller.product.value?.price_after_discount != null
-          //                         ? TextDecoration.lineThrough // If there's a discount, strikethrough the original price
-          //                         : TextDecoration.none, // Else, show plain text
-          //                   ),
-          //                 );
-          //               }),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //     Padding(
-          //       padding: getPadding(right: 8.0),
-          //       child: Obx(() => widget.controller.product.value?.orders_count != null && (widget.controller.product.value?.orders_count ?? 0) > 0
-          //           ? SizedBox(
-          //               width: getHorizontalSize(110),
-          //               child: Padding(
-          //                 padding: const EdgeInsets.all(5.0),
-          //                 child: buildInfoItem(
-          //                   icon: Icons.library_books,
-          //                   title: "No. of Order".tr,
-          //                   content: Obx(() => Text(
-          //                         widget.controller.updatingProductInfo.value ? "" : widget.controller.product.value!.orders_count.toString(),
-          //                         style: TextStyle(
-          //                           color: Colors.red[800],
-          //                           fontWeight: FontWeight.w700,
-          //                           fontSize: getFontSize(15),
-          //                         ),
-          //                       )),
-          //                 ),
-          //               ),
-          //             )
-          //           : SizedBox()),
-          //     ),
-          //     Padding(
-          //       padding: getPadding(right: 8.0),
-          //       child: SizedBox(
-          //         width: getHorizontalSize(110),
-          //         child: buildInfoItem(
-          //           icon: Icons.layers,
-          //           title: "Available Stocks".tr,
-          //           content: Obx(() => Text(
-          //                 widget.controller.product.value!.product_qty_left.toString(),
-          //                 style: TextStyle(
-          //                   color: Colors.red[800],
-          //                   fontWeight: FontWeight.w700,
-          //                   fontSize: getFontSize(15),
-          //                 ),
-          //               )),
-          //         ),
-          //       ),
-          //     )
-          //   ],
-          // ),
         ],
       ),
     );
   }
 
-  Widget buildInfoItem({
-    required IconData icon,
-    required String title,
-    Widget? subtitle,
-    required Widget content,
-  }) {
-    return DottedBorder(
-      radius: const Radius.circular(55),
-      color: Colors.grey,
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Obx(() => widget.controller.updatingProductInfo.value
-            ? Container()
-            : SizedBox(
-                width: getHorizontalSize(110),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          icon,
-                          color: Colors.black,
-                          size: 18,
-                        ),
-                        if (subtitle != null) subtitle,
-                        Text(
-                          title,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.black, fontSize: getFontSize(10), fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: content,
-                    ),
+  void _showReviewDialog(BuildContext context) {
+    showDialog<ConfirmAction>(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
                   ],
                 ),
-              )),
-      ),
-    );
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text("Review and Rate".tr,
+                        style: TextStyle(
+                            fontSize: getFontSize(22),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87)),
+                    const SizedBox(height: 16),
+                    Obx(() => RatingBar(
+                          initialRating:
+                              widget.controller.rating.value.toDouble(),
+                          direction: Axis.horizontal,
+                          allowHalfRating: true,
+                          itemCount: 5,
+                          itemSize: 36,
+                          itemBuilder: (context, _) => const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (rating) {
+                            widget.controller.rateNumber = rating;
+                          },
+                        )),
+                    const SizedBox(height: 20),
+                    Form(
+                      key: widget.controller.formKey,
+                      child: TextFormField(
+                        controller: widget.controller.Reviewcontroller,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 4,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Review Filed Required!".tr
+                            : null,
+                        decoration: InputDecoration(
+                          hintText: 'Describe your experience'.tr,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: ColorConstant.logoFirstColor),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(ConfirmAction.CANCEL),
+                            child: Text('Cancel'.tr,
+                                style: const TextStyle(color: Colors.black54)),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorConstant.logoFirstColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: () {
+                              if (widget.controller.Reviewcontroller.text
+                                  .trim()
+                                  .isEmpty) {
+                                toaster(context, 'Review it first please'.tr);
+                              } else {
+                                widget.controller.Review_Rate();
+                                Navigator.of(context).pop(ConfirmAction.CANCEL);
+                              }
+                            },
+                            child: Text('Submit'.tr,
+                                style: const TextStyle(color: Colors.white)),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

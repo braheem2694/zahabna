@@ -1,45 +1,32 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
-import 'package:app_links/app_links.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:bottom_navbar_with_indicator/bottom_navbar_with_indicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/response/response.dart';
+import 'package:http/http.dart' as http;
 import 'package:iq_mall/screens/ProductDetails_screen/ProductDetails_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../cores/assets.dart';
-import '../../../cores/math_utils.dart';
 import '../../../main.dart';
 import '../../../models/CurrencyEx.dart';
 import '../../../routes/app_routes.dart';
 import '../../../utils/ShColors.dart';
-import '../../../widgets/applink.dart';
-import '../../Cart_List_screen/Cart_List_screen.dart';
-import '../../Cart_List_screen/controller/Cart_List_controller.dart';
-import '../../HomeScreenPage/ShHomeScreen.dart';
 import '../../Home_screen_fragment/Home_screen_fragment.dart';
 import '../../Home_screen_fragment/controller/Home_screen_fragment_controller.dart';
 import '../../ProductDetails_screen/controller/ProductDetails_screen_controller.dart';
 import '../../Stores_screen/Stores_screen.dart';
 import '../../Stores_screen/controller/Stores_screen_controller.dart';
-import '../../Stores_screen/controller/my_store_controller.dart';
 import '../../Stores_screen/widgets/item_widget.dart';
 import '../../Wishlist_screen/controller/Wishlist_controller.dart';
 import '../../Wishlist_screen/wish_list_screen.dart';
 import '../../categories_screen/categories_screen.dart';
 import '../binding/tabs_binding.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart' show rootBundle;
 
 String uuidForCartList = "";
 var arabicFont;
@@ -55,9 +42,8 @@ class TabsController extends GetxController {
   RxBool colorful = true.obs;
   RxBool hasStore = false.obs;
 
-  void onButtonPressed(int index) {
-    currentIndex.value = index;
-  }
+  // Trigger for UI rebuilds
+  RxInt rebuildTrigger = 0.obs;
 
   final iconList = <IconData>[
     Icons.brightness_5,
@@ -76,7 +62,96 @@ class TabsController extends GetxController {
   List cartInfo = [];
   Locale? initialLocale;
 
-  // late final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
+  void onButtonPressed(int index) {
+    currentIndex.value = index;
+  }
+
+  /// Check if user has store access
+  bool get hasStoreAccess =>
+      globalController.stores.isNotEmpty && prefs?.getString('logged_in') == 'true';
+
+  /// Get the bottom bar items based on current state
+  List<CustomBottomBarItems> getBottomBarItems() {
+    final items = <CustomBottomBarItems>[
+      CustomBottomBarItems(
+        label: 'Home'.tr,
+        icon: Icons.home_outlined,
+        isAssetsImage: false,
+      ),
+      CustomBottomBarItems(
+        label: 'Categories'.tr,
+        icon: Icons.category_outlined,
+        isAssetsImage: false,
+      ),
+    ];
+
+    // Add "Add Item" only if user has store access
+    if (hasStoreAccess) {
+      items.add(CustomBottomBarItems(
+        label: 'Add Item'.tr,
+        icon: Icons.add_circle_outlined,
+        isAssetsImage: false,
+      ));
+    }
+
+    items.addAll([
+      CustomBottomBarItems(
+        label: 'Favorites'.tr,
+        icon: Icons.favorite_border,
+        isAssetsImage: false,
+      ),
+      CustomBottomBarItems(
+        label: 'Stores'.tr,
+        icon: Icons.store_outlined,
+        isAssetsImage: false,
+      ),
+    ]);
+
+    return items;
+  }
+
+  /// Get pages list based on current state
+  List<Widget> getPages() {
+    if (hasStoreAccess) {
+      return [
+        Home_screen_fragmentscreen(),
+        CategoriesScreen(),
+        AddNewItemScreen(),
+        Wishlistscreen(),
+        Storesscreen(),
+      ];
+    } else {
+      return [
+        Home_screen_fragmentscreen(),
+        CategoriesScreen(),
+        Wishlistscreen(),
+        Storesscreen(),
+      ];
+    }
+  }
+
+  /// Rebuilds the pages and bottom bar items
+  /// Called after store deletion or any store-related changes
+  void rebuildPages() {
+    debugPrint('TabsController: rebuildPages called');
+    debugPrint('TabsController: hasStoreAccess = $hasStoreAccess');
+    debugPrint('TabsController: stores count = ${globalController.stores.length}');
+
+    // Update pages
+    pages.value = getPages();
+    pages.refresh();
+
+    // Reset to home if current index is invalid
+    if (currentIndex.value >= pages.length) {
+      currentIndex.value = 0;
+    }
+
+    // Trigger UI rebuild
+    rebuildTrigger.value++;
+
+    update();
+    refresh();
+  }
 
   loadArabicFont() async {
     arabicFont = await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
@@ -87,7 +162,7 @@ class TabsController extends GetxController {
     final link = prefs.getString("pending_deep_link");
 
     if (link != null) {
-      prefs.remove("pending_deep_link"); // Clear to avoid loops
+      prefs.remove("pending_deep_link");
 
       Uri uri = Uri.parse(link);
       final productId = uri.pathSegments.last;
@@ -113,31 +188,20 @@ class TabsController extends GetxController {
   @override
   void onInit() async {
     uuidForCartList = uuid.v4().toString();
+
+    // Fetch stores and rebuild when done
     FetchStores().then((value) {
-      // globalController.refreshFunctions();
+      rebuildPages();
     });
+
     initialLocale = await getInitialLocale();
 
     if (!Get.isRegistered<StoreController>(tag: "main")) {
-      Get.put(StoreController(), tag: "main"); // Ensure the main tab screen controller exists
+      Get.put(StoreController(), tag: "main");
     }
 
-    if (globalController.stores.isNotEmpty && prefs?.getString('logged_in') == 'true') {
-      pages.value = [
-        Home_screen_fragmentscreen(),
-        CategoriesScreen(),
-        AddNewItemScreen(),
-        Wishlistscreen(),
-        Storesscreen(), // This uses tag "main"
-      ];
-    } else {
-      pages.value = [
-        Home_screen_fragmentscreen(),
-        CategoriesScreen(),
-        Wishlistscreen(),
-        Storesscreen(), // This uses tag "main"
-      ];
-    }
+    // Initial pages setup
+    pages.value = getPages();
 
     super.onInit();
   }
@@ -148,25 +212,6 @@ class TabsController extends GetxController {
     });
   }
 
-  void _handle(Uri uri) {
-    final productId = uri.pathSegments.last;
-    if (productId.isNotEmpty) {
-      Future.delayed(Duration(seconds: 10)).then((value) {
-        Get.offNamed(
-          AppRoutes.Productdetails_screen,
-          arguments: {
-            'product': null,
-            'fromCart': false,
-            'productSlug': productId,
-            'from_banner': true,
-            'tag': "${UniqueKey()}$productId",
-          },
-          parameters: {'tag': productId},
-        );
-      });
-    }
-  }
-
   InitStateFucntion() {
     currentIndex.value = mainCurrentIndex.value;
     mainCurrentIndex.value = 0;
@@ -174,39 +219,43 @@ class TabsController extends GetxController {
       LoadingDrawer.value = false;
     });
     try {
-      changeColorsAndDisplay(prefs!.getString('button_color').toString(), prefs!.getString('main_color').toString(), prefs!.getString('discount_price_color').toString());
+      changeColorsAndDisplay(
+        prefs!.getString('button_color').toString(),
+        prefs!.getString('main_color').toString(),
+        prefs!.getString('discount_price_color').toString(),
+      );
       load.value = true;
     } catch (e) {
       print(e);
       load.value = true;
     }
-    // Future.delayed(Duration.zero, () {
-    //   Get.to(() => ShHomeScreen(), routeName: '/ShHomeScreen');
-    // });
+
     getsettings();
 
     if (prefs?.getString('currency').toString() == 'null') {
       prefs?.setString('currency', 'Lebanese Lira');
       prefs?.setString('idselected', country_currency_id!);
       idselected = int.parse(prefs?.getString('idselected') ?? "");
-      prefs?.setString('sign', sign.value.toString() ?? "");
+      prefs?.setString('sign', sign.value.toString());
       for (int i = 0; i < currencyExlist.length; i++) {
-        if (currencyExlist[i].from_currency == country_currency_id && currencyExlist[i].to_currency == idselected.toString()) {
+        if (currencyExlist[i].from_currency == country_currency_id &&
+            currencyExlist[i].to_currency == idselected.toString()) {
           prefs?.setString('currency_rate', currencyExlist[i].Rate);
         }
       }
     } else {
       idselected = int.parse(prefs?.getString('idselected') ?? "");
-      prefs?.setString('sign', sign.value.toString() ?? "");
+      prefs?.setString('sign', sign.value.toString());
       Future.delayed(Duration.zero, () {});
     }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unreadednotification();
       LoadingDrawer.value = false;
     });
+
     Future.delayed(Duration.zero, () async {
       drawerSize.value = Get.size.height - 200;
-      // globalController.selectedTab.value = 0;
     });
   }
 
@@ -215,9 +264,7 @@ class TabsController extends GetxController {
       var url = "${con!}notification/get-count";
       final http.Response response = await http.post(
         Uri.parse(url),
-        body: {
-          'user_id': prefs?.getString('user_id'),
-        },
+        body: {'user_id': prefs?.getString('user_id')},
       );
       var count = json.decode(response.body) as List;
       globalController.refreshUnreadNotification(int.parse(count[0]['unreaded']));
@@ -229,18 +276,16 @@ class TabsController extends GetxController {
       currentIndex.value = index;
     } else {
       if (currentIndex.value == 2) {
-        WishlistController _controller = Get.find();
-        Gototop(_controller.ScrollListenerFAVORITE.value);
+        WishlistController controller = Get.find();
+        Gototop(controller.ScrollListenerFAVORITE.value);
       } else if (currentIndex.value == 0) {
-        Home_screen_fragmentController _controller = Get.find();
-
-        Gototop(_controller.ScrollListenerHOME);
+        Home_screen_fragmentController controller = Get.find();
+        Gototop(controller.ScrollListenerHOME);
       } else if (currentIndex.value == 1) {
-        WishlistController _controller = Get.find();
-        Gototop(_controller.ScrollListenerFAVORITE.value);
+        WishlistController controller = Get.find();
+        Gototop(controller.ScrollListenerFAVORITE.value);
       } else if (currentIndex.value == 3) {
         // MyStoreController _controller = Get.find();
-        //
         // Gototop(_controller.ScrollListenerCART);
       }
     }
@@ -248,7 +293,6 @@ class TabsController extends GetxController {
 
   @override
   void onClose() {
-    // TODO: implement onClose
     super.onClose();
   }
 
@@ -257,12 +301,7 @@ class TabsController extends GetxController {
     InitStateFucntion();
     LoadingDrawer.value = false;
 
-    // controller.locale = Locale(value);
-
     globalController.updateCurrentRout(Get.currentRoute);
-    // if (prefs?.getString('terms_accepted') != 'true') {
-    // _showTermsDialog(Get.context!);
-    // }
 
     super.onReady();
     if (Platform.isAndroid) {
@@ -282,35 +321,10 @@ class TabsController extends GetxController {
     } catch (ex) {}
   }
 
-  // void showRestartAppAlert(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text("Connection Error"),
-  //         content: Text("Failed to establish a connection to the server."),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               exit(0); // Close the alert
-  //               // You can add any additional actions here if needed
-  //             },
-  //             child: Text("OK"),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget get currentPage => pages[currentIndex.value];
-
-  /// change page in route
 
   Future<int> changePageInRoot(int _index) async {
     int index = _index;
-    // isTab="tab";
     currentIndex.value = _index;
     return index;
   }

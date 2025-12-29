@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:iq_mall/routes/app_routes.dart';
 import 'package:iq_mall/widgets/custom_image_view.dart';
-import 'package:iq_mall/widgets/ui.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../cores/math_utils.dart';
 import '../../main.dart';
@@ -12,356 +12,803 @@ import '../../utils/ShColors.dart';
 import '../../utils/ShImages.dart';
 import 'controller/Stores_screen_controller.dart';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎨 STORES THEME - Premium Gold Design
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _StoresTheme {
+  // Brand Colors
+  static Color get primary => ColorConstant.logoFirstColor;
+  static Color get accent => ColorConstant.logoSecondColor;
+  static Color get background => const Color(0xFFF8F6F3);
+  static Color get cardBg => Colors.white;
+  static Color get textPrimary => const Color(0xFF1A1A2E);
+  static Color get textSecondary => const Color(0xFF6B7280);
+  
+  // Spacing
+  static const double spacingXS = 4.0;
+  static const double spacingSM = 8.0;
+  static const double spacingMD = 12.0;
+  static const double spacingLG = 16.0;
+  static const double spacingXL = 24.0;
+  
+  // Radius
+  static const double radiusSM = 8.0;
+  static const double radiusMD = 12.0;
+  static const double radiusLG = 16.0;
+  
+  // Shadows
+  static List<BoxShadow> get cardShadow => [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.06),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
+    ),
+  ];
+  
+  static List<BoxShadow> get accentGlow => [
+    BoxShadow(
+      color: accent.withOpacity(0.25),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
+  
+  // Gradients
+  static LinearGradient get goldGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      accent.withOpacity(0.85),
+      accent,
+    ],
+  );
+  
+  static LinearGradient get subtleGoldGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      accent.withOpacity(0.05),
+      accent.withOpacity(0.1),
+    ],
+  );
+}
+
 class Storesscreen extends StatelessWidget {
-  Storesscreen({Key? key}) : super(key: key);
+  const Storesscreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Ensure arguments exist
     final tag = Get.arguments?["tag"] ?? "main";
 
-    // Ensure controller is registered
     if (!Get.isRegistered<StoreController>(tag: tag)) {
       Get.put(StoreController(), tag: tag);
     }
 
-    // Retrieve controller instance
     final StoreController controller = Get.find<StoreController>(tag: tag);
 
     return Obx(() {
       if (controller.loading.isTrue) {
         return Scaffold(
-          body: Center(child: Ui.circularIndicator(color: ColorConstant.logoFirstColorConstant)),
+          backgroundColor: _StoresTheme.background,
+          body: _buildShimmerLoading(),
         );
       }
 
       return Scaffold(
-        backgroundColor: const Color(0xFFf5f5f5),
+        backgroundColor: _StoresTheme.background,
         appBar: globalController.storeRoute.value != AppRoutes.tabsRoute
-            ? AppBar(
-                toolbarHeight: getSize(50),
-                title: Text("All Stores".tr, style: const TextStyle(color: Colors.black)),
-                leading: GestureDetector(
-                  onTap: () {
-                    Get.back();
-                  },
-                  child: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.black,
-                  ),
-                ),
-              )
+            ? _buildAppBar()
             : null,
         body: Column(
           children: [
-            Obx(() {
-              print("getTopPadding(): ${getTopPadding()}");
-              return globalController.storeRoute.value == AppRoutes.tabsRoute
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Text(
-                          //   prefs!.getString('welcome_text')!,
-                          //   style: const TextStyle(
-                          //     color: Color(0xffE8A78A),
-                          //     fontSize: 25,
-                          //   ),
-                          // ),
-                          const SizedBox(height: 10),
-                          Text(
-                            // prefs!.getString('store_name')?.toUpperCase() ?? 'Zalzali',
-                            "All Stores".tr,
-                            style: const TextStyle(
-                              color: Color(0xff494C57),
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    )
-                  : SizedBox();
-            }),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: getPadding(left: 16.0, right: 16.0, top: globalController.storeRoute.value == AppRoutes.tabsRoute ? (AppBar().preferredSize.height) : getVerticalSize(30), bottom: 3),
-                child: Obx(
-                  () => Container(
-                    constraints: BoxConstraints(minWidth: Get.width / 3, maxWidth: Get.width),
-                    height: getSize(50),
-                    width: Get.width,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(color: Colors.white.withOpacity(0.5)),
-                      color: sh_light_grey, // Use sh_light_grey here
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade300,
-                          blurRadius: 1,
-                          offset: const Offset(1, 2),
-                        ),
-                      ],
-                    ),
-                    padding: getPadding(left: 8, right: 12),
-                    alignment: Alignment.bottomCenter,
-                    child: DropdownButtonHideUnderline(
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          canvasColor: sh_light_grey, // Dropdown background color
-                          popupMenuTheme: PopupMenuThemeData(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                        ),
-                        child: Obx(() {
-                          return DropdownButton<String>(
-                            value: controller.selectedCity.value,
-
-                            items: List.generate(
-                                controller.cities.length,
-                                (index) => DropdownMenuItem(
-                                      value: controller.cities[index].values.last,
-                                      child: Text(
-                                        controller.cities[index].values.last.tr,
-                                        style: TextStyle(color: Colors.black87, fontSize: getFontSize(13)), // Text color
-                                      ),
-                                    )),
-                            onChanged: (value) {
-                              controller.selectedCity.value = value != "Select City" ? value! : null;
-
-                              if (controller.selectedCity.value == null) {
-                                controller.selectedCityId.value = null;
-                              } else {
-                                controller.cities.forEach((element) {
-                                  if (element.values.first == controller.selectedCity.value) {
-                                    controller.selectedCityId.value = element.keys.first;
-                                  }
-                                });
-                              }
-
-                              controller.fetchStores(false, false);
-
-                              // widget.controller.getProducts(1).then((value) {
-                              //   widget.controller.loader.value = false;
-                              //   Get.back();
-                              // });
-                              // ... Your existing onChanged logic ...
-                            },
-                            hint: Text(
-                              'Select City'.tr,
-                              style: TextStyle(color: Colors.black54), // Hint text style
-                            ),
-                            icon: const Icon(
-                              Icons.arrow_drop_down_sharp,
-                              color: Colors.black, // Icon color
-                            ),
-                            style: TextStyle(color: Colors.black),
-                            // Selected item style
-                            isExpanded: true,
-                            dropdownColor: sh_light_grey,
-                            elevation: 16,
-                            // Shadow elevation
-                            borderRadius: BorderRadius.circular(15),
-                            // Border radius of dropdown
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // Inner padding
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Header Section
+            _buildHeader(controller),
+            
+            // City Filter Dropdown
+            _buildCityFilter(context, controller),
+            
+            // Stores Grid
             Expanded(
-              child: Obx(() {
-                if (controller.stores.isEmpty) {
-                  return Center(child: Text("No stores available."));
-                }
-                RxList<Rx<StoreClass>> stores = (Get.arguments == null || Get.arguments["tag"] != "side_menu"
-                        ? controller.stores
-                        : controller.stores
-                            .where((element) => element.value.ownerId.toString() == prefs?.getString("user_id"))
-                            .map((store) => store) // Keep it as Rx<StoreClass>
-                            .toList())
-                    .cast<Rx<StoreClass>>()
-                    .obs;
-
-                return RefreshIndicator(
-                  onRefresh: () {
-                    return controller.fetchStores(false, true);
-                  },
-                  child: GridView.builder(
-                    padding: EdgeInsets.only(bottom: getBottomPadding() + getSize(60), right: 12, left: 12, top: 12),
-                    physics: const AlwaysScrollableScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                    shrinkWrap: true,
-                    controller: controller.scrollController,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      mainAxisExtent: getVerticalSize(280.00),
-                      crossAxisCount: 2,
-                      mainAxisSpacing: getHorizontalSize(7.50),
-                      crossAxisSpacing: getHorizontalSize(7.50),
-                    ),
-                    itemCount: stores.length,
-                    itemBuilder: (context, index) {
-                      final store = stores[index];
-                      final storeName = store.value.store_name;
-                      final mainImage = store.value.main_image ?? "";
-                      var unescape = HtmlUnescape();
-                      var text = unescape.convert(storeName ?? 'No Name');
-                      return GestureDetector(
-                        onTap: () {
-                          // Ui.flutterToast("Coming soon :)".tr, Toast.LENGTH_LONG, MainColor, whiteA700);
-
-                          // Get.to(()=>MyStore());
-                          controller.saveStoreView(store.value.id);
-
-                          globalController.updateStoreRoute(AppRoutes.tabsRoute);
-                          prefs?.setString("id", store.value.id.toString());
-                          Get.offAllNamed(AppRoutes.tabsRoute);
-                          // Get.toNamed(AppRoutes.myStore,arguments: {"store":store});
-
-                          // controller.ChangeStroredStore(store, 'a');
-                          // Handle onTap event
-                        },
-                        child: Container(
-                          height: getVerticalSize(100),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(color: Colors.grey[200]!),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: ColorConstant.black900.withOpacity(0.15),
-                                blurRadius: 4.0,
-                                spreadRadius: 0.0,
-                                offset: const Offset(0, 3.0),
-                              ),
-                            ],
-                          ),
-                          width: getHorizontalSize(175),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      ColorConstant.logoSecondColor.withOpacity(0.4),
-                                      ColorConstant.logoSecondColor.withOpacity(0.6),
-                                      ColorConstant.logoSecondColor.withOpacity(0.9),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(7),
-                                    topRight: Radius.circular(7),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 3),
-                                    child: Text(
-                                      text,
-                                      style: TextStyle(color: ColorConstant.logoFirstColor.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: getFontSize(18)),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              CustomImageView(
-                                image: mainImage != "" ? mainImage : AssetPaths.placeholder,
-                                placeHolder: AssetPaths.placeholder,
-                                height: getVerticalSize(100),
-                                width: getVerticalSize(120),
-                                fit: BoxFit.cover,
-                              ),
-                              Spacer(),
-                              Container(
-                                width: getHorizontalSize(190),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      ColorConstant.logoSecondColor.withOpacity(0.4),
-                                      ColorConstant.logoSecondColor.withOpacity(0.6),
-                                      ColorConstant.logoSecondColor.withOpacity(0.9),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(7),
-                                    bottomLeft: Radius.circular(7),
-                                  ),
-                                ),
-                                padding: getPadding(top: 8, left: 10, right: 10, bottom: 8),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 3),
-                                      child: Container(
-                                        decoration: BoxDecoration(color: fromHex('#996c22'), borderRadius: BorderRadius.circular(5)),
-                                        width: getHorizontalSize(140),
-                                        alignment: Alignment.center,
-                                        padding: getPadding(top: 8, left: 15, right: 15, bottom: 8),
-                                        child: Text(
-                                          "Shop",
-                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: getFontSize(16)),
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // controller.saveStoreView(store.id);
-
-                                        Get.toNamed(AppRoutes.soreDetails, arguments: {"store": store.value, "tag": tag})?.then(
-                                          (value) {
-                                            controller.refreshStores.value = true;
-                                            store.value.main_image = globalController.storeImage.value;
-                                            store.refresh();
-                                            controller.stores[index].value.main_image = globalController.storeImage.value;
-                                            controller.stores[index].refresh();
-                                            Future.delayed(const Duration(milliseconds: 500)).then((value) {
-                                              controller.refreshStores.value = false;
-                                            });
-                                            controller.fetchStores(false, false, fromInfo: true);
-                                          },
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 3),
-                                        child: Container(
-                                          decoration: BoxDecoration(color: ColorConstant.logoFirstColorConstant.withOpacity(0.8), borderRadius: BorderRadius.circular(5)),
-                                          width: getHorizontalSize(140),
-                                          alignment: Alignment.center,
-                                          padding: getPadding(top: 8, left: 15, right: 15, bottom: 8),
-                                          child: Text(
-                                            "Info",
-                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: getFontSize(16)),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
+              child: _buildStoresGrid(controller, tag),
             ),
           ],
         ),
       );
     });
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      toolbarHeight: getSize(50),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      title: Text(
+        "All Stores".tr,
+        style: TextStyle(
+          color: _StoresTheme.primary,
+          fontWeight: FontWeight.w700,
+          fontSize: getFontSize(18),
+        ),
+      ),
+      leading: _AnimatedPressable(
+        onTap: () => Get.back(),
+        child: Icon(
+          Icons.arrow_back_ios_rounded,
+          color: _StoresTheme.primary,
+          size: 22,
+        ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          height: 1,
+          color: _StoresTheme.accent.withOpacity(0.1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(StoreController controller) {
+    return Obx(() {
+      if (globalController.storeRoute.value != AppRoutes.tabsRoute) {
+        return const SizedBox.shrink();
+      }
+      
+      return Container(
+        padding: EdgeInsets.only(
+          top: getTopPadding() + _StoresTheme.spacingLG+ getSize(45),
+          bottom: _StoresTheme.spacingSM,
+        ),
+        child: Column(
+          children: [
+            // Decorative accent line
+            Container(
+              width: 40,
+              height: 3,
+              decoration: BoxDecoration(
+                color: _StoresTheme.accent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: _StoresTheme.spacingMD),
+            Text(
+              "All Stores".tr,
+              style: TextStyle(
+                color: _StoresTheme.textPrimary,
+                fontSize: getFontSize(26),
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildCityFilter(BuildContext context, StoreController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _StoresTheme.spacingLG,
+        vertical: _StoresTheme.spacingSM,
+      ),
+      child: Obx(() {
+        final isFiltering = controller.isFiltering.value;
+        
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: getSize(52),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+            border: Border.all(
+              color: isFiltering 
+                  ? _StoresTheme.accent 
+                  : _StoresTheme.accent.withOpacity(0.2),
+              width: isFiltering ? 2 : 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isFiltering 
+                    ? _StoresTheme.accent.withOpacity(0.15) 
+                    : Colors.black.withOpacity(0.04),
+                blurRadius: isFiltering ? 12 : 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: _StoresTheme.spacingMD),
+          child: Row(
+            children: [
+              // Dropdown
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: controller.selectedCity.value,
+                    items: List.generate(
+                      controller.cities.length,
+                      (index) => DropdownMenuItem(
+                        value: controller.cities[index].values.last,
+                        child: Row(
+                          children: [
+                            if (controller.cities[index].values.last != "Select City")
+                              Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.only(right: _StoresTheme.spacingSM),
+                                decoration: BoxDecoration(
+                                  color: _StoresTheme.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            Text(
+                              controller.cities[index].values.last.tr,
+                              style: TextStyle(
+                                color: _StoresTheme.textPrimary,
+                                fontSize: getFontSize(14),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    onChanged: isFiltering ? null : (value) {
+                      controller.filterByCity(value);
+                    },
+                    hint: Text(
+                      'Select City'.tr,
+                      style: TextStyle(
+                        color: _StoresTheme.textSecondary,
+                        fontSize: getFontSize(14),
+                      ),
+                    ),
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: isFiltering
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(_StoresTheme.accent),
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(_StoresTheme.spacingXS),
+                              decoration: BoxDecoration(
+                                color: _StoresTheme.accent.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: _StoresTheme.accent,
+                                size: 20,
+                              ),
+                            ),
+                    ),
+                    isExpanded: true,
+                    dropdownColor: Colors.white,
+                    elevation: 8,
+                    borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+                  ),
+                ),
+              ),
+              
+              // Clear filter button
+              if (controller.selectedCity.value != null && !isFiltering)
+                Padding(
+                  padding: const EdgeInsets.only(left: _StoresTheme.spacingSM),
+                  child: _AnimatedPressable(
+                    onTap: () => controller.filterByCity("Select City"),
+                    child: Container(
+                      padding: const EdgeInsets.all(_StoresTheme.spacingXS),
+                      decoration: BoxDecoration(
+                        color: _StoresTheme.textSecondary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: _StoresTheme.textSecondary,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildStoresGrid(StoreController controller, String tag) {
+    return Obx(() {
+      final isFiltering = controller.isFiltering.value;
+      
+      if (controller.stores.isEmpty && !isFiltering) {
+        return _buildEmptyState();
+      }
+
+      final RxList<Rx<StoreClass>> stores = (Get.arguments == null || Get.arguments["tag"] != "side_menu"
+          ? controller.stores
+          : controller.stores
+              .where((element) => element.value.ownerId.toString() == prefs?.getString("user_id"))
+              .map((store) => store)
+              .toList())
+          .cast<Rx<StoreClass>>()
+          .obs;
+
+      return Stack(
+        children: [
+          RefreshIndicator(
+            color: _StoresTheme.accent,
+            backgroundColor: Colors.white,
+            onRefresh: () => controller.fetchStores(false, true),
+            child: GridView.builder(
+              padding: EdgeInsets.only(
+                bottom: getBottomPadding() + getSize(60),
+                right: _StoresTheme.spacingMD,
+                left: _StoresTheme.spacingMD,
+                top: _StoresTheme.spacingSM,
+              ),
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              controller: controller.scrollController,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                mainAxisExtent: getVerticalSize(260),
+                crossAxisCount: 2,
+                mainAxisSpacing: _StoresTheme.spacingMD,
+                crossAxisSpacing: _StoresTheme.spacingMD,
+              ),
+              itemCount: stores.isEmpty ? 0 : stores.length,
+              itemBuilder: (context, index) {
+                return AnimatedOpacity(
+                  opacity: isFiltering ? 0.5 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: _StoreCard(
+                    store: stores[index],
+                    index: index,
+                    controller: controller,
+                    tag: tag,
+                  ),
+                );
+              },
+            ),
+          ),
+          
+          // Filtering overlay with shimmer effect
+          if (isFiltering)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: isFiltering ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    color: _StoresTheme.background.withOpacity(0.3),
+                    child: Center(
+                      child: _buildFilteringIndicator(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildFilteringIndicator() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.8, end: 1.0),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Transform.scale(scale: value, child: child);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _StoresTheme.spacingXL,
+          vertical: _StoresTheme.spacingLG,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+          boxShadow: [
+            BoxShadow(
+              color: _StoresTheme.accent.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation(_StoresTheme.accent),
+              ),
+            ),
+            const SizedBox(height: _StoresTheme.spacingMD),
+            Text(
+              'Filtering stores...'.tr,
+              style: TextStyle(
+                color: _StoresTheme.textPrimary,
+                fontSize: getFontSize(14),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.8, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(scale: value, child: child);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(_StoresTheme.spacingXL),
+              decoration: BoxDecoration(
+                color: _StoresTheme.accent.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.store_mall_directory_outlined,
+                size: 60,
+                color: _StoresTheme.accent,
+              ),
+            ),
+          ),
+          const SizedBox(height: _StoresTheme.spacingLG),
+          Text(
+            "No stores available".tr,
+            style: TextStyle(
+              color: _StoresTheme.textPrimary,
+              fontSize: getFontSize(18),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: _StoresTheme.spacingSM),
+          Text(
+            "Check back later for new stores".tr,
+            style: TextStyle(
+              color: _StoresTheme.textSecondary,
+              fontSize: getFontSize(14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: getTopPadding() + _StoresTheme.spacingXL * 3,
+        left: _StoresTheme.spacingMD,
+        right: _StoresTheme.spacingMD,
+      ),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          mainAxisExtent: getVerticalSize(260),
+          crossAxisCount: 2,
+          mainAxisSpacing: _StoresTheme.spacingMD,
+          crossAxisSpacing: _StoresTheme.spacingMD,
+        ),
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+              ),
+              child: Column(
+                children: [
+                  // Header shimmer
+                  Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(_StoresTheme.radiusLG),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Image shimmer
+                  Container(
+                    height: getVerticalSize(80),
+                    width: getVerticalSize(100),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Buttons shimmer
+                  Container(
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(_StoresTheme.radiusLG),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏪 STORE CARD - Premium Design
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _StoreCard extends StatelessWidget {
+  final Rx<StoreClass> store;
+  final int index;
+  final StoreController controller;
+  final String tag;
+
+  const _StoreCard({
+    required this.store,
+    required this.index,
+    required this.controller,
+    required this.tag,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 400 + (index * 50).clamp(0, 200)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: _AnimatedPressable(
+        onTap: () => _onShopTap(),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _StoresTheme.cardBg,
+            borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+            boxShadow: _StoresTheme.cardShadow,
+          ),
+          child: Column(
+            children: [
+              // Store Name Header
+              _buildHeader(),
+              
+              // Store Image
+              Expanded(child: _buildStoreImage()),
+              
+              // Action Buttons
+              _buildActionButtons(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final unescape = HtmlUnescape();
+    final storeName = unescape.convert(store.value.store_name ?? 'No Name');
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        vertical: _StoresTheme.spacingMD,
+        horizontal: _StoresTheme.spacingSM,
+      ),
+      decoration: BoxDecoration(
+        gradient: _StoresTheme.subtleGoldGradient,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(_StoresTheme.radiusLG),
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: _StoresTheme.accent.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Text(
+        storeName,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: _StoresTheme.primary,
+          fontWeight: FontWeight.w700,
+          fontSize: getFontSize(15),
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreImage() {
+    final mainImage = store.value.main_image ?? "";
+    
+    return Padding(
+      padding: const EdgeInsets.all(_StoresTheme.spacingMD),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+          border: Border.all(
+            color: _StoresTheme.accent.withOpacity(0.15),
+            width: 2,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD - 2),
+          child: CustomImageView(
+            image: mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
+            placeHolder: AssetPaths.placeholder,
+            height: getVerticalSize(85),
+            width: getVerticalSize(100),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Container(
+      padding: const EdgeInsets.all(_StoresTheme.spacingMD),
+      decoration: BoxDecoration(
+        gradient: _StoresTheme.subtleGoldGradient,
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(_StoresTheme.radiusLG),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Shop Button
+          _AnimatedPressable(
+            onTap: _onShopTap,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: _StoresTheme.spacingMD),
+              decoration: BoxDecoration(
+                gradient: _StoresTheme.goldGradient,
+                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+                boxShadow: _StoresTheme.accentGlow,
+              ),
+              child: Center(
+                child: Text(
+                  "Shop".tr,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: getFontSize(14),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: _StoresTheme.spacingSM),
+          
+          // Info Button
+          _AnimatedPressable(
+            onTap: _onInfoTap,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: _StoresTheme.spacingMD),
+              decoration: BoxDecoration(
+                color: _StoresTheme.primary.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+              ),
+              child: Center(
+                child: Text(
+                  "Info".tr,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: getFontSize(14),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onShopTap() {
+    controller.saveStoreView(store.value.id);
+    globalController.updateStoreRoute(AppRoutes.tabsRoute);
+    prefs?.setString("id", store.value.id.toString());
+    Get.offAllNamed(AppRoutes.tabsRoute);
+  }
+
+  void _onInfoTap() {
+    Get.toNamed(
+      AppRoutes.soreDetails,
+      arguments: {"store": store.value, "tag": tag},
+    )?.then((value) {
+      controller.refreshStores.value = true;
+      store.value.main_image = globalController.storeImage.value;
+      store.refresh();
+      controller.stores[index].value.main_image = globalController.storeImage.value;
+      controller.stores[index].refresh();
+      Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        controller.refreshStores.value = false;
+      });
+      controller.fetchStores(false, false, fromInfo: true);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎯 ANIMATED PRESSABLE - Tap Feedback Widget
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _AnimatedPressable extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _AnimatedPressable({required this.child, this.onTap});
+
+  @override
+  State<_AnimatedPressable> createState() => _AnimatedPressableState();
+}
+
+class _AnimatedPressableState extends State<_AnimatedPressable> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOutCubic,
+        child: AnimatedOpacity(
+          opacity: _isPressed ? 0.85 : 1.0,
+          duration: const Duration(milliseconds: 100),
+          child: widget.child,
+        ),
+      ),
+    );
   }
 }

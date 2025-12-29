@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iq_mall/utils/ShColors.dart';
+import 'package:iq_mall/screens/tabs_screen/controller/tabs_controller.dart';
 
 import '../../main.dart';
 import '../../models/store_request.dart';
@@ -144,14 +145,13 @@ class StoreRequestController extends GetxController {
         Ui.flutterToast(
             "Changes saved".tr, Toast.LENGTH_LONG, Colors.green, Colors.white);
 
-        // Update local args with current edits
+        // Update local args with new data from controllers
         args = StoreRequest(
           id: args!.id,
           subscriberName: subscriberNameController.text,
           motherName: motherNameController.text,
           storeName: storeNameController.text,
-          phoneNumber:
-              "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+          phoneNumber: "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
           country: globalController.countryName.value,
           region: regionController.text,
           address: addressController.text,
@@ -159,20 +159,15 @@ class StoreRequestController extends GetxController {
           createdAt: args!.createdAt,
           hasTransaction: args!.hasTransaction,
           endDate: args!.endDate,
-          email: args!.email,
+          email: emailController.text,
           startDate: args!.startDate,
           registerDate: args!.registerDate,
           status: args!.status,
-          recordNumber: recordNumber.text != ""
-              ? double.tryParse(recordNumber.text) ?? 0.0
-              : 0.0,
+          recordNumber: recordNumber.text != "" ? double.tryParse(recordNumber.text) ?? 0.0 : 0.0,
           branchCount: int.tryParse(branchCountController.text) ?? 1,
-          subscriptionMonths:
-              int.tryParse(subscriptionMonthsController.text) ?? 1,
+          subscriptionMonths: int.tryParse(subscriptionMonthsController.text) ?? 1,
           agreedToTerms: agreedToTerms.value,
-          userTermsANdConditions: termsConditions.value != ""
-              ? termsConditions.value
-              : globalController.homeDataList.value.requestTerms ?? '',
+          userTermsANdConditions: termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms ?? '',
           latitude: double.tryParse(latController.text),
           longitude: double.tryParse(lngController.text),
           images: args!.images,
@@ -227,6 +222,18 @@ class StoreRequestController extends GetxController {
     return true;
   }
 
+  /// Refreshes the tabs controller to update the bottom navigation after store deletion
+  void _refreshTabsAfterStoreDeletion() {
+    try {
+      if (Get.isRegistered<TabsController>()) {
+        final tabsController = Get.find<TabsController>();
+        tabsController.rebuildPages();
+      }
+    } catch (e) {
+      debugPrint('Error refreshing tabs: $e');
+    }
+  }
+
   Future<bool> deleteStoreById(String id) async {
     final String token = prefs!.getString("token") ?? "";
     if (token.isEmpty) {
@@ -246,11 +253,16 @@ class StoreRequestController extends GetxController {
       if (response['success'] == true) {
         deletingRequest.value = false;
         args!.status = "Deleted";
-
-        Get.back();
-        Get.back(result: args);
+        
+        // Update stores list and refresh tabs
+        await FetchStores();
+        _refreshTabsAfterStoreDeletion();
+        
         Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
             Colors.black45, Colors.white);
+
+        Get.back(); // Close dialog
+        Get.back(result: args); // Go back with result
 
         return true;
       } else {
@@ -503,6 +515,7 @@ class StoreRequestController extends GetxController {
     phoneNumberController.text = normalizePhoneNumber(request.phoneNumber);
 
     countryController.text = request.country;
+    emailController.text = request.email ?? '';
 
     regionController.text = request.region;
     branchCountController.text = request.branchCount.toString();

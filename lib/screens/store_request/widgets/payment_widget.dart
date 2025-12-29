@@ -38,10 +38,12 @@ class PaymentImagePickerScreen extends StatefulWidget {
   final StoreRequest request;
   final bool isReneu;
 
-  const PaymentImagePickerScreen({super.key, required this.request, this.isReneu = false});
+  const PaymentImagePickerScreen(
+      {super.key, required this.request, this.isReneu = false});
 
   @override
-  _PaymentImagePickerScreenState createState() => _PaymentImagePickerScreenState();
+  _PaymentImagePickerScreenState createState() =>
+      _PaymentImagePickerScreenState();
 }
 
 class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
@@ -92,7 +94,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         entryType: FieldEntryType.text,
         valueFocusNode: FocusNode(),
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'second team'.tr,
@@ -100,7 +103,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'store address'.tr,
@@ -108,7 +112,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'phone number'.tr,
@@ -116,7 +121,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.number,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'represented by Mr.'.tr,
@@ -124,7 +130,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'his birthday'.tr,
@@ -132,7 +139,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.birthday,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'Mothers name'.tr,
@@ -140,19 +148,24 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.text,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       FieldRowController(
         initialTitle: 'record number'.tr + "(رقم القيد)".tr,
-        initialValue: widget.request.recordNumber != null ? widget.request.recordNumber.toString() : "",
+        initialValue: widget.request.recordNumber != null
+            ? widget.request.recordNumber.toString()
+            : "",
         isTitleLocked: true,
         valueFocusNode: FocusNode(),
         entryType: FieldEntryType.number,
-        validator: (value) => (value == null || value.isEmpty) ? 'This field is required' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'This field is required' : null,
       ),
       // FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: widget.request.email ?? '', isTitleLocked: true, entryType: FieldEntryType.text),
     ]);
-    htmlContract.value = globalController.homeDataList.value.paymentRequestTerms ?? '';
+    htmlContract.value =
+        globalController.homeDataList.value.paymentRequestTerms ?? '';
   }
 
   @override
@@ -183,7 +196,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
   }
 
   String exportCurrentFormToJson() {
-    final fields = _fields.map((f) => PaymentFormField(title: f.title.text.trim(), value: f.value.text.trim())).toList();
+    final fields = _fields
+        .map((f) => PaymentFormField(
+            title: f.title.text.trim(), value: f.value.text.trim()))
+        .toList();
 
     final data = PaymentFormData(
       requestId: _requestIdForSubtitle,
@@ -194,7 +210,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     return PaymentFormIO.toJsonString(data);
   }
 
-  Widget imageBox({required Rxn<String>? imagePath, required int imageNumber, required String label}) {
+  Widget imageBox(
+      {required Rxn<String>? imagePath,
+      required int imageNumber,
+      required String label}) {
     return GestureDetector(
       onTap: () => showPickerBottomSheet(imagePath!),
       child: Container(
@@ -207,7 +226,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: imagePath == null
-            ? Center(child: Text("Click to add $label", style: TextStyle(fontSize: 16)))
+            ? Center(
+                child:
+                    Text("Click to add $label", style: TextStyle(fontSize: 16)))
             : ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Obx(
@@ -218,7 +239,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                           width: double.infinity,
                         )
                       : SizedBox(
-                          child: Center(child: Text("Click to add $label".tr, style: TextStyle(fontSize: 16))),
+                          child: Center(
+                              child: Text("Click to add $label".tr,
+                                  style: TextStyle(fontSize: 16))),
                         ),
                 )),
       ),
@@ -287,8 +310,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                                 row: row.value,
                                 isRequired: row.value.isRequired,
                                 validator: row.value.validator,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                onEditTitle: () => _editTitleDialog(context, row.value),
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                onEditTitle: () =>
+                                    _editTitleDialog(context, row.value),
                               )
                             : _FieldTwoPerLine(
                                 row: row,
@@ -331,7 +356,12 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     );
   }
 
-  Future<SubmitPaymentResult?> submitStorePayment({required String requestId, required num amount, required DateTime date, String? token, required BuildContext context}) async {
+  Future<SubmitPaymentResult?> submitStorePayment(
+      {required String requestId,
+      required num amount,
+      required DateTime date,
+      String? token,
+      required BuildContext context}) async {
     isSubmittingPayment.value = true;
     saving.value = true;
 
@@ -373,13 +403,23 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
               res.addAll({"subscription_end_date": value["end_date"]});
               result = SubmitPaymentResult.fromMap(res);
             } else {
-              Ui.flutterToast((res['message'] as String?) ?? 'Payment submission failed. Please try again.', Toast.LENGTH_SHORT, Colors.red, whiteA700);
+              Ui.flutterToast(
+                  (res['message'] as String?) ??
+                      'Payment submission failed. Please try again.',
+                  Toast.LENGTH_SHORT,
+                  Colors.red,
+                  whiteA700);
             }
           },
         );
         return result;
       } else {
-        Ui.flutterToast((res['message'] as String?) ?? 'Payment submission failed. Please try again.', Toast.LENGTH_SHORT, Colors.red, whiteA700);
+        Ui.flutterToast(
+            (res['message'] as String?) ??
+                'Payment submission failed. Please try again.',
+            Toast.LENGTH_SHORT,
+            Colors.red,
+            whiteA700);
       }
     } catch (e) {
       saving.value = false;
@@ -393,19 +433,28 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
     try {
       saving.value = true;
 
-      final originalPairs = _fields.map((f) => MapEntry(f.title.text.trim(), f.value.text.trim())).where((e) => e.key.isNotEmpty || e.value.isNotEmpty).toList();
+      final originalPairs = _fields
+          .map((f) => MapEntry(f.title.text.trim(), f.value.text.trim()))
+          .where((e) => e.key.isNotEmpty || e.value.isNotEmpty)
+          .toList();
 
       if (originalPairs.isEmpty && _htmlCtrl.text.trim().isEmpty) {
-        Fluttertoast.showToast(msg: 'Please add at least one field or HTML text'.tr);
+        Fluttertoast.showToast(
+            msg: 'Please add at least one field or HTML text'.tr);
         return;
       }
 
-      final fontRegular = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Regular.ttf'));
-      final fontBold = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Bold.ttf'));
+      final fontRegular =
+          pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Regular.ttf'));
+      final fontBold =
+          pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Bold.ttf'));
 
       final unescape = HtmlUnescape();
       String htmlText = unescape.convert(htmlContract.value);
-      htmlText = htmlText.replaceAll(RegExp(r'<[^>]*>'), '').replaceAll(RegExp(r'\s+'), ' ').trim();
+      htmlText = htmlText
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
 
       // ---------- Helpers ----------
       bool _matchesAny(String key, List<String> needles) {
@@ -418,14 +467,25 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         final k = key.toLowerCase();
 
         if (_matchesAny(k, ['represented', 'الممثل'])) return 'الممثل بالسيد';
-        if (_matchesAny(k, ['his birthday', 'birth', 'مواليد'])) return 'مواليد';
-        if (_matchesAny(k, ['moms name', 'mother', 'اسم الام', 'اسم الأم', 'والدته'])) return 'اسم الأم';
+        if (_matchesAny(k, ['his birthday', 'birth', 'مواليد']))
+          return 'مواليد';
+        if (_matchesAny(
+            k, ['moms name', 'mother', 'اسم الام', 'اسم الأم', 'والدته']))
+          return 'اسم الأم';
         if (_matchesAny(k, ['record', 'رقم السجل', 'سجل'])) return 'رقم السجل';
-        if (_matchesAny(k, ['phone number', 'phone', 'رقم الهاتف', 'هاتف'])) return 'رقم الهاتف';
+        if (_matchesAny(k, ['phone number', 'phone', 'رقم الهاتف', 'هاتف']))
+          return 'رقم الهاتف';
 
-        if (_matchesAny(k, ['first team', 'الفريق الاول'])) return 'الفريق الأول';
-        if (_matchesAny(k, ['second team', 'الفريق الثاني'])) return 'الفريق الثاني';
-        if (_matchesAny(k, ['store address', 'branch address', 'عنوان الفرع', 'store address'])) return 'عنوان الفرع';
+        if (_matchesAny(k, ['first team', 'الفريق الاول']))
+          return 'الفريق الأول';
+        if (_matchesAny(k, ['second team', 'الفريق الثاني']))
+          return 'الفريق الثاني';
+        if (_matchesAny(k, [
+          'store address',
+          'branch address',
+          'عنوان الفرع',
+          'store address'
+        ])) return 'عنوان الفرع';
         if (_matchesAny(k, ['store name', 'اسم المتجر'])) return 'اسم المتجر';
         if (_matchesAny(k, ['address', 'العنوان'])) return 'العنوان';
 
@@ -437,14 +497,17 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
           mainAxisSize: pw.MainAxisSize.max,
           crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
-            pw.Text(_arabicLabelFor(label), style: pw.TextStyle(font: fontBold, fontSize: 11), textDirection: pw.TextDirection.rtl),
+            pw.Text(_arabicLabelFor(label),
+                style: pw.TextStyle(font: fontBold, fontSize: 11),
+                textDirection: pw.TextDirection.rtl),
             pw.SizedBox(width: 6),
             pw.Expanded(
               child: pw.Container(
                 padding: const pw.EdgeInsets.only(bottom: 2),
                 decoration: const pw.BoxDecoration(
                   border: pw.Border(
-                    bottom: pw.BorderSide(width: 0.8, color: pdf.PdfColors.grey600),
+                    bottom:
+                        pw.BorderSide(width: 0.8, color: pdf.PdfColors.grey600),
                   ),
                 ),
                 child: value.isEmpty
@@ -455,7 +518,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                           padding: const pw.EdgeInsets.only(top: 2),
                           child: pw.Text(
                             value,
-                            style: pw.TextStyle(font: fontRegular, fontSize: 10, color: pdf.PdfColors.grey700),
+                            style: pw.TextStyle(
+                                font: fontRegular,
+                                fontSize: 10,
+                                color: pdf.PdfColors.grey700),
                             textDirection: pw.TextDirection.rtl,
                           ),
                         ),
@@ -466,7 +532,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
         );
       }
 
-      pw.Widget _formLine(String label, String value) => pw.Padding(padding: const pw.EdgeInsets.symmetric(vertical: 6), child: _kvBlock(label, value));
+      pw.Widget _formLine(String label, String value) => pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 6),
+          child: _kvBlock(label, value));
 
       // 3 inline items (represented, birthday, mom) on one line, record on its own line
       pw.Widget _inlineRowWide(List<MapEntry<String, String>> items) {
@@ -495,7 +563,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
             ),
             if (recordItem != null)
               pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+                padding:
+                    const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 20),
                 child: _kvBlock(recordItem.key, recordItem.value),
               ),
           ],
@@ -505,14 +574,21 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
       // ---------- Identify special fields ----------
       const representedKeys = ['الممثل', 'الممثل بالسيد', 'represented'];
       const birthKeys = ['مواليد', 'تاريخ الميلاد', 'birth', 'his birthday'];
-      const motherKeys = ['والدته', 'اسم الأم', 'moms name', 'mother', 'اسم الام'];
+      const motherKeys = [
+        'والدته',
+        'اسم الأم',
+        'moms name',
+        'mother',
+        'اسم الام'
+      ];
       const recordKeys = ['سجل', 'رقم السجل', 'record'];
       const phoneKeys = ['هاتف', 'رقم الهاتف', 'phone', 'phone number'];
 
       MapEntry<String, String>? represented, birth, mother, record, phone;
 
       for (final p in originalPairs) {
-        if (represented == null && _matchesAny(p.key, representedKeys)) represented = p;
+        if (represented == null && _matchesAny(p.key, representedKeys))
+          represented = p;
         if (birth == null && _matchesAny(p.key, birthKeys)) birth = p;
         if (mother == null && _matchesAny(p.key, motherKeys)) mother = p;
         if (record == null && _matchesAny(p.key, recordKeys)) record = p;
@@ -521,7 +597,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
       // Order: represented → birthday → moms name → record
       final inlineItems = <MapEntry<String, String>>[];
-      if (represented != null) inlineItems.add(MapEntry('الممثل بالسيد', represented!.value));
+      if (represented != null)
+        inlineItems.add(MapEntry('الممثل بالسيد', represented!.value));
       if (birth != null) inlineItems.add(MapEntry('مواليد', birth!.value));
       if (mother != null) inlineItems.add(MapEntry('اسم الأم', mother!.value));
       if (record != null) inlineItems.add(MapEntry('رقم السجل', record!.value));
@@ -531,11 +608,15 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
       pw.Widget headerLine(String text) => pw.Padding(
             padding: const pw.EdgeInsets.only(top: 8, bottom: 4),
-            child: pw.Text(text, style: pw.TextStyle(font: fontBold, fontSize: 12), textDirection: pw.TextDirection.rtl),
+            child: pw.Text(text,
+                style: pw.TextStyle(font: fontBold, fontSize: 12),
+                textDirection: pw.TextDirection.rtl),
           );
 
       final topWidgets = <pw.Widget>[
-        pw.Center(child: pw.Text('عقد اشتراك', style: pw.TextStyle(font: fontBold, fontSize: 18))),
+        pw.Center(
+            child: pw.Text('عقد اشتراك',
+                style: pw.TextStyle(font: fontBold, fontSize: 18))),
         pw.SizedBox(height: 10),
         headerLine('موقع فيما بين:'),
       ];
@@ -596,7 +677,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
       final bytes = await doc.save();
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/payment_form_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      final file = File(
+          '${dir.path}/payment_form_${DateTime.now().millisecondsSinceEpoch}.pdf');
       await file.writeAsBytes(bytes);
 
       Fluttertoast.showToast(msg: 'PDF saved:\n${file.path}');
@@ -617,7 +699,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
 
   Future<pw.Font> getArabicFont() async {
     if (arabicFont == null) {
-      final data = await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
+      final data =
+          await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
       arabicFont = pw.Font.ttf(data);
     }
     return arabicFont!;
@@ -659,7 +742,8 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
             preferredSize: const Size.fromHeight(1),
             child: Container(
               height: 1,
-              color: Colors.black.withOpacity(0.08), // subtle divider under the app bar
+              color: Colors.black
+                  .withOpacity(0.08), // subtle divider under the app bar
             ),
           ),
         ),
@@ -677,8 +761,10 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                     methodName: "Whish Payment".tr,
                     logo: "https://example.com/visa.png",
                     logoIsNetwork: true,
-                    beforePaymentText: "Please review your details before proceeding".tr,
-                    amountText: "${globalController.homeDataList.value.requestPrice.toString()}\$",
+                    beforePaymentText:
+                        "Please review your details before proceeding".tr,
+                    amountText:
+                        "${globalController.homeDataList.value.requestPrice.toString()}\$",
                     onTap: () {
                       // open payment method selection, etc.
                     },
@@ -717,7 +803,6 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
         floatingActionButton: Obx(() => Align(
               alignment: Alignment.bottomCenter,
               child: MyCustomButton(
@@ -729,7 +814,11 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                   width: 280,
                   isExpanded: saving.value,
                   onTap: () async {
-                    final amount = globalController.homeDataList.value.requestPrice!.toDouble() + globalController.homeDataList.value.requestFees!.toDouble();
+                    final amount = globalController
+                            .homeDataList.value.requestPrice!
+                            .toDouble() +
+                        globalController.homeDataList.value.requestFees!
+                            .toDouble();
                     final now = DateTime.now();
                     final dateStr = DateFormat('yyyy-MM-dd').format(now);
                     Future.delayed(Duration(milliseconds: 400)).then(
@@ -743,20 +832,32 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                           dateLabel: dateStr,
                           onConfirm: () async {
                             // 0) validate required fields first
-                            final isValid = _formKey.currentState?.validate() ?? false;
+                            final isValid =
+                                _formKey.currentState?.validate() ?? false;
                             if (!isValid) {
                               Navigator.of(context).pop(false);
 
-                              Ui.flutterToast("Please fill all required fields correctly.", Toast.LENGTH_SHORT, Colors.red, whiteA700);
+                              Ui.flutterToast(
+                                  "Please fill all required fields correctly.",
+                                  Toast.LENGTH_SHORT,
+                                  Colors.red,
+                                  whiteA700);
                               return;
                             }
                             Navigator.of(context).pop(false);
 
-                            final SubmitPaymentResult? result = await submitStorePayment(requestId: widget.request.id, amount: amount, date: now, context: context);
+                            final SubmitPaymentResult? result =
+                                await submitStorePayment(
+                                    requestId: widget.request.id,
+                                    amount: amount,
+                                    date: now,
+                                    context: context);
                             //
                             // // If submit failed, inform user and keep screen
                             if (result == null || !result.success) {
-                              Get.snackbar('Payment', 'Payment failed.', snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
+                              Get.snackbar('Payment', 'Payment failed.',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  duration: const Duration(seconds: 3));
                               return; // don't proceed to PDF or pop screens
                             } else {
                               request.status = "Accepted";
@@ -772,6 +873,7 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
                             // Get.back(); // closes the dialog only
 
                             // 4) return to previous screen with the subscriptionEndDate as result
+                            FetchStores();
                             Get.back(result: request);
                           }),
                       barrierDismissible: false,
@@ -921,7 +1023,8 @@ class PaymentSummaryCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 18, color: theme.colorScheme.primary),
+                  Icon(Icons.info_outline_rounded,
+                      size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -944,14 +1047,16 @@ class PaymentSummaryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: (isDark ? Colors.white10 : Colors.grey.shade50),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: (isDark ? Colors.white12 : Colors.black12)),
+                border: Border.all(
+                    color: (isDark ? Colors.white12 : Colors.black12)),
               ),
               child: Row(
                 children: [
                   Text(
                     'Payment Amount'.tr,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color:
+                          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
                   const Spacer(),
@@ -968,8 +1073,11 @@ class PaymentSummaryCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 0),
                 child: Text(
-                  globalController.homeDataList.value.requestFees!.toStringAsFixed(2) + " \$ will be added as a fees".tr,
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w400, fontSize: 12),
+                  globalController.homeDataList.value.requestFees!
+                          .toStringAsFixed(2) +
+                      " \$ will be added as a fees".tr,
+                  style: theme.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w400, fontSize: 12),
                 ),
               ),
             ),
@@ -992,7 +1100,8 @@ class _Logo extends StatelessWidget {
 
     Widget inner;
     if (logo == null || logo!.trim().isEmpty) {
-      inner = Icon(Icons.account_balance_wallet_rounded, size: 22, color: ColorConstant.logoSecondColor);
+      inner = Icon(Icons.account_balance_wallet_rounded,
+          size: 22, color: ColorConstant.logoSecondColor);
     } else if (isNetwork) {
       inner = ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -1061,7 +1170,8 @@ class _FieldOnePerLine extends StatelessWidget {
     final now = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 18, now.month, now.day), // default: 18 years old
+      initialDate:
+          DateTime(now.year - 18, now.month, now.day), // default: 18 years old
       firstDate: DateTime(1900, 1, 1),
       lastDate: now,
       helpText: 'Select birthday',
@@ -1076,7 +1186,8 @@ class _FieldOnePerLine extends StatelessWidget {
     );
     if (picked != null) {
       row.value.text = DateFormat('yyyy-MM-dd').format(picked);
-      row.value.selection = TextSelection.collapsed(offset: row.value.text.length);
+      row.value.selection =
+          TextSelection.collapsed(offset: row.value.text.length);
       row.value.notifyListeners();
     }
   }
@@ -1187,9 +1298,19 @@ class _FieldOnePerLine extends StatelessWidget {
         // Build a label that can show a red asterisk for required fields.
         final label = RichText(
           text: TextSpan(
-            text: row.entryType == FieldEntryType.birthday ? 'YYYY-MM-DD' : titleText,
-            style: Theme.of(context).inputDecorationTheme.labelStyle ?? Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
-            children: isRequired ? const [TextSpan(text: ' *', style: TextStyle(color: Colors.red))] : const [],
+            text: row.entryType == FieldEntryType.birthday
+                ? 'YYYY-MM-DD'
+                : titleText,
+            style: Theme.of(context).inputDecorationTheme.labelStyle ??
+                Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Colors.black54),
+            children: isRequired
+                ? const [
+                    TextSpan(text: ' *', style: TextStyle(color: Colors.red))
+                  ]
+                : const [],
           ),
         );
 
@@ -1202,20 +1323,23 @@ class _FieldOnePerLine extends StatelessWidget {
           textInputAction: TextInputAction.next,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
           decoration: InputDecoration(
             label: label, // uses the RichText above
             isDense: false,
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Colors.black12),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+              borderSide:
+                  const BorderSide(color: Color(0xFF1976D2), width: 1.4),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -1253,25 +1377,35 @@ class _FieldTwoPerLine extends StatelessWidget {
               return Obx(() => TextField(
                     controller: row.value.title,
                     textInputAction: TextInputAction.next,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                     decoration: InputDecoration(
                       labelText: 'Title'.tr,
                       hintText: 'e.g. Bank Name'.tr,
-                      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
-                      floatingLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1976D2)),
+                      labelStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87),
+                      floatingLabelStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1976D2)),
                       isDense: true,
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: const BorderSide(color: Colors.black12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF1976D2), width: 1.4),
                       ),
-                      prefixIcon: const Icon(Icons.badge_outlined, size: 18, color: Colors.black54),
+                      prefixIcon: const Icon(Icons.badge_outlined,
+                          size: 18, color: Colors.black54),
                       prefixIconConstraints: const BoxConstraints(minWidth: 40),
                       suffixIcon: value.text.isNotEmpty
                           ? IconButton(
@@ -1299,25 +1433,35 @@ class _FieldTwoPerLine extends StatelessWidget {
               return TextField(
                 controller: row.value.value,
                 textInputAction: TextInputAction.next,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                 decoration: InputDecoration(
                   labelText: 'Value'.tr,
                   hintText: 'e.g. User Name'.tr,
-                  labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
-                  floatingLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1976D2)),
+                  labelStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87),
+                  floatingLabelStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1976D2)),
                   isDense: true,
                   filled: true,
                   fillColor: Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(color: Colors.black12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.4),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF1976D2), width: 1.4),
                   ),
-                  prefixIcon: const Icon(Icons.edit_note_outlined, size: 18, color: Colors.black54),
+                  prefixIcon: const Icon(Icons.edit_note_outlined,
+                      size: 18, color: Colors.black54),
                   prefixIconConstraints: const BoxConstraints(minWidth: 40),
                   suffixIcon: value.text.isNotEmpty
                       ? IconButton(
@@ -1339,7 +1483,8 @@ class _FieldTwoPerLine extends StatelessWidget {
 }
 
 /// Inline dialog to edit the "Title" when in 1-per-line mode.
-Future<void> _editTitleDialog(BuildContext context, FieldRowController row) async {
+Future<void> _editTitleDialog(
+    BuildContext context, FieldRowController row) async {
   final tempCtrl = TextEditingController(text: row.title.text);
   await showDialog(
     context: context,
@@ -1354,12 +1499,14 @@ Future<void> _editTitleDialog(BuildContext context, FieldRowController row) asyn
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel'.tr)),
+        TextButton(
+            onPressed: () => Navigator.pop(ctx), child: Text('Cancel'.tr)),
         ElevatedButton(
           onPressed: () {
             // Update and explicitly notify to trigger rebuilds
             row.title.text = tempCtrl.text;
-            row.title.selection = TextSelection.collapsed(offset: row.title.text.length);
+            row.title.selection =
+                TextSelection.collapsed(offset: row.title.text.length);
             row.title.notifyListeners(); // <-- ensures listeners rebuild
             Navigator.pop(ctx);
           },
@@ -1384,10 +1531,12 @@ class _ConfirmSubmitPaymentDialog extends StatefulWidget {
   final Future<void> Function() onConfirm;
 
   @override
-  State<_ConfirmSubmitPaymentDialog> createState() => _ConfirmSubmitPaymentDialogState();
+  State<_ConfirmSubmitPaymentDialog> createState() =>
+      _ConfirmSubmitPaymentDialogState();
 }
 
-class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog> {
+class _ConfirmSubmitPaymentDialogState
+    extends State<_ConfirmSubmitPaymentDialog> {
   RxBool isSubmittingPayment = false.obs;
   @override
   Widget build(BuildContext context) {
@@ -1401,17 +1550,22 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
           children: [
             const Icon(Icons.warning_rounded, size: 40, color: Colors.red),
             const SizedBox(height: 12),
-            Text('Confirm payment?'.tr, style: Theme.of(context).textTheme.titleMedium),
+            Text('Confirm payment?'.tr,
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               // keep it concise and clear
               'You are about to submit a payment of  ${(double.parse(globalController.homeDataList.value.requestPrice.toString()) + double.parse(globalController.homeDataList.value.requestFees.toString()))}\$\nThis action will be recorded.'
                   .trParams({
-                'amount': '${(double.parse(globalController.homeDataList.value.requestPrice.toString()) + double.parse(globalController.homeDataList.value.requestFees.toString()))}\$',
+                'amount':
+                    '${(double.parse(globalController.homeDataList.value.requestPrice.toString()) + double.parse(globalController.homeDataList.value.requestFees.toString()))}\$',
                 'date': widget.dateLabel
               }),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black54),
             ),
             const SizedBox(height: 16),
             Row(
@@ -1420,7 +1574,8 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text('Cancel'.tr),
                   ),
@@ -1440,13 +1595,17 @@ class _ConfirmSubmitPaymentDialogState extends State<_ConfirmSubmitPaymentDialog
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Obx(() => isSubmittingPayment.value
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white)),
                           )
                         : Text('Yes, submit'.tr)),
                   ),

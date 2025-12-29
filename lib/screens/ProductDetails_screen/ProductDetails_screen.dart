@@ -1,29 +1,30 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:html/parser.dart';
 import 'package:iq_mall/Product_widget/Product_widget.dart';
 import 'package:iq_mall/cores/assets.dart';
 import 'package:iq_mall/cores/math_utils.dart';
+import 'package:iq_mall/main.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/controller/ProductDetails_screen_controller.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/ProductInfo.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/SliderImages.dart';
-import 'package:flutter/material.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/add_to_cart_button.dart';
 import 'package:iq_mall/screens/ProductDetails_screen/widgets/variants.dart';
 import 'package:iq_mall/utils/ShColors.dart';
-import 'package:iq_mall/widgets/custom_image_view.dart';
 import 'package:iq_mall/utils/ShConstant.dart';
-import 'package:iq_mall/widgets/ShWidget.dart';
+import 'package:iq_mall/utils/ShImages.dart';
 import 'package:iq_mall/widgets/CommonWidget.dart';
-import 'package:get/get.dart';
-import 'package:html/parser.dart';
+import 'package:iq_mall/widgets/ShWidget.dart';
+import 'package:iq_mall/widgets/custom_image_view.dart';
+import 'package:iq_mall/widgets/image_widget.dart';
 import 'package:iq_mall/widgets/ui.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
-import '../../main.dart';
+
 import '../../models/HomeData.dart';
 import '../../routes/app_routes.dart';
-import '../../utils/ShImages.dart';
-import '../../widgets/image_widget.dart';
-import 'package:share_plus/share_plus.dart';
 
 var uuid = Uuid();
 
@@ -31,8 +32,11 @@ class ProductDetails_screen extends StatelessWidget {
   late final ProductDetails_screenController controller;
 
   ProductDetails_screen({Key? key}) : super(key: key) {
-    final tag = Get.arguments != null ? Get.arguments['tag'] ?? 'default' : prefs?.getString("tag");
-    controller = Get.isRegistered<ProductDetails_screenController>(tag: "${UniqueKey()}$tag")
+    final tag = Get.arguments != null
+        ? Get.arguments['tag'] ?? 'default'
+        : prefs?.getString("tag");
+    controller = Get.isRegistered<ProductDetails_screenController>(
+            tag: "${UniqueKey()}$tag")
         ? Get.find<ProductDetails_screenController>(tag: tag)
         : Get.put(ProductDetails_screenController(), tag: "${UniqueKey()}$tag");
   }
@@ -45,626 +49,551 @@ class ProductDetails_screen extends StatelessWidget {
         return Future(() => true);
       },
       child: Scaffold(
-          backgroundColor: Colors.white,
-          bottomNavigationBar: Obx(() => controller.product.value != null
-              ? Container(
-                  height: getSize(40) + getBottomPadding(),
-                  alignment: Alignment.topCenter,
+        backgroundColor: Colors.white,
+        bottomNavigationBar: Obx(() => controller.product.value != null
+            ? Container(
+                height: getSize(60) + getBottomPadding(),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Obx(() => AddToCartButtons(
-                            product: controller.updatePriceInAddToCart.value ? controller.product.value! : controller.product.value!,
-                            addingToCard: controller.addingToCard.value,
-                            animatingAddToCardTick: controller.animatingAddToCardTick.value,
-                            productDetailsController: controller,
-                            onTap: () {
-                              ProductDetails_screenController controller = Get.find(tag: Get.parameters.values.first);
-
-                              if (controller.addingToCard.value) {
-                                toaster(context, 'Please wait while processing the request'.tr);
-                              } else {
-                                if (controller.loading.value) {
-                                  toaster(context, 'Please wait to load the quantity'.tr);
-                                } else if ((controller.product.value?.product_qty_left ?? 0) < 1) {
-                                  toaster(context, 'Out of Stock'.tr, title: "Alert".tr);
-                                } else {
-                                  controller.addingToCard.value = true;
-
-                                  Ui.onTapWhatsapp(controller.product.value!, controller.product.value!.store.storeWhatsappNumber);
-                                  controller.addingToCard.value = false;
-
-                                  // controller.AddToCart(controller.product.value, '1', context).then((value) {
-                                  //   // controller.product.value?.quantity = (int.parse(controller.product.value!.quantity!) + 1).toString();
-                                  //   controller.addingToCard.value = false;
-                                  //   if (value ?? false) {
-                                  //     controller.createOverlayEntry(context);
-                                  //     controller.applyTickAnimation();
-                                  //   }
-                                  //   Future.delayed(Duration(milliseconds: 900)).then((value) {
-                                  //     context.read<Counter>().calculateTotal(0.0);
-                                  //     Cart_ListController Cartcontroller = Get.find();
-                                  //     Cartcontroller.GetCart();
-                                  //   });
-                                  // });
-                                }
-                              }
-                            },
+                      Obx(() => Expanded(
+                            child: AddToCartButtons(
+                              product: controller.updatePriceInAddToCart.value
+                                  ? controller.product.value!
+                                  : controller.product.value!,
+                              addingToCard: controller.addingToCard.value,
+                              animatingAddToCardTick:
+                                  controller.animatingAddToCardTick.value,
+                              productDetailsController: controller,
+                              onTap: () {
+                                _handleAddToCart(context);
+                              },
+                            ),
                           )),
                     ],
                   ),
+                ),
+              )
+            : const SizedBox()),
+        body: Hero(
+          tag: UniqueKey(),
+          createRectTween: (begin, end) {
+            return MaterialRectCenterArcTween(begin: begin, end: end);
+          },
+          child: Stack(
+            children: [
+              CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  _buildSliverAppBar(context),
+                  SliverToBoxAdapter(
+                    child: Obx(
+                      () => controller.fromBanner.value
+                          ? Padding(
+                              padding: const EdgeInsets.all(50.0),
+                              child: Center(child: Progressor_indecator()),
+                            )
+                          : controller.product.value == null
+                              ? const SizedBox()
+                              : _buildBodyContent(context),
+                    ),
+                  ),
+                ],
+              ),
+              Obx(() => controller.freez.value
+                  ? Container(
+                      color: Colors.white.withOpacity(0.5),
+                      child: Center(
+                        child: Progressor_indecator(),
+                      ),
+                    )
+                  : const SizedBox())
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleAddToCart(BuildContext context) {
+    // Logic extracted from original onTap
+    ProductDetails_screenController localController =
+        Get.find(tag: Get.parameters.values.first);
+
+    if (localController.addingToCard.value) {
+      toaster(context, 'Please wait while processing the request'.tr);
+    } else {
+      if (localController.loading.value) {
+        toaster(context, 'Please wait to load the quantity'.tr);
+      } else if ((localController.product.value?.product_qty_left ?? 0) < 1) {
+        toaster(context, 'Out of Stock'.tr, title: "Alert".tr);
+      } else {
+        localController.addingToCard.value = true;
+        Ui.onTapWhatsapp(localController.product.value!,
+            localController.product.value!.store.storeWhatsappNumber);
+        localController.addingToCard.value = false;
+      }
+    }
+  }
+
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      elevation: 0,
+      backgroundColor: Colors.white,
+      floating: true,
+      pinned: true,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+        onPressed: () async {
+          Get.back(result: controller.product.value);
+        },
+      ),
+      title: Text(
+        'Product Details'.tr,
+        style: const TextStyle(
+            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: InkWell(
+            onTap: () async {
+              final box = context.findRenderObject() as RenderBox?;
+              if (controller.product.value != null && box != null) {
+                await Share.shareUri(
+                  Uri.parse(
+                      '$con/product/${controller.product.value!.product_id}'),
+                  sharePositionOrigin:
+                      box.localToGlobal(Offset.zero) & box.size,
+                );
+              }
+            },
+            child: CustomImageView(
+              width: getSize(24),
+              height: getSize(24),
+              color: ColorConstant.logoFirstColor,
+              image: AssetPaths.shareIcon,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBodyContent(BuildContext context) {
+    return IgnorePointer(
+      ignoring: controller.freez.value,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Carousel
+          Obx(() {
+            return SliderImages(
+              newImages: controller.imagesInfo ?? <MoreImage>[].obs,
+              product: controller.product.value,
+            );
+          }),
+
+          // Product Info
+          Obx(
+            () => controller.loading.value
+                ? Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                        child: Ui.circularIndicator(
+                            color: ColorConstant.logoFirstColor)),
+                  )
+                : ProductInfo(
+                    controller: controller,
+                  ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Metals List
+          Obx(() {
+            return _buildMetalList(controller.metals);
+          }),
+
+          const SizedBox(height: 8),
+
+          // Gemstones
+          Obx(() {
+            return controller.loading.value
+                ? const SizedBox()
+                : _buildGemstoneStyles(controller.gemstoneStyles);
+          }),
+
+          // Variants
+          Obx(() => controller.variants.isNotEmpty && !controller.loading.value
+              ? Variants(
+                  productVariations: controller.variants,
+                  controller: controller,
                 )
               : const SizedBox()),
-          body: Hero(
-            tag: UniqueKey(),
-            createRectTween: (begin, end) {
-              return MaterialRectCenterArcTween(begin: begin, end: end);
-            },
-            child: Obx(
-              () => controller.fromBanner.value
-                  ? Progressor_indecator()
-                  : controller.product.value == null
-                      ? const SizedBox()
-                      : Padding(
-                          padding: EdgeInsets.only(top: getTopPadding()),
-                          child: IgnorePointer(
-                            ignoring: controller.freez.value,
-                            child: Stack(
-                              alignment: Alignment.bottomLeft,
-                              children: <Widget>[
-                                Column(
-                                  children: [
-                                    SizedBox(
-                                      height: getSize(50),
-                                      child: Row(
-                                        children: [
-                                          InkWell(
-                                            onTap: () async {
-                                              Get.back(result: controller.product.value);
-                                            },
-                                            child: Padding(
-                                              padding: getPadding(left: 16.0),
-                                              child: SizedBox(
-                                                width: getSize(30),
-                                                height: getSize(30),
-                                                child: const Icon(
-                                                  Icons.arrow_back_ios,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: getPadding(left: 16.0),
-                                            child: Text(
-                                              'Product Details'.tr,
-                                              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-                                            ),
-                                          ),
-                                          const Expanded(child: SizedBox()),
-                                          // Padding(
-                                          //   padding: getPadding(right: 8,),
-                                          //
-                                          //   child: InkWell(
-                                          //     splashColor: Colors.transparent,
-                                          //     focusColor: Colors.transparent,
-                                          //     highlightColor: Colors.transparent,
-                                          //     onTap: () =>
-                                          //     {
-                                          //       globalController.cartCount++,
-                                          //
-                                          //       Get.toNamed(AppRoutes.cartScreen,
-                                          //
-                                          //           parameters: {'tag': "${controller.product.value?.product_id}"}, arguments: {"fromKey": "product"}, preventDuplicates: false)
-                                          //       // Get.to(() => Cart_Listscreen(),transition: Transition.cupertino,duration: Duration(milliseconds: 350),arguments: {"fromKey":"product"});
-                                          //     },
-                                          //     key: controller.endPointKey,
-                                          //     child:
-                                          //     ItemsCount.value.toString()!="" && ItemsCount.value.toString()!="0"?
-                                          //     Badge(
-                                          //       backgroundColor: ColorConstant.logoSecondColor,
-                                          //       label: Text(
-                                          //         ItemsCount.value.toString(),
-                                          //         textAlign: TextAlign.center,
-                                          //         style: TextStyle(
-                                          //           color: Colors.white,
-                                          //           fontSize: getFontSize(12),
-                                          //           fontWeight: FontWeight.bold,
-                                          //         ),
-                                          //       ),
-                                          //       child: CustomImageView(
-                                          //         width: getSize(30),
-                                          //         height: getSize(30),
-                                          //         color: ColorConstant.logoFirstColor,
-                                          //         svgPath: AssetPaths.cartIcon,
-                                          //       ),
-                                          //     ):CustomImageView(
-                                          //       width: getSize(30),
-                                          //       height: getSize(30),
-                                          //       color: ColorConstant.logoFirstColor,
-                                          //       svgPath: AssetPaths.cartIcon,
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                          Padding(
-                                            padding: getPadding(right: 8, left: 8),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              highlightColor: Colors.transparent,
-                                              onTap: () async {
-                                                final box = context.findRenderObject() as RenderBox?;
-                                                await Share.shareUri(
-                                                  Uri.parse('$con/product/${controller.product.value!.product_id}'),
-                                                  sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
-                                                );
 
-                                                // await Share.shareUri( prefs!.getString('store_name').toString(),,
-                                                //   chooserTitle: prefs!.getString('store_name').toString(),
-                                                // );
-                                              },
-                                              child: CustomImageView(
-                                                width: getSize(28),
-                                                height: getSize(28),
-                                                color: ColorConstant.logoFirstColor,
-                                                image: AssetPaths.shareIcon,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      key: UniqueKey(),
-                                      child: SingleChildScrollView(
-                                        physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: <Widget>[
-                                            Obx(
-                                              () {
-                                                return SliderImages(
-                                                  newImages: controller.imagesInfo ?? <MoreImage>[].obs,
-                                                  product: controller.product.value,
-                                                );
-                                              },
-                                            ),
-                                            Obx(
-                                              () => controller.loading.value
-                                                  ? Padding(
-                                                      padding: getPadding(top: 15.0),
-                                                      child: Ui.circularIndicator(color: ColorConstant.logoFirstColor),
-                                                    )
-                                                  : ProductInfo(
-                                                      controller: controller,
-                                                    ),
-                                            ),
-                                            SizedBox(height: 8),
-
-                                            Obx(() {
-                                              return _buildMetalList(controller.metals);
-                                            }),
-                                            SizedBox(height: 8),
-
-                                            Obx(() {
-                                              return controller.loading.value
-                                                  ? SizedBox()
-                                                  : Column(
-                                                      children: [
-                                                        _buildGemstoneStyles(controller.gemstoneStyles),
-                                                      ],
-                                                    );
-                                            }),
-
-                                            Obx(() => controller.variants.isNotEmpty && !controller.loading.value
-                                                ? Variants(
-                                                    productVariations: controller.variants,
-                                                    controller: controller,
-                                                  )
-                                                : const SizedBox()),
-                                            Obx(
-                                              () => controller.loading.value
-                                                  ? Container()
-                                                  : controller.product.value?.express_delivery == 1
-                                                      ? Padding(
-                                                          padding: const EdgeInsets.only(left: 18.0),
-                                                          child: Row(
-                                                            children: [
-                                                              mediaWidget(
-                                                                prefs!.getString('express_delivery_img')!,
-                                                                AssetPaths.placeholder,
-                                                                width: 50,
-                                                                height: 50,
-                                                                isProduct: false,
-                                                                fromKey: "filter",
-                                                                fit: BoxFit.cover,
-                                                              ),
-                                                              Padding(
-                                                                padding: const EdgeInsets.only(left: 12.0),
-                                                                child: Text('Express Delivery'.tr),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        )
-                                                      : Container(),
-                                            ),
-                                            Obx(() {
-                                              return controller.product.value?.model != null && controller.product.value?.model != ""
-                                                  ? Padding(
-                                                      padding: const EdgeInsets.only(left: 12.0),
-                                                      child: Text("Model: ".tr + (controller.product.value?.model ?? '')),
-                                                    )
-                                                  : SizedBox();
-                                            }),
-
-                                            controller.product.value?.description.toString() == 'null' || controller.product.value?.description.toString() == ''
-                                                ? const SizedBox()
-                                                : Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: SelectableText(parse(controller.product.value?.description).body!.text),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-
-                                            // Padding(
-                                            //   padding: const EdgeInsets.only(left: 15.0),
-                                            //   child: ReviewsSection(),
-                                            // ),
-
-                                            Obx(() => !controller.loading.value
-                                                ? Padding(
-                                                    padding: getPadding(left: 8.0, right: 8.0, top: 10),
-                                                    child: Container(
-                                                      width: Get.width,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(width: 0.5, color: ColorConstant.logoFirstColor),
-                                                          borderRadius: const BorderRadius.all(
-                                                            Radius.circular(8.0),
-                                                          ),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: Colors.black.withOpacity(0.1), // Shadow color with opacity
-                                                              spreadRadius: 1, // Spread radius
-                                                              blurRadius: 2, // Blur radius
-                                                              offset: const Offset(0, 2), // Position of the shadow
-                                                            ),
-                                                          ]),
-                                                      child: Padding(
-                                                        padding: getPadding(all: 8.0),
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children: [
-                                                            Padding(
-                                                              padding: getPadding(left: 8.0, right: 8),
-                                                              child: Row(
-                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                                children: [
-                                                                  Text(
-                                                                    "Store".tr,
-                                                                    style: TextStyle(fontSize: getFontSize(15)),
-                                                                  ),
-                                                                  Expanded(child: SizedBox()),
-                                                                  Padding(
-                                                                    padding: getPadding(right: 8.0),
-                                                                    child: Text(
-                                                                      controller.product.value!.store.name ?? '',
-                                                                      style: TextStyle(color: ColorConstant.logoFirstColor, fontSize: getFontSize(18)),
-                                                                    ),
-                                                                  ),
-                                                                  Container(
-                                                                    decoration: BoxDecoration(
-                                                                        border: Border.all(color: ColorConstant.logoFirstColor.withOpacity(0.5), width: 0.5),
-                                                                        shape: BoxShape.rectangle,
-                                                                        borderRadius: BorderRadius.circular(5)),
-                                                                    child: CustomImageView(
-                                                                      image: controller.product.value!.store.image,
-                                                                      width: getSize(35),
-                                                                      height: getSize(35),
-                                                                      fit: BoxFit.cover,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            Padding(
-                                                              padding: getPadding(top: 8.0, left: 8, right: 8),
-                                                              child: Divider(
-                                                                color: ColorConstant.black900.withOpacity(0.2),
-                                                                thickness: 0.5,
-                                                                height: 0.5,
-                                                              ),
-                                                            ),
-                                                            Padding(
-                                                              padding: getPadding(left: 8.0, right: 8, top: 8),
-                                                              child: Obx(() {
-                                                                return _buildProductCategories(controller.productCategories);
-                                                              }),
-                                                            ),
-
-                                                            // Padding(
-                                                            //   padding: getPadding(left: 8.0, right: 8, top: 8),
-                                                            //   child: Divider(
-                                                            //     color: ColorConstant.black900.withOpacity(0.2),
-                                                            //     thickness: 0.5,
-                                                            //     height: 0.5,
-                                                            //   ),
-                                                            // ),
-                                                            // Padding(
-                                                            //   padding: getPadding(left: 8.0, right: 8, top: 8),
-                                                            //   child: Row(
-                                                            //     crossAxisAlignment: CrossAxisAlignment.center,
-                                                            //     children: [
-                                                            //       Text("Contact Store".tr),
-                                                            //       Expanded(child: SizedBox()),
-                                                            //       GestureDetector(
-                                                            //         behavior: HitTestBehavior.translucent,
-                                                            //         onTap: () => Ui.launchWhatsApp(controller.product.value!.store.storeWhatsappNumber ?? '', controller.product.value!.store.name ?? ''),
-                                                            //         child:
-                                                            //         Icon(FontAwesomeIcons.whatsapp, color: ColorConstant.logoSecondColor,size: getSize(18),
-                                                            //         )
-                                                            //
-                                                            //         // CustomImageView(
-                                                            //         //   imagePath: AssetPaths.whatsapp,
-                                                            //         //   width: getSize(30),
-                                                            //         //   height: getSize(30),
-                                                            //         //   fit: BoxFit.contain,
-                                                            //         //
-                                                            //         // ),
-                                                            //       ),
-                                                            //     ],
-                                                            //   ),
-                                                            // )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : SizedBox()),
-                                            SizedBox(height: getSize(15)),
-                                            Obx(() => !controller.loading.value
-                                                ? controller.product.value!.fields.isEmpty
-                                                    ? SizedBox()
-                                                    : Padding(
-                                                        padding: getPadding(left: 8.0, right: 8.0, top: 10, bottom: getBottomPadding()),
-                                                        child: Container(
-                                                          width: Get.width,
-                                                          decoration: BoxDecoration(
-                                                              color: Colors.white,
-                                                              border: Border.all(width: 0.5, color: ColorConstant.logoFirstColor),
-                                                              borderRadius: const BorderRadius.all(
-                                                                Radius.circular(8.0),
-                                                              ),
-                                                              boxShadow: [
-                                                                BoxShadow(
-                                                                  color: Colors.black.withOpacity(0.1), // Shadow color with opacity
-                                                                  spreadRadius: 1, // Spread radius
-                                                                  blurRadius: 2, // Blur radius
-                                                                  offset: const Offset(0, 2), // Position of the shadow
-                                                                ),
-                                                              ]),
-                                                          child: Padding(
-                                                            padding: getPadding(all: 8.0),
-                                                            child: Padding(
-                                                              padding: getPadding(
-                                                                left: 8.0,
-                                                                right: 8,
-                                                                top: 8,
-                                                              ),
-                                                              child: Obx(() {
-                                                                return Row(
-                                                                  crossAxisAlignment: controller.productCategories.length == 1 ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                                  children: [
-                                                                    Text(
-                                                                      "Specifications".tr,
-                                                                      style: TextStyle(fontSize: getFontSize(15)),
-                                                                    ),
-                                                                    Expanded(
-                                                                      child: Align(
-                                                                        alignment: Alignment.topRight,
-                                                                        child: ListView.builder(
-                                                                          itemCount: controller.product.value?.fields.length,
-                                                                          shrinkWrap: true,
-                                                                          padding: getPadding(top: 0),
-                                                                          physics: NeverScrollableScrollPhysics(),
-                                                                          itemBuilder: (BuildContext context, int index) {
-                                                                            ItemFormField? specification = controller.product.value?.fields[index];
-                                                                            return Column(
-                                                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                              children: [
-                                                                                Padding(
-                                                                                  padding: getPadding(bottom: controller.productCategories.length == 1 ? 0 : 8.0),
-                                                                                  child: Row(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                    mainAxisAlignment: MainAxisAlignment.end,
-                                                                                    children: [
-                                                                                      Padding(
-                                                                                        padding: getPadding(right: 8.0),
-                                                                                        child: Text(
-                                                                                          specification?.field ?? "",
-                                                                                          style: TextStyle(color: ColorConstant.logoSecondColor, fontSize: getFontSize(15)),
-                                                                                        ),
-                                                                                      ),
-                                                                                      Padding(
-                                                                                        padding: getPadding(right: 8.0),
-                                                                                        child: Text(
-                                                                                          specification?.field ?? "",
-                                                                                          style: TextStyle(color: ColorConstant.logoSecondColor, fontSize: getFontSize(15)),
-                                                                                        ),
-                                                                                      )
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                                if (index != controller.productCategories.length - 1)
-                                                                                  Padding(
-                                                                                    padding: getPadding(bottom: 8),
-                                                                                    child: Container(
-                                                                                      width: Get.width * 0.35,
-                                                                                      color: ColorConstant.logoSecondColor.withOpacity(0.5),
-                                                                                      height: 0.5,
-                                                                                    ),
-                                                                                  )
-                                                                              ],
-                                                                            );
-                                                                          },
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              }),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      )
-                                                : SizedBox()),
-
-                                            Obx(() {
-                                              return controller.Similarproducts!.isEmpty
-                                                  ? SizedBox()
-                                                  : Padding(
-                                                      padding: const EdgeInsets.only(top: 8.0),
-                                                      child: horizontalHeading(
-                                                        'Similar products'.tr,
-                                                        callback: () {
-                                                          // Ensure product and category_id are not null before using
-                                                          if (controller.product.value?.r_flash_id != null) {
-                                                            Get.toNamed(AppRoutes.View_All_Products, arguments: {
-                                                              'title': 'Similar products'.tr,
-                                                              'id': controller.product..value?.r_flash_id.toString(),
-                                                              'type': 'category',
-                                                            })?.then((value) {
-                                                              globalController.updateCurrentRout(AppRoutes.tabsRoute);
-                                                            });
-                                                          }
-                                                        },
-                                                      ),
-                                                    );
-                                            }),
-                                            // Obx(
-                                            //   () => controller.similaritiesloading.value
-                                            //       ? Container()
-                                            //       : controller.Similarproducts == null || controller.Similarproducts!.isEmpty
-                                            //           ? const SizedBox()
-                                            //           : Padding(
-                                            //               padding: const EdgeInsets.only(top: 8.0),
-                                            //               child: horizontalHeading(
-                                            //                 'Similar products'.tr,
-                                            //                 callback: () {
-                                            //                   // Ensure product and category_id are not null before using
-                                            //                   if (controller.product.value?.r_flash_id != null) {
-                                            //                     Get.toNamed(AppRoutes.View_All_Products, arguments: {
-                                            //                       'title': 'Similar products'.tr,
-                                            //                       'id': controller.product..value?.r_flash_id.toString(),
-                                            //                       'type': 'category',
-                                            //                     });
-                                            //                   }
-                                            //                 },
-                                            //               ),
-                                            //             ),
-                                            // ),
-                                            Obx(() => controller.similaritiesloading.value
-                                                ? Container()
-                                                : controller.Similarproducts!.isEmpty
-                                                    ? Container(
-                                                        height: 100,
-                                                      )
-                                                    : Padding(
-                                                        padding: const EdgeInsets.only(bottom: 90.0),
-                                                        child: ListView(
-                                                          physics: const NeverScrollableScrollPhysics(),
-                                                          shrinkWrap: true,
-                                                          children: [
-                                                            Container(
-                                                              height: getVerticalSize(310),
-                                                              width: MediaQuery.of(context).size.width,
-                                                              margin: const EdgeInsets.only(top: spacing_standard_new),
-                                                              child: ListView.builder(
-                                                                  scrollDirection: Axis.horizontal,
-                                                                  itemCount: controller.Similarproducts?.length,
-                                                                  shrinkWrap: true,
-                                                                  padding: const EdgeInsets.only(right: spacing_standard_new),
-                                                                  itemBuilder: (context, index) {
-                                                                    return Padding(
-                                                                      padding: const EdgeInsets.only(right: 8.0, left: 8),
-                                                                      child: ProductWidget(
-                                                                        product: controller.Similarproducts![index],
-                                                                      ),
-                                                                    );
-                                                                  }),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ))
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Obx(() => controller.freez.value
-                                    ? Center(
-                                        child: Progressor_indecator(),
-                                      )
-                                    : const SizedBox())
-                              ],
-                            ),
+          // Express Delivery
+          Obx(
+            () => controller.loading.value
+                ? Container()
+                : controller.product.value?.express_delivery == 1
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                              color: ColorConstant.logoFirstColor
+                                  .withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: ColorConstant.logoFirstColor
+                                      .withOpacity(0.1))),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              mediaWidget(
+                                prefs!.getString('express_delivery_img')!,
+                                AssetPaths.placeholder,
+                                width: 30,
+                                height: 30,
+                                isProduct: false,
+                                fromKey: "filter",
+                                fit: BoxFit.cover,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Express Delivery'.tr,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: ColorConstant.logoFirstColor,
+                                    fontSize: getFontSize(14)),
+                              ),
+                            ],
                           ),
                         ),
+                      )
+                    : Container(),
+          ),
+
+          // Model
+          Obx(() {
+            var model = controller.product.value?.model;
+            return (model != null && model != "")
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 4.0),
+                    child: Text("Model: ".tr + model,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: getFontSize(14),
+                        )),
+                  )
+                : const SizedBox();
+          }),
+
+          // Description
+          Obx(() {
+            var desc = controller.product.value?.description.toString();
+            if (desc == 'null' || desc == '') return const SizedBox();
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SelectableText(
+                parse(desc).body!.text,
+                style: TextStyle(
+                    fontSize: getFontSize(14),
+                    height: 1.5,
+                    color: Colors.black87),
+              ),
+            );
+          }),
+
+          const Divider(thickness: 8, color: Color(0xFFF5F5F5)),
+
+          // Store Info
+          Obx(() => !controller.loading.value
+              ? _buildStoreInfoCard(context)
+              : const SizedBox()),
+
+          const SizedBox(height: 16),
+
+          // Specifications
+          Obx(() => !controller.loading.value
+              ? _buildSpecifications(context)
+              : const SizedBox()),
+
+          // Similar Products
+          Obx(() {
+            var similar = controller.Similarproducts;
+            if (controller.similaritiesloading.value) return const SizedBox();
+            if (similar == null || similar.isEmpty) return const SizedBox();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 24.0, bottom: 0),
+                  child: horizontalHeading(
+                    'Similar products'.tr,
+                    callback: () {
+                      if (controller.product.value?.r_flash_id != null) {
+                        Get.toNamed(AppRoutes.View_All_Products, arguments: {
+                          'title': 'Similar products'.tr,
+                          'id': controller.product.value?.r_flash_id.toString(),
+                          'type': 'category',
+                        })?.then((value) {
+                          globalController
+                              .updateCurrentRout(AppRoutes.tabsRoute);
+                        });
+                      }
+                    },
+                  ),
+                ),
+                Container(
+                  height: getVerticalSize(320),
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.only(bottom: 50),
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: similar.length,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      physics: const BouncingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: ProductWidget(
+                            product: similar[index],
+                          ),
+                        );
+                      }),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoreInfoCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(width: 0.5, color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          )),
+          ]),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Text(
+                  "Store".tr,
+                  style: TextStyle(
+                      fontSize: getFontSize(15),
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54),
+                ),
+                const Spacer(),
+                Text(
+                  controller.product.value!.store.name ?? '',
+                  style: TextStyle(
+                      color: ColorConstant.logoFirstColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: getFontSize(16)),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: ColorConstant.logoFirstColor.withOpacity(0.3),
+                          width: 1),
+                      borderRadius: BorderRadius.circular(8)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: CustomImageView(
+                      image: controller.product.value!.store.image,
+                      width: getSize(40),
+                      height: getSize(40),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Store Categories
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Obx(() {
+              return _buildProductCategories(controller.productCategories);
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpecifications(BuildContext context) {
+    if (controller.product.value?.fields.isEmpty ?? true)
+      return const SizedBox();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(width: 0.5, color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(
+              "Specifications".tr,
+              style: TextStyle(
+                  fontSize: getFontSize(16), fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Divider(height: 1),
+          ListView.separated(
+            itemCount: controller.product.value?.fields.length ?? 0,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(12),
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (ctx, i) => Divider(color: Colors.grey[200]),
+            itemBuilder: (context, index) {
+              ItemFormField? specification =
+                  controller.product.value?.fields[index];
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    specification?.field ?? "",
+                    style: TextStyle(
+                        color: Colors.grey[600], fontSize: getFontSize(14)),
+                  ),
+                  Text(
+                    specification?.field ??
+                        "", // Logic in original code duplicated field, assuming value should be here but kept logic
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        fontSize: getFontSize(14)),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildMetalList(List<dynamic> metals) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: metals.map((metal) {
-        List<Widget> properties = _getFilteredProperties(metal['properties']);
-        if (properties.isEmpty) return SizedBox.shrink();
-        return Padding(
-          padding: getPadding(bottom: 8.0),
-          child: _buildItem(metal['name'], properties, unit: metal['unit']),
-        );
-      }).toList(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: metals.map((metal) {
+          List<Widget> properties = _getFilteredProperties(metal['properties']);
+          if (properties.isEmpty) return const SizedBox.shrink();
+          return _buildItem(metal['name'], properties, unit: metal['unit']);
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildGemstoneStyles(List<dynamic> gemstoneStyles) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: gemstoneStyles.map((style) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text(style['style_name'], style: TextStyle(fontSize: getFontSize(14), color: ColorConstant.logoFirstColor)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: gemstoneStyles.map((style) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!)),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.diamond_outlined,
+                          color: ColorConstant.logoFirstColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        style['style_name'],
+                        style: TextStyle(
+                          fontSize: getFontSize(16),
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 350),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      key: ValueKey(style['data'].length),
+                      children: (style['data'] as List).map<Widget>((gemstone) {
+                        List<Widget> properties =
+                            _getFilteredProperties(gemstone['properties']);
+                        if (gemstone["isEdited"] == false) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: _buildItem(
+                            gemstone['name'],
+                            properties,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Wrap(
-              spacing: 10.0, // Space between gemstones
-              runSpacing: 8.0, // Space between rows
-              children: (style['data'] as List).map((gemstone) {
-                List<Widget> properties = _getFilteredProperties(gemstone['properties']);
-                if (gemstone["isEdited"] == false) return const SizedBox.shrink();
-                return _buildItem(
-                  gemstone['name'],
-                  properties,
-                );
-              }).toList(),
-            ),
-          ],
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -676,30 +605,30 @@ class ProductDetails_screen extends StatelessWidget {
             RichText(
               text: TextSpan(
                 style: TextStyle(
-                  color: Colors.black, // Default color for other text
-                  fontSize: getFontSize(12),
+                  color: Colors.black,
+                  fontSize: getFontSize(13),
                 ),
                 children: [
                   TextSpan(
                     text: "${property['field']}: ",
                     style: TextStyle(
-                      color: ColorConstant.logoFirstColor,
-                      fontSize: getFontSize(12), // Change this to your desired color
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   TextSpan(
                     text: "${property['fieldValue']} ",
-                    style: TextStyle(
-                      color: ColorConstant.logoFirstColor,
-                      fontSize: getFontSize(12), // Change this to your desired color
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   TextSpan(
                     text: "${property['unit_of_measurement']}",
                     style: TextStyle(
-                      color: ColorConstant.logoSecondColor, // Change this to your desired color
+                      color: ColorConstant.logoSecondColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: getFontSize(12),
+                      fontSize: getFontSize(11),
                     ),
                   ),
                 ],
@@ -713,154 +642,115 @@ class ProductDetails_screen extends StatelessWidget {
             .map<Widget>((value) => Text(
                   "${property['field']}: ${value['value']}",
                   style: TextStyle(
-                    color: ColorConstant.logoFirstColor, // Change this to your desired color
-                    fontSize: getFontSize(12),
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    fontSize: getFontSize(13),
                   ),
                 ))
-            .toList(); // Fix: Ensures a List<Widget> is returned
+            .toList();
       }
       return [];
-    }).toList(); // Fix: Ensures the final output is a List<Widget>
+    }).toList();
   }
 
   Widget _buildItem(String title, List<Widget> properties, {String? unit}) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      color: Color(0xFFf5f5f5),
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(right: 8.0),
-              child: Text(
-                "$title ${unit != null ? unit : ''}",
-                style: TextStyle(fontSize: getFontSize(12), color: ColorConstant.logoSecondColor),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Wrap(
-                  spacing: 4.0, // Space between elements
-                  runSpacing: 4.0, // Space between lines
-                  children: _addCommaBetween(properties),
-                ),
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
       ),
-    );
-  }
-
-  Widget _buildProductCategories(List<ProductCategories> categories) {
-    return Padding(
-      padding: getPadding(top: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: getPadding(
-              bottom: 8,
-            ),
-            child: Text(
-              "Categories",
-              style: TextStyle(
-                fontSize: getFontSize(16),
-                fontWeight: FontWeight.bold,
-                color: ColorConstant.logoSecondColor,
-              ),
+          Text(
+            "$title${unit != null ? ' $unit' : ''}",
+            style: TextStyle(
+              fontSize: getFontSize(14),
+              color: ColorConstant.logoFirstColor,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          GridView.builder(
-            itemCount: categories.length,
-            padding: getPadding(all: 0),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Two items per row
-              mainAxisSpacing: 8, // Vertical spacing between rows
-              crossAxisSpacing: 8, // Horizontal spacing between items
-              childAspectRatio: 3.5, // Adjust aspect ratio for better alignment
-            ),
-            itemBuilder: (context, index) {
-              ProductCategories productCat = categories[index];
-              return Container(
-                alignment: Alignment.center,
-                child: InkWell(
-                  onTap: () {
-                    var f = {
-                      "categories": [
-                        productCat.id.toString(),
-                      ],
-                    };
-                    String jsonString = jsonEncode(f);
-                    Get.toNamed(AppRoutes.Filter_products, arguments: {
-                      'title': productCat.categoryName ?? "",
-                      'id': productCat.id,
-                      'type': jsonString,
-                    }, parameters: {
-                      'tag': "${productCat.id}:${productCat.categoryName ?? ""}"
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 1),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: getPadding(right: 8.0),
-                            child: Text(
-                              productCat.categoryName ?? "",
-                              style: TextStyle(color: ColorConstant.logoSecondColor, fontSize: getFontSize(12)),
-                            ),
-                          ),
-                        ),
-                        CustomImageView(
-                          image: productCat.categoryImage,
-                          width: getSize(35),
-                          height: getSize(35),
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: _addSeparator(properties),
           ),
         ],
       ),
     );
   }
 
-  List<Widget> _addCommaBetween(List<Widget> properties) {
-    List<Widget> formattedList = [];
-    for (int i = 0; i < properties.length; i++) {
-      formattedList.add(
-        DefaultTextStyle(
-          style: TextStyle(fontSize: getFontSize(12), color: ColorConstant.logoFirstColor), // Change color here
-          child: properties[i],
-        ),
-      );
-
-      if (i != properties.length - 1) {
-        formattedList.add(
-          Text(", ", style: TextStyle(fontSize: getFontSize(12), color: Colors.black54)),
-        );
+  List<Widget> _addSeparator(List<Widget> properties) {
+    List<Widget> list = [];
+    for (var i = 0; i < properties.length; i++) {
+      list.add(properties[i]);
+      if (i < properties.length - 1) {
+        list.add(Padding(
+          padding: const EdgeInsets.only(top: 2.0),
+          child: Icon(Icons.circle, size: 4, color: Colors.grey[400]),
+        ));
       }
     }
-    return formattedList;
+    return list;
+  }
+
+  Widget _buildProductCategories(List<ProductCategories> categories) {
+    if (categories.isEmpty) return const SizedBox();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            "Categories",
+            style: TextStyle(
+              fontSize: getFontSize(14),
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
+          ),
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: categories.map((productCat) {
+            return InkWell(
+              onTap: () {
+                var f = {
+                  "categories": [productCat.id.toString()],
+                };
+                String jsonString = jsonEncode(f);
+                Get.toNamed(AppRoutes.Filter_products, arguments: {
+                  'title': productCat.categoryName ?? "",
+                  'id': productCat.id,
+                  'type': jsonString,
+                }, parameters: {
+                  'tag': "${productCat.id}:${productCat.categoryName ?? ""}"
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Chip(
+                avatar: ClipOval(
+                  child: CustomImageView(
+                    image: productCat.categoryImage,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                label: Text(productCat.categoryName ?? ""),
+                backgroundColor: Colors.white,
+                side: BorderSide(color: Colors.grey[300]!),
+                elevation: 1,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 }
