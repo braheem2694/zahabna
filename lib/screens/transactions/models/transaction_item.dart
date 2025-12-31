@@ -6,6 +6,7 @@ class TransactionItem extends Equatable {
   final double amount;
   final String paymentType; // e.g. "Card", "Cash", "Bank Transfer"
   final String recipientName;
+  final DateTime subscriptionStartDate;
   final DateTime subscriptionEndDate;
 
   const TransactionItem({
@@ -14,6 +15,7 @@ class TransactionItem extends Equatable {
     required this.amount,
     required this.paymentType,
     required this.recipientName,
+    required this.subscriptionStartDate,
     required this.subscriptionEndDate,
   });
 
@@ -31,6 +33,9 @@ class TransactionItem extends Equatable {
       amount: parseAmount(json['amount'].toString()),
       paymentType: json['paymentType'].toString(),
       recipientName: json['recipientName'].toString(),
+      subscriptionStartDate: json['subscriptionStartDate'] != null
+          ? DateTime.parse(json['subscriptionStartDate'].toString())
+          : DateTime.parse(json['date'].toString()),
       subscriptionEndDate: DateTime.parse(json['subscriptionEndDate'].toString()),
     );
   }
@@ -43,12 +48,13 @@ class TransactionItem extends Equatable {
       'amount': amount,
       'paymentType': paymentType,
       'recipientName': recipientName,
+      'subscriptionStartDate': subscriptionStartDate.toIso8601String(),
       'subscriptionEndDate': subscriptionEndDate.toIso8601String(),
     };
   }
 
   @override
-  List<Object?> get props => [id, date, amount, paymentType, recipientName, subscriptionEndDate];
+  List<Object?> get props => [id, date, amount, paymentType, recipientName, subscriptionStartDate, subscriptionEndDate];
 }
 
 class ContractPDF {

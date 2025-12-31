@@ -514,13 +514,13 @@ class _TxnTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'starts: ${DateFormat('yMMMd').format(t.date)}',
-                  style: const TextStyle(fontSize: 11.5, color: Colors.black54),
+                  'Recipient: ${t.recipientName}',
+                  style: const TextStyle(fontSize: 12, color: Colors.black87),
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  'Recipient: ${t.recipientName}',
-                  style: const TextStyle(fontSize: 12, color: Colors.black87),
+                  'Starts: ${DateFormat('yMMMd').format(t.subscriptionStartDate)}',
+                  style: const TextStyle(fontSize: 11.5, color: Colors.black54),
                 ),
                 Text(
                   'Ends: ${DateFormat('yMMMd').format(t.subscriptionEndDate)}',

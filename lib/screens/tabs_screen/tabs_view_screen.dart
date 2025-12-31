@@ -172,7 +172,10 @@ class TabsPage extends GetView<TabsController> {
         child: Container(
           alignment: Alignment.topCenter,
           height: getSize(50) + getBottomPadding(context: context),
-          padding: getPadding(all: 0),
+          padding: EdgeInsets.zero,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
           child: CustomLineIndicatorBottomNavbar(
             selectedColor: ColorConstant.logoSecondColor,
             unSelectedColor: ColorConstant.logoFirstColor,

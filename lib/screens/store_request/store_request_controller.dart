@@ -5,6 +5,7 @@ import 'package:dio/dio.dart' as dio;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iq_mall/utils/ShColors.dart';
 import 'package:iq_mall/screens/tabs_screen/controller/tabs_controller.dart';
+import 'package:iq_mall/services/background_upload_service.dart';
 
 import '../../main.dart';
 import '../../models/store_request.dart';
@@ -176,7 +177,7 @@ class StoreRequestController extends GetxController {
         // Upload any newly selected images
         await uploadImageInBackground({
           'row_id': args!.id,
-          'table_name': 'stores_request',
+          'table_name': response['table_name'],
           'token': token,
         });
 
@@ -336,75 +337,147 @@ class StoreRequestController extends GetxController {
     return c;
   }
 
+  /// Build list of images to upload for the background service
+  List<Map<String, dynamic>> _buildPendingImagesList() {
+    final images = <Map<String, dynamic>>[];
+    
+    if (_shouldUpload(idImage, 201)) {
+      images.add({
+        'filePath': idImage.value!,
+        'fileName': _basename(idImage.value!),
+        'type': 201,
+      });
+    }
+    
+    if (_shouldUpload(id2Image, 202)) {
+      images.add({
+        'filePath': id2Image.value!,
+        'fileName': _basename(id2Image.value!),
+        'type': 202,
+      });
+    }
+    
+    if (_shouldUpload(selfieImage, 205)) {
+      images.add({
+        'filePath': selfieImage.value!,
+        'fileName': _basename(selfieImage.value!),
+        'type': 205,
+      });
+    }
+    
+    if (_shouldUpload(storeImage, 203)) {
+      images.add({
+        'filePath': storeImage.value!,
+        'fileName': _basename(storeImage.value!),
+        'type': 203,
+      });
+    }
+    
+    if (_shouldUpload(logoImage, 206)) {
+      images.add({
+        'filePath': logoImage.value!,
+        'fileName': _basename(logoImage.value!),
+        'type': 206,
+      });
+    }
+    
+    return images;
+  }
+
+  /// Enqueue images for background upload.
+  /// 
+  /// This method delegates to [BackgroundUploadService] which:
+  /// - Continues uploads even after this controller is disposed
+  /// - Prevents duplicate uploads
+  /// - Provides observable progress via streams
+  /// 
+  /// The method returns immediately - uploads continue in background.
   Future<void> uploadImageInBackground(Map<String, dynamic> argsMap) async {
-    if (isUploading.value) return;
+    // Don't block if already uploading via service
+    if (BackgroundUploadService.instance.hasActiveUploads(argsMap['row_id'].toString())) {
+      debugPrint('📤 Upload already in progress for row: ${argsMap['row_id']}');
+      return;
+    }
+    
     sendingRequest.value = false;
 
-    // Compute only the changed/new images
-    totalImages.value = _countPendingUploads();
-    if (totalImages.value == 0) {
-      // nothing to upload
+    // Build list of images that need uploading
+    final images = _buildPendingImagesList();
+    
+    if (images.isEmpty) {
+      debugPrint('📤 No images to upload');
       return;
     }
 
+    // Update local state for UI feedback (optional, service has its own state)
+    totalImages.value = images.length;
     isUploading.value = true;
     uploadProgress.value = 0;
 
-    try {
-      final String table = argsMap['table_name'].toString();
-      final String rowId = argsMap['row_id'].toString();
-
-      // ID front (201)
-      if (_shouldUpload(idImage, 201)) {
-        final path = idImage.value!;
-        await uploadImage(table, rowId, _basename(path), path, 201);
-        uploadProgress.value++;
-      }
-
-      // ID back (202)
-      if (_shouldUpload(id2Image, 202)) {
-        final path = id2Image.value!;
-        await uploadImage(table, rowId, _basename(path), path, 202);
-        uploadProgress.value++;
-      }
-
-      // Selfie (205)
-      if (_shouldUpload(selfieImage, 205)) {
-        final path = selfieImage.value!;
-        await uploadImage(table, rowId, _basename(path), path, 205);
-        uploadProgress.value++;
-      }
-
-      // Store (203)
-      if (_shouldUpload(storeImage, 203)) {
-        final path = storeImage.value!;
-        await uploadImage(table, rowId, _basename(path), path, 203);
-        uploadProgress.value++;
-      }
-
-      // Logo (206)
-      if (_shouldUpload(logoImage, 206)) {
-        final path = logoImage.value!;
-        await uploadImage(table, rowId, _basename(path), path, 206);
-        uploadProgress.value++;
-      }
-
-      // Optionally: success toast/snackbar here
-    } catch (e) {
-      Get.snackbar(
-        'Error'.tr,
-        'Failed to upload some images. Please try again.'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-        duration: const Duration(seconds: 3),
-      );
-    } finally {
-      isUploading.value = false;
-      uploadProgress.value = 0;
-      totalImages.value = 0;
-    }
+    // Capture token at call time (before any navigation might invalidate prefs)
+    final token = argsMap['token']?.toString() ?? prefs?.getString("token") ?? "";
+    
+    // Delegate to background service - this continues even if controller is disposed
+    BackgroundUploadService.instance.enqueueUpload(
+      images: images,
+      tableName: argsMap['table_name'].toString(),
+      rowId: argsMap['row_id'].toString(),
+      token: token,
+    );
+    
+    // Optional: Subscribe to progress updates for UI
+    // This subscription is automatically cleaned up when controller is disposed
+    _subscribeToUploadProgress(argsMap['row_id'].toString());
+  }
+  
+  /// Subscribe to upload progress from background service.
+  /// This is safe - if controller is disposed, the subscription is cleaned up.
+  void _subscribeToUploadProgress(String rowId) {
+    // Listen to upload events for UI updates
+    BackgroundUploadService.instance.uploadEvents.listen(
+      (event) {
+        // Only process events for our row
+        if (event.batchId?.contains(rowId) != true) return;
+        
+        switch (event.type) {
+          case UploadEventType.progress:
+            uploadProgress.value = event.current ?? 0;
+            break;
+          case UploadEventType.completed:
+            isUploading.value = false;
+            uploadProgress.value = 0;
+            totalImages.value = 0;
+            break;
+          case UploadEventType.completedWithErrors:
+            isUploading.value = false;
+            uploadProgress.value = 0;
+            totalImages.value = 0;
+            // Show error only if controller is still active
+            if (!isClosed) {
+              Get.snackbar(
+                'Warning'.tr,
+                'Some images failed to upload'.tr,
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.orange,
+                colorText: Colors.white,
+                margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                duration: const Duration(seconds: 3),
+              );
+            }
+            break;
+          case UploadEventType.error:
+          case UploadEventType.taskFailed:
+            // Individual failures are logged but batch continues
+            break;
+          default:
+            break;
+        }
+      },
+      onError: (e) {
+        debugPrint('📤 Upload event error: $e');
+      },
+      cancelOnError: false,
+    );
   }
 
   Future<void> uploadImage(String tableName, String rowId, String fileName,
@@ -586,8 +659,8 @@ class StoreRequestController extends GetxController {
       'country': globalController.countryName.value,
       'address': addressController.text,
       'region': regionController.text,
-      'email': regionController.text,
-      'place': regionController.text,
+      "place": regionController.text,
+      'email': emailController.text,
       'latitude': latController.text,
       'longitude': lngController.text,
       'birth_date': birthDay.text,

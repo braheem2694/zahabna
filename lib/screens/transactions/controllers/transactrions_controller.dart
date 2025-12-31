@@ -56,13 +56,21 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
   }
 
   initializeScreen() async {
-    args = Get.arguments;
-    if (args["isStoreRequest"] == true) {
-      await fetchRequestById(args["storeRequestId"].toString());
-      await fetchTransactions(filter: TxnFilter.all, useMock: false, requestId: args["storeRequestId"].toString());
-    } else {
-      await fetchStoreRequests();
-      await fetchTransactions(filter: TxnFilter.all, useMock: false);
+    isLoading.value = true;
+    isLoadingTransactions.value = true;
+    
+    try {
+      args = Get.arguments;
+      if (args["isStoreRequest"] == true) {
+        await fetchRequestById(args["storeRequestId"].toString(), setLoading: false);
+        await fetchTransactions(filter: TxnFilter.all, useMock: false, requestId: args["storeRequestId"].toString(), setLoading: false);
+      } else {
+        await fetchStoreRequests(setLoading: false);
+        await fetchTransactions(filter: TxnFilter.all, useMock: false, setLoading: false);
+      }
+    } finally {
+      isLoading.value = false;
+      isLoadingTransactions.value = false;
     }
   }
 
@@ -121,8 +129,8 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
   }
 
   // ----------------- Store Requests (unchanged) -----------------
-  Future<List<StoreRequest>> fetchStoreRequests() async {
-    isLoading.value = true;
+  Future<List<StoreRequest>> fetchStoreRequests({bool setLoading = true}) async {
+    if (setLoading) isLoading.value = true;
     final String token = prefs!.getString("token") ?? "";
 
     final Map<String, dynamic> response = await api.getData(
@@ -141,13 +149,13 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
       } else {}
     } catch (e) {
     } finally {
-      isLoading.value = false;
+      if (setLoading) isLoading.value = false;
     }
     return requests;
   }
 
-  Future<bool> fetchRequestById(id) async {
-    isLoading.value = true;
+  Future<bool> fetchRequestById(id, {bool setLoading = true}) async {
+    if (setLoading) isLoading.value = true;
     bool success = false;
     final String token = prefs!.getString("token") ?? "";
 
@@ -172,7 +180,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
       }
     } catch (e) {
     } finally {
-      isLoading.value = false;
+      if (setLoading) isLoading.value = false;
     }
     return success;
   }
@@ -190,8 +198,9 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
     bool useMock = false,
     String? requestId,
     bool fallbackToMockOnError = true,
+    bool setLoading = true,
   }) async {
-    isLoadingTransactions.value = true;
+    if (setLoading) isLoadingTransactions.value = true;
 
     final String token = prefs!.getString("token") ?? "";
 
@@ -297,9 +306,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
         _applyCurrent();
       }
     } finally {
-      Future.delayed(Duration(seconds: 1), () {
-        isLoadingTransactions.value = false;
-      });
+      if (setLoading) isLoadingTransactions.value = false;
     }
   }
 
@@ -318,9 +325,11 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
     }
 
     String? dateStr = json['date']?.toString();
+    String? subStartStr = json['subscriptionStartDate']?.toString();
     String? subEndStr = json['subscriptionEndDate']?.toString();
     // Fallback to common keys
     dateStr ??= json['created_at']?.toString();
+    subStartStr ??= json['subscription_start']?.toString();
     subEndStr ??= json['subscription_end']?.toString();
 
     return TransactionItem(
@@ -329,6 +338,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
       amount: amount,
       paymentType: (json['paymentType'] ?? json['payment_type'] ?? 'Unknown').toString(),
       recipientName: (json['recipientName'] ?? json['recipient'] ?? 'Unknown').toString(),
+      subscriptionStartDate: subStartStr != null ? DateTime.parse(subStartStr) : (dateStr != null ? DateTime.parse(dateStr) : DateTime.now()),
       subscriptionEndDate: subEndStr != null ? DateTime.parse(subEndStr) : DateTime.now(),
     );
   }
@@ -350,10 +360,7 @@ class TransactionsController extends GetxController with GetTickerProviderStateM
       maxAmt: maxAmount.value == double.infinity ? null : maxAmount.value,
     );
 
-    Future.delayed(Duration(seconds: 1), () {
-      isLoadingTransactions.value = false;
-      refreshController.stop();
-    });
+    refreshController.stop();
   }
 
   /// Apply a date filter for the UI. If [f] is custom, pass [from] and [to].

@@ -348,12 +348,12 @@ class Storesscreen extends StatelessWidget {
             onRefresh: () => controller.fetchStores(false, true),
             child: GridView.builder(
               padding: EdgeInsets.only(
-                bottom: getBottomPadding() + getSize(60),
+                bottom: getBottomPadding()+ getSize(55),
                 right: _StoresTheme.spacingMD,
                 left: _StoresTheme.spacingMD,
                 top: _StoresTheme.spacingSM,
               ),
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
               controller: controller.scrollController,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 mainAxisExtent: getVerticalSize(260),
@@ -582,6 +582,10 @@ class _StoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unescape = HtmlUnescape();
+    final storeName = unescape.convert(store.value.store_name ?? 'No Name');
+    final mainImage = store.value.main_image ?? "";
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: 400 + (index * 50).clamp(0, 200)),
@@ -596,155 +600,261 @@ class _StoreCard extends StatelessWidget {
         );
       },
       child: _AnimatedPressable(
-        onTap: () => _onShopTap(),
+        onTap: _onShopTap,
         child: Container(
           decoration: BoxDecoration(
-            color: _StoresTheme.cardBg,
             borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
-            boxShadow: _StoresTheme.cardShadow,
-          ),
-          child: Column(
-            children: [
-              // Store Name Header
-              _buildHeader(),
-              
-              // Store Image
-              Expanded(child: _buildStoreImage()),
-              
-              // Action Buttons
-              _buildActionButtons(),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    final unescape = HtmlUnescape();
-    final storeName = unescape.convert(store.value.store_name ?? 'No Name');
-    
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        vertical: _StoresTheme.spacingMD,
-        horizontal: _StoresTheme.spacingSM,
-      ),
-      decoration: BoxDecoration(
-        gradient: _StoresTheme.subtleGoldGradient,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(_StoresTheme.radiusLG),
-        ),
-        border: Border(
-          bottom: BorderSide(
-            color: _StoresTheme.accent.withOpacity(0.1),
-            width: 1,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Full-size background image
+                CustomImageView(
+                  image: mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
+                  placeHolder: AssetPaths.placeholder,
+                  fit: BoxFit.cover,
+                ),
+                
+                // Gradient overlay for text readability
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.15),
+                          Colors.black.withOpacity(0.05),
+                          Colors.black.withOpacity(0.35),
+                          Colors.black.withOpacity(0.85),
+                        ],
+                        stops: const [0.0, 0.25, 0.6, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Top accent border with glow
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      gradient: _StoresTheme.goldGradient,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(_StoresTheme.radiusLG),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _StoresTheme.accent.withOpacity(0.5),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Info badge - Top right corner
+                Positioned(
+                  top: _StoresTheme.spacingMD,
+                  right: _StoresTheme.spacingSM,
+                  child: _buildInfoBadge(),
+                ),
+                
+                // Store name and Shop button - Bottom area
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(_StoresTheme.spacingMD),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.1),
+                        ],
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Store name with enhanced styling
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: _StoresTheme.spacingSM,
+                            vertical: _StoresTheme.spacingXS,
+                          ),
+                          child: Text(
+                            storeName,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: getFontSize(16),
+                              letterSpacing: 0.4,
+                              height: 1.2,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.7),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.4),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: _StoresTheme.spacingMD),
+                        
+                        // Shop button badge
+                        _buildShopBadge(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      child: Text(
-        storeName,
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: _StoresTheme.primary,
-          fontWeight: FontWeight.w700,
-          fontSize: getFontSize(15),
-          letterSpacing: 0.3,
-        ),
-      ),
     );
   }
 
-  Widget _buildStoreImage() {
-    final mainImage = store.value.main_image ?? "";
-    
-    return Padding(
-      padding: const EdgeInsets.all(_StoresTheme.spacingMD),
+  /// Frosted-glass style Shop badge
+  Widget _buildShopBadge() {
+    return _AnimatedPressable(
+      onTap: _onShopTap,
       child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _StoresTheme.spacingLG,
+          vertical: _StoresTheme.spacingSM + 4,
+        ),
         decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              _StoresTheme.accent,
+              _StoresTheme.accent.withOpacity(0.9),
+            ],
+          ),
           borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
           border: Border.all(
-            color: _StoresTheme.accent.withOpacity(0.15),
-            width: 2,
+            color: Colors.white.withOpacity(0.25),
+            width: 1.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: _StoresTheme.accent.withOpacity(0.5),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD - 2),
-          child: CustomImageView(
-            image: mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
-            placeHolder: AssetPaths.placeholder,
-            height: getVerticalSize(85),
-            width: getVerticalSize(100),
-            fit: BoxFit.cover,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.storefront_rounded,
+              color: Colors.white,
+              size: getFontSize(18),
+            ),
+            const SizedBox(width: _StoresTheme.spacingSM),
+            Text(
+              "Shop".tr,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: getFontSize(14),
+                letterSpacing: 0.8,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButtons() {
-    return Container(
-      padding: const EdgeInsets.all(_StoresTheme.spacingMD),
-      decoration: BoxDecoration(
-        gradient: _StoresTheme.subtleGoldGradient,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(_StoresTheme.radiusLG),
+  /// Modern solid-style Info badge with high visibility
+  Widget _buildInfoBadge() {
+    return _AnimatedPressable(
+      onTap: _onInfoTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _StoresTheme.spacingMD,
+          vertical: _StoresTheme.spacingSM,
         ),
-      ),
-      child: Column(
-        children: [
-          // Shop Button
-          _AnimatedPressable(
-            onTap: _onShopTap,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: _StoresTheme.spacingMD),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+            BoxShadow(
+              color: _StoresTheme.accent.withOpacity(0.15),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                gradient: _StoresTheme.goldGradient,
-                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
-                boxShadow: _StoresTheme.accentGlow,
+                color: _StoresTheme.accent.withOpacity(0.15),
+                shape: BoxShape.circle,
               ),
-              child: Center(
-                child: Text(
-                  "Shop".tr,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: getFontSize(14),
-                    letterSpacing: 0.5,
-                  ),
-                ),
+              child: Icon(
+                Icons.info_rounded,
+                color: _StoresTheme.accent,
+                size: getFontSize(14),
               ),
             ),
-          ),
-          
-          const SizedBox(height: _StoresTheme.spacingSM),
-          
-          // Info Button
-          _AnimatedPressable(
-            onTap: _onInfoTap,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: _StoresTheme.spacingMD),
-              decoration: BoxDecoration(
-                color: _StoresTheme.primary.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
-              ),
-              child: Center(
-                child: Text(
-                  "Info".tr,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: getFontSize(14),
-                  ),
-                ),
+            const SizedBox(width: _StoresTheme.spacingXS + 2),
+            Text(
+              "Info".tr,
+              style: TextStyle(
+                color: _StoresTheme.textPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: getFontSize(12),
+                letterSpacing: 0.3,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

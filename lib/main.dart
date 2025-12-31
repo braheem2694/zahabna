@@ -38,6 +38,7 @@ import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'services/background_upload_service.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -253,6 +254,9 @@ Future<bool> FetchStores() async {
 
 Future<bool> initializeApp() async {
   try {
+    // Initialize background upload service (lives for app lifetime)
+    await BackgroundUploadService.init();
+    
     // Perform necessary initializations here (e.g., API calls, reading SharedPreferences, etc.)
     await Future.wait([
       CheckAutoLogin(),

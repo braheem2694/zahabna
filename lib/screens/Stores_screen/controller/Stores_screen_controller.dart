@@ -132,22 +132,16 @@ class StoreController extends GetxController {
         }
         payment_methods = response["payment_types"];
         
-        // Cache all stores for local filtering
-        if (!isScroll && !isFilterChange) {
+        // Clear stores and cache on initial load
+        if (!isScroll) {
+          stores.clear();
           allStores.clear();
         }
         
         for (int i = 0; i < storesInfo.length; i++) {
           final store = StoreClass.userFromJson(storesInfo[i]).obs;
           stores.add(store);
-          if (!isScroll && !isFilterChange) {
-            allStores.add(store);
-          }
-        }
-        
-        // Apply local filter if city is selected
-        if (isFilterChange && selectedCityId.value != null) {
-          _applyLocalFilter();
+          allStores.add(store); // Always add to cache
         }
         
         if (isScroll) {
@@ -216,7 +210,7 @@ class StoreController extends GetxController {
     });
   }
 
-  /// Filter stores by city - Fast local filtering with background refresh
+  /// Filter stores by city - Fast local filtering
   void filterByCity(String? cityValue) async {
     // Check if clearing filter
     final isClearingFilter = cityValue == null || cityValue == "Select City";
@@ -239,21 +233,11 @@ class StoreController extends GetxController {
     // Start filtering animation
     isFiltering.value = true;
 
-    // Apply local filter immediately for instant feedback
-    if (allStores.isNotEmpty) {
-      _applyLocalFilter();
-    }
-
     // Small delay for visual feedback
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 200));
 
-    // If clearing filter, refetch all stores fresh from server
-    if (isClearingFilter) {
-      await fetchStores(false, false); // Fetch all stores
-    } else {
-      // Fetch filtered data from server
-      await fetchStores(false, false, isFilterChange: true);
-    }
+    // Apply local filter from cached stores
+    _applyLocalFilter();
     
     // Stop filtering animation
     isFiltering.value = false;
@@ -261,16 +245,22 @@ class StoreController extends GetxController {
 
   /// Apply local filter to cached stores
   void _applyLocalFilter() {
-    if (selectedCityId.value == null || allStores.isEmpty) {
-      // Show all stores from cache, or keep current if cache empty
-      if (allStores.isNotEmpty) {
-        stores.value = List.from(allStores);
-      }
+    if (allStores.isEmpty) {
+      // No cached stores, keep current stores
+      return;
+    }
+    
+    if (selectedCityId.value == null || selectedCityId.value == "0") {
+      // No filter - show all stores from cache
+      stores.value = List.from(allStores);
     } else {
       // Filter by city ID
-      stores.value = allStores
-          .where((store) => store.value.cityId.toString() == selectedCityId.value)
-          .toList();
+      final filtered = allStores.where((store) {
+        final storeCityId = store.value.cityId?.toString() ?? "";
+        return storeCityId == selectedCityId.value;
+      }).toList();
+      
+      stores.value = filtered;
     }
     stores.refresh();
   }

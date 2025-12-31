@@ -121,164 +121,260 @@ class StoreRequestView extends GetView<StoreRequestController> {
     return Obx(() {
       final bool isReadOnly =
           controller.args != null && !controller.editing.value;
-           print("emailcontroller" +controller.emailController.text);
+      final bool isUploading = controller.isUploading.value;
+      print("emailcontroller" + controller.emailController.text);
 
-      return Scaffold(
-        backgroundColor: _Theme.background,
-        appBar: _buildAppBar(),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-          child: Form(
-            key: controller.formKey,
-            child: Column(
-              children: [
-                // ═══════════════════════════════════════════════════════
-                // 👤 PERSONAL INFORMATION CARD
-                // ═══════════════════════════════════════════════════════
-                _buildCard(
-                  icon: Icons.person_outline_rounded,
-                  title: 'Personal Information',
-                  subtitle: 'Your identity details',
-                  color: _Theme.primary,
-                  children: [
-                    _buildField(
-                      label: 'Full Name',
-                      controller: controller.subscriberNameController,
-                      focusNode: subscriberNameFocus,
-                      icon: Icons.badge_outlined,
-                      isReadOnly: isReadOnly,
-                      validator: (v) =>
-                          v?.isEmpty ?? true ? 'Required'.tr : null,
+      return PopScope(
+        canPop: !isUploading,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && isUploading) {
+            Get.snackbar(
+              'Upload in Progress'.tr,
+              'Please wait for images to finish uploading'.tr,
+              backgroundColor: _Theme.gold,
+              colorText: Colors.white,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+            );
+          }
+        },
+        child: Stack(
+          children: [
+            AbsorbPointer(
+              absorbing: isUploading,
+              child: Scaffold(
+                backgroundColor: _Theme.background,
+                appBar: _buildAppBar(),
+                body: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  child: Form(
+                    key: controller.formKey,
+                    child: Column(
+                      children: [
+                        // ═══════════════════════════════════════════════════════
+                        // 👤 PERSONAL INFORMATION CARD
+                        // ═══════════════════════════════════════════════════════
+                        _buildCard(
+                          icon: Icons.person_outline_rounded,
+                          title: 'Personal Information',
+                          subtitle: 'Your identity details',
+                          color: _Theme.primary,
+                          children: [
+                            _buildField(
+                              label: 'Full Name',
+                              controller: controller.subscriberNameController,
+                              focusNode: subscriberNameFocus,
+                              icon: Icons.badge_outlined,
+                              isReadOnly: isReadOnly,
+                              validator: (v) =>
+                                  v?.isEmpty ?? true ? 'Required'.tr : null,
+                            ),
+                            _buildField(
+                              label: 'Mother\'s Name',
+                              controller: controller.motherNameController,
+                              focusNode: motherNameFocus,
+                              icon: Icons.family_restroom_outlined,
+                              isReadOnly: isReadOnly,
+                              validator: (v) =>
+                                  v?.isEmpty ?? true ? 'Required'.tr : null,
+                            ),
+                            _buildDateField(
+                              label: 'Date of Birth',
+                              controller: controller.birthDay,
+                              focusNode: birthDayFocus,
+                              isReadOnly: isReadOnly,
+                              context: context,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ═══════════════════════════════════════════════════════
+                        // 🏪 STORE INFORMATION CARD
+                        // ═══════════════════════════════════════════════════════
+                        _buildCard(
+                          icon: Icons.store_mall_directory_outlined,
+                          title: 'Store Information',
+                          subtitle: 'Your business details',
+                          color: _Theme.gold,
+                          children: [
+                            _buildField(
+                              label: 'Store Name',
+                              controller: controller.storeNameController,
+                              focusNode: storeNameFocus,
+                              icon: Icons.storefront_outlined,
+                              isReadOnly: isReadOnly,
+                              validator: (v) =>
+                                  v?.isEmpty ?? true ? 'Required'.tr : null,
+                            ),
+                            _buildPhoneField(context, isReadOnly),
+                            _buildField(
+                              label: 'Email Address',
+                              controller: controller.emailController,
+                              focusNode: recordFocus,
+                              icon: Icons.email_outlined,
+                              isReadOnly: isReadOnly,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ═══════════════════════════════════════════════════════
+                        // 📍 LOCATION CARD
+                        // ═══════════════════════════════════════════════════════
+                        _buildCard(
+                          icon: Icons.location_on_outlined,
+                          title: 'Location',
+                          subtitle: 'Where is your store?',
+                          color: const Color(0xFF8B5CF6),
+                          children: [
+                            Obx(() => _buildField(
+                                  label: 'Country',
+                                  controller: TextEditingController(
+                                      text: globalController.countryName.value),
+                                  focusNode: countryFocus,
+                                  icon: Icons.public_outlined,
+                                  isReadOnly: isReadOnly,
+                                  validator: (v) =>
+                                      v?.isEmpty ?? true ? 'Required'.tr : null,
+                                )),
+                            _buildField(
+                              label: 'Region / City',
+                              controller: controller.regionController,
+                              focusNode: regionFocus,
+                              icon: Icons.map_outlined,
+                              isReadOnly: isReadOnly,
+                              validator: (v) =>
+                                  v?.isEmpty ?? true ? 'Required'.tr : null,
+                            ),
+                            _buildField(
+                              label: 'Street Address',
+                              controller: controller.addressController,
+                              focusNode: addressFocus,
+                              icon: Icons.home_outlined,
+                              isReadOnly: isReadOnly,
+                              validator: (v) =>
+                                  v?.isEmpty ?? true ? 'Required'.tr : null,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ═══════════════════════════════════════════════════════
+                        // 📄 DOCUMENTS CARD
+                        // ═══════════════════════════════════════════════════════
+                        _buildDocumentsCard(isReadOnly),
+
+                        const SizedBox(height: 16),
+
+                        // ═══════════════════════════════════════════════════════
+                        // 🗺️ MAP CARD
+                        // ═══════════════════════════════════════════════════════
+                        _buildMapCard(isReadOnly),
+
+                        const SizedBox(height: 16),
+
+                        // ═══════════════════════════════════════════════════════
+                        // ✅ TERMS & SUMMARY
+                        // ═══════════════════════════════════════════════════════
+                        _buildTermsCard(isReadOnly),
+
+                        const SizedBox(height: 16),
+
+                        _buildPricingCard(),
+
+                        const SizedBox(height: 24),
+
+                        // Submit Button
+                        if (controller.args == null) _buildSubmitButton(),
+
+                        // Update Button (for editing)
+                        if (controller.editing.value) _buildUpdateButton(),
+                      ],
                     ),
-                    _buildField(
-                      label: 'Mother\'s Name',
-                      controller: controller.motherNameController,
-                      focusNode: motherNameFocus,
-                      icon: Icons.family_restroom_outlined,
-                      isReadOnly: isReadOnly,
-                      validator: (v) =>
-                          v?.isEmpty ?? true ? 'Required'.tr : null,
-                    ),
-                    _buildDateField(
-                      label: 'Date of Birth',
-                      controller: controller.birthDay,
-                      focusNode: birthDayFocus,
-                      isReadOnly: isReadOnly,
-                      context: context,
-                    ),
-                  ],
+                  ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // ═══════════════════════════════════════════════════════
-                // 🏪 STORE INFORMATION CARD
-                // ═══════════════════════════════════════════════════════
-                _buildCard(
-                  icon: Icons.store_mall_directory_outlined,
-                  title: 'Store Information',
-                  subtitle: 'Your business details',
-                  color: _Theme.gold,
-                  children: [
-                    _buildField(
-                      label: 'Store Name',
-                      controller: controller.storeNameController,
-                      focusNode: storeNameFocus,
-                      icon: Icons.storefront_outlined,
-                      isReadOnly: isReadOnly,
-                      validator: (v) =>
-                          v?.isEmpty ?? true ? 'Required'.tr : null,
-                    ),
-                    _buildPhoneField(context, isReadOnly),
-                    _buildField(
-                      label: 'Email Address',
-                      controller: controller.emailController,
-                      focusNode: recordFocus,
-                      icon: Icons.email_outlined,
-                      isReadOnly: isReadOnly,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // ═══════════════════════════════════════════════════════
-                // 📍 LOCATION CARD
-                // ═══════════════════════════════════════════════════════
-                _buildCard(
-                  icon: Icons.location_on_outlined,
-                  title: 'Location',
-                  subtitle: 'Where is your store?',
-                  color: const Color(0xFF8B5CF6),
-                  children: [
-                    Obx(() => _buildField(
-                          label: 'Country',
-                          controller: TextEditingController(
-                              text: globalController.countryName.value),
-                          focusNode: countryFocus,
-                          icon: Icons.public_outlined,
-                          isReadOnly: isReadOnly,
-                          validator: (v) =>
-                              v?.isEmpty ?? true ? 'Required'.tr : null,
-                        )),
-                    _buildField(
-                      label: 'Region / City',
-                      controller: controller.regionController,
-                      focusNode: regionFocus,
-                      icon: Icons.map_outlined,
-                      isReadOnly: isReadOnly,
-                      validator: (v) =>
-                          v?.isEmpty ?? true ? 'Required'.tr : null,
-                    ),
-                    _buildField(
-                      label: 'Street Address',
-                      controller: controller.addressController,
-                      focusNode: addressFocus,
-                      icon: Icons.home_outlined,
-                      isReadOnly: isReadOnly,
-                      validator: (v) =>
-                          v?.isEmpty ?? true ? 'Required'.tr : null,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // ═══════════════════════════════════════════════════════
-                // 📄 DOCUMENTS CARD
-                // ═══════════════════════════════════════════════════════
-                _buildDocumentsCard(isReadOnly),
-
-                const SizedBox(height: 16),
-
-                // ═══════════════════════════════════════════════════════
-                // 🗺️ MAP CARD
-                // ═══════════════════════════════════════════════════════
-                _buildMapCard(isReadOnly),
-
-                const SizedBox(height: 16),
-
-                // ═══════════════════════════════════════════════════════
-                // ✅ TERMS & SUMMARY
-                // ═══════════════════════════════════════════════════════
-                _buildTermsCard(isReadOnly),
-
-                const SizedBox(height: 16),
-
-                _buildPricingCard(),
-
-                const SizedBox(height: 24),
-
-                // Submit Button
-                if (controller.args == null) _buildSubmitButton(),
-
-                // Update Button (for editing)
-                if (controller.editing.value) _buildUpdateButton(),
-              ],
+              ),
             ),
-          ),
+            // Upload Loading Overlay
+            if (isUploading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _Theme.gold.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: _Theme.gold.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation(_Theme.gold),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Uploading Images...'.tr,
+                            style: TextStyle(
+                              color: _Theme.text,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Please wait, do not close this screen'.tr,
+                            style: TextStyle(
+                              color: _Theme.textLight,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          Obx(() => Text(
+                                '${controller.uploadProgress.value}%',
+                                style: TextStyle(
+                                  color: _Theme.gold,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     });
@@ -290,17 +386,30 @@ class StoreRequestView extends GetView<StoreRequestController> {
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       leading: _Pressable(
-        onTap: () => Get.back(),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: _Theme.gold.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              if (controller.isUploading.value) {
+                Get.snackbar(
+                  'Upload in Progress'.tr,
+                  'Please wait for images to finish uploading'.tr,
+                  backgroundColor: _Theme.gold,
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.all(16),
+                );
+                return;
+              }
+              Get.back();
+            },
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _Theme.gold.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: _Theme.primary, size: 18),
+            ),
           ),
-          child: Icon(Icons.arrow_back_ios_new_rounded,
-              color: _Theme.primary, size: 18),
-        ),
-      ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -324,7 +433,6 @@ class StoreRequestView extends GetView<StoreRequestController> {
     );
   }
 
- 
   Widget _buildCard({
     required IconData icon,
     required String title,
@@ -632,16 +740,18 @@ class StoreRequestView extends GetView<StoreRequestController> {
         final bool readOnly =
             controller.args != null && !controller.editing.value;
 
+        // Check if this is an ID card with 2 images (National ID)
+        final bool isNationalIdWithTwoImages = index == 0 &&
+            (controller.idImage.value?.isNotEmpty ?? false) &&
+            (controller.id2Image.value?.isNotEmpty ?? false);
+
         return _Pressable(
           onTap: () {
             unfocusAll();
             if (readOnly) {
-              if (index == 0 &&
-                  controller.idImage.value != null &&
-                  controller.id2Image.value != null) {
-                openIDImagePickerScreen(
-                    idImage: controller.idImage.value,
-                    id2Image: controller.id2Image.value);
+              if (isNationalIdWithTwoImages) {
+                // Open gallery viewer for both images
+                _openNationalIdGallery();
                 return;
               }
               if (hasImage) {
@@ -692,6 +802,67 @@ class StoreRequestView extends GetView<StoreRequestController> {
                               CustomImageView(
                                   image: imageController.value,
                                   fit: BoxFit.cover),
+                              // Badge for 2 images (National ID)
+                              if (isNationalIdWithTwoImages)
+                                Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          _Theme.primary,
+                                          _Theme.primary.withOpacity(0.85),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              _Theme.primary.withOpacity(0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.25),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.photo_library_rounded,
+                                            color: Colors.white,
+                                            size: 10,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          '2',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               Positioned(
                                 bottom: 4,
                                 right: 4,
@@ -747,6 +918,19 @@ class StoreRequestView extends GetView<StoreRequestController> {
         );
       }),
     );
+  }
+
+  /// Opens a gallery view for National ID with front and back images
+  void _openNationalIdGallery() {
+    final images = <String>[];
+    if (controller.idImage.value != null) images.add(controller.idImage.value!);
+    if (controller.id2Image.value != null)
+      images.add(controller.id2Image.value!);
+
+    Get.to(() => _NationalIdGalleryViewer(
+          images: images,
+          titles: ['ID Front'.tr, 'ID Back'.tr],
+        ));
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2027,6 +2211,184 @@ class _EnableDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🖼️ NATIONAL ID GALLERY VIEWER
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _NationalIdGalleryViewer extends StatefulWidget {
+  final List<String> images;
+  final List<String> titles;
+
+  const _NationalIdGalleryViewer({
+    required this.images,
+    required this.titles,
+  });
+
+  @override
+  State<_NationalIdGalleryViewer> createState() =>
+      _NationalIdGalleryViewerState();
+}
+
+class _NationalIdGalleryViewerState extends State<_NationalIdGalleryViewer> {
+  late PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: _Pressable(
+          onTap: () => Get.back(),
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.close, color: Colors.white, size: 20),
+          ),
+        ),
+        title: Text(
+          widget.titles[_currentIndex],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _Theme.gold.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${_currentIndex + 1} / ${widget.images.length}',
+              style: TextStyle(
+                color: _Theme.gold,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (index) {
+                setState(() => _currentIndex = index);
+              },
+              itemBuilder: (context, index) {
+                return InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Center(
+                    child: CustomImageView(
+                      image: widget.images[index],
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Thumbnail indicators
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.images.length, (index) {
+                final isSelected = index == _currentIndex;
+                return GestureDetector(
+                  onTap: () {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected ? _Theme.gold : Colors.white24,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CustomImageView(
+                            image: widget.images[index],
+                            fit: BoxFit.cover,
+                          ),
+                          if (!isSelected)
+                            Container(color: Colors.black.withOpacity(0.4)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          // Labels
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.images.length, (index) {
+                final isSelected = index == _currentIndex;
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  width: 60,
+                  child: Text(
+                    widget.titles[index],
+                    style: TextStyle(
+                      color: isSelected ? _Theme.gold : Colors.white54,
+                      fontSize: 10,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }
