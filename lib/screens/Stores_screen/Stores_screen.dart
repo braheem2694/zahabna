@@ -13,49 +13,45 @@ import '../../utils/ShImages.dart';
 import 'controller/Stores_screen_controller.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🎨 STORES THEME - Premium Gold Design
+// 🎨 STORES THEME - Premium Gold Design (Cached for Performance)
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _StoresTheme {
-  // Brand Colors
-  static Color get primary => ColorConstant.logoFirstColor;
-  static Color get accent => ColorConstant.logoSecondColor;
-  static Color get background => const Color(0xFFF8F6F3);
-  static Color get cardBg => Colors.white;
-  static Color get textPrimary => const Color(0xFF1A1A2E);
-  static Color get textSecondary => const Color(0xFF6B7280);
-  
+  // Cached colors - avoid repeated getter calls
+  static final Color primary = ColorConstant.logoFirstColor;
+  static final Color accent = ColorConstant.logoSecondColor;
+  static const Color background = Color(0xFFF8F6F3);
+  static const Color cardBg = Colors.white;
+  static const Color textPrimary = Color(0xFF1A1A2E);
+  static const Color textSecondary = Color(0xFF6B7280);
+
   // Spacing
   static const double spacingXS = 4.0;
   static const double spacingSM = 8.0;
   static const double spacingMD = 12.0;
   static const double spacingLG = 16.0;
   static const double spacingXL = 24.0;
-  
+
   // Radius
   static const double radiusSM = 8.0;
   static const double radiusMD = 12.0;
   static const double radiusLG = 16.0;
-  
-  // Shadows
-  static List<BoxShadow> get cardShadow => [
+
+  // Cached decorations - avoid recreating on each build
+  static final List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.06),
-      blurRadius: 12,
-      offset: const Offset(0, 4),
+      color: Colors.black.withOpacity(0.12),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
     ),
   ];
-  
-  static List<BoxShadow> get accentGlow => [
-    BoxShadow(
-      color: accent.withOpacity(0.25),
-      blurRadius: 8,
-      offset: const Offset(0, 2),
-    ),
-  ];
-  
-  // Gradients
-  static LinearGradient get goldGradient => LinearGradient(
+
+  static final BoxDecoration cardDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(radiusLG),
+    boxShadow: cardShadow,
+  );
+
+  static final LinearGradient goldGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
@@ -63,13 +59,37 @@ class _StoresTheme {
       accent,
     ],
   );
-  
-  static LinearGradient get subtleGoldGradient => LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+
+  static final LinearGradient cardOverlayGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
     colors: [
-      accent.withOpacity(0.05),
-      accent.withOpacity(0.1),
+      Colors.black.withOpacity(0.15),
+      Colors.black.withOpacity(0.05),
+      Colors.black.withOpacity(0.35),
+      Colors.black.withOpacity(0.85),
+    ],
+    stops: const [0.0, 0.25, 0.6, 1.0],
+  );
+
+  // Cached text styles
+  static final TextStyle storeNameStyle = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w800,
+    fontSize: getFontSize(16),
+    letterSpacing: 0.4,
+    height: 1.2,
+    shadows: [
+      Shadow(
+        color: Colors.black.withOpacity(0.7),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+      Shadow(
+        color: Colors.black.withOpacity(0.4),
+        blurRadius: 16,
+        offset: const Offset(0, 4),
+      ),
     ],
   );
 }
@@ -91,7 +111,7 @@ class Storesscreen extends StatelessWidget {
       if (controller.loading.isTrue) {
         return Scaffold(
           backgroundColor: _StoresTheme.background,
-          body: _buildShimmerLoading(),
+          body: _ShimmerLoading(),
         );
       }
 
@@ -103,14 +123,14 @@ class Storesscreen extends StatelessWidget {
         body: Column(
           children: [
             // Header Section
-            _buildHeader(controller),
-            
+            _HeaderWidget(controller: controller),
+
             // City Filter Dropdown
-            _buildCityFilter(context, controller),
-            
+            _CityFilterWidget(controller: controller),
+
             // Stores Grid
             Expanded(
-              child: _buildStoresGrid(controller, tag),
+              child: _StoresGridWidget(controller: controller, tag: tag),
             ),
           ],
         ),
@@ -131,8 +151,9 @@ class Storesscreen extends StatelessWidget {
           fontSize: getFontSize(18),
         ),
       ),
-      leading: _AnimatedPressable(
+      leading: GestureDetector(
         onTap: () => Get.back(),
+        behavior: HitTestBehavior.opaque,
         child: Icon(
           Icons.arrow_back_ios_rounded,
           color: _StoresTheme.primary,
@@ -148,21 +169,31 @@ class Storesscreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildHeader(StoreController controller) {
+// ═══════════════════════════════════════════════════════════════════════════
+// 📍 HEADER WIDGET - Separated for targeted rebuilds
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _HeaderWidget extends StatelessWidget {
+  final StoreController controller;
+
+  const _HeaderWidget({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       if (globalController.storeRoute.value != AppRoutes.tabsRoute) {
         return const SizedBox.shrink();
       }
-      
+
       return Container(
         padding: EdgeInsets.only(
-          top: getTopPadding() + _StoresTheme.spacingLG+ getSize(45),
+          top: getTopPadding() + _StoresTheme.spacingLG + getSize(45),
           bottom: _StoresTheme.spacingSM,
         ),
         child: Column(
           children: [
-            // Decorative accent line
             Container(
               width: 40,
               height: 3,
@@ -186,8 +217,19 @@ class Storesscreen extends StatelessWidget {
       );
     });
   }
+}
 
-  Widget _buildCityFilter(BuildContext context, StoreController controller) {
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔍 CITY FILTER WIDGET - Isolated rebuilds
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _CityFilterWidget extends StatelessWidget {
+  final StoreController controller;
+
+  const _CityFilterWidget({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: _StoresTheme.spacingLG,
@@ -195,68 +237,43 @@ class Storesscreen extends StatelessWidget {
       ),
       child: Obx(() {
         final isFiltering = controller.isFiltering.value;
-        
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        final selectedCity = controller.selectedCity.value;
+
+        return Container(
           height: getSize(52),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
             border: Border.all(
-              color: isFiltering 
-                  ? _StoresTheme.accent 
+              color: isFiltering
+                  ? _StoresTheme.accent
                   : _StoresTheme.accent.withOpacity(0.2),
               width: isFiltering ? 2 : 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: isFiltering 
-                    ? _StoresTheme.accent.withOpacity(0.15) 
+                color: isFiltering
+                    ? _StoresTheme.accent.withOpacity(0.15)
                     : Colors.black.withOpacity(0.04),
                 blurRadius: isFiltering ? 12 : 8,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: _StoresTheme.spacingMD),
+          padding:
+              const EdgeInsets.symmetric(horizontal: _StoresTheme.spacingMD),
           child: Row(
             children: [
-              // Dropdown
               Expanded(
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
-                    value: controller.selectedCity.value,
-                    items: List.generate(
-                      controller.cities.length,
-                      (index) => DropdownMenuItem(
-                        value: controller.cities[index].values.last,
-                        child: Row(
-                          children: [
-                            if (controller.cities[index].values.last != "Select City")
-                              Container(
-                                width: 8,
-                                height: 8,
-                                margin: const EdgeInsets.only(right: _StoresTheme.spacingSM),
-                                decoration: BoxDecoration(
-                                  color: _StoresTheme.accent,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            Text(
-                              controller.cities[index].values.last.tr,
-                              style: TextStyle(
-                                color: _StoresTheme.textPrimary,
-                                fontSize: getFontSize(14),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    onChanged: isFiltering ? null : (value) {
-                      controller.filterByCity(value);
-                    },
+                    value: selectedCity,
+                    items: _buildDropdownItems(),
+                    onChanged: isFiltering
+                        ? null
+                        : (value) {
+                            controller.filterByCity(value);
+                          },
                     hint: Text(
                       'Select City'.tr,
                       style: TextStyle(
@@ -264,30 +281,30 @@ class Storesscreen extends StatelessWidget {
                         fontSize: getFontSize(14),
                       ),
                     ),
-                    icon: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: isFiltering
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(_StoresTheme.accent),
-                              ),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(_StoresTheme.spacingXS),
-                              decoration: BoxDecoration(
-                                color: _StoresTheme.accent.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
-                              ),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: _StoresTheme.accent,
-                                size: 20,
-                              ),
+                    icon: isFiltering
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation(_StoresTheme.accent),
                             ),
-                    ),
+                          )
+                        : Container(
+                            padding:
+                                const EdgeInsets.all(_StoresTheme.spacingXS),
+                            decoration: BoxDecoration(
+                              color: _StoresTheme.accent.withOpacity(0.1),
+                              borderRadius:
+                                  BorderRadius.circular(_StoresTheme.radiusSM),
+                            ),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: _StoresTheme.accent,
+                              size: 20,
+                            ),
+                          ),
                     isExpanded: true,
                     dropdownColor: Colors.white,
                     elevation: 8,
@@ -295,20 +312,20 @@ class Storesscreen extends StatelessWidget {
                   ),
                 ),
               ),
-              
-              // Clear filter button
-              if (controller.selectedCity.value != null && !isFiltering)
+              if (selectedCity != null && !isFiltering)
                 Padding(
                   padding: const EdgeInsets.only(left: _StoresTheme.spacingSM),
-                  child: _AnimatedPressable(
+                  child: GestureDetector(
                     onTap: () => controller.filterByCity("Select City"),
+                    behavior: HitTestBehavior.opaque,
                     child: Container(
                       padding: const EdgeInsets.all(_StoresTheme.spacingXS),
                       decoration: BoxDecoration(
                         color: _StoresTheme.textSecondary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
+                        borderRadius:
+                            BorderRadius.circular(_StoresTheme.radiusSM),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.close_rounded,
                         color: _StoresTheme.textSecondary,
                         size: 18,
@@ -323,22 +340,68 @@ class Storesscreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoresGrid(StoreController controller, String tag) {
+  List<DropdownMenuItem<String>> _buildDropdownItems() {
+    return List.generate(
+      controller.cities.length,
+      (index) => DropdownMenuItem(
+        value: controller.cities[index].values.last,
+        child: Row(
+          children: [
+            if (controller.cities[index].values.last != "Select City")
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(right: _StoresTheme.spacingSM),
+                decoration: BoxDecoration(
+                  color: _StoresTheme.accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            Text(
+              controller.cities[index].values.last.tr,
+              style: TextStyle(
+                color: _StoresTheme.textPrimary,
+                fontSize: getFontSize(14),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📦 STORES GRID WIDGET - Optimized with RepaintBoundary
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _StoresGridWidget extends StatelessWidget {
+  final StoreController controller;
+  final String tag;
+
+  const _StoresGridWidget({required this.controller, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       final isFiltering = controller.isFiltering.value;
-      
-      if (controller.stores.isEmpty && !isFiltering) {
-        return _buildEmptyState();
+      final storesList = controller.stores;
+
+      if (storesList.isEmpty && !isFiltering) {
+        return const _EmptyState();
       }
 
-      final RxList<Rx<StoreClass>> stores = (Get.arguments == null || Get.arguments["tag"] != "side_menu"
-          ? controller.stores
-          : controller.stores
-              .where((element) => element.value.ownerId.toString() == prefs?.getString("user_id"))
-              .map((store) => store)
-              .toList())
-          .cast<Rx<StoreClass>>()
-          .obs;
+      // Compute filtered stores list once
+      final List<Rx<StoreClass>> stores;
+      if (Get.arguments == null || Get.arguments["tag"] != "side_menu") {
+        stores = storesList;
+      } else {
+        final userId = prefs?.getString("user_id");
+        stores = storesList
+            .where((element) => element.value.ownerId.toString() == userId)
+            .toList();
+      }
 
       return Stack(
         children: [
@@ -348,12 +411,13 @@ class Storesscreen extends StatelessWidget {
             onRefresh: () => controller.fetchStores(false, true),
             child: GridView.builder(
               padding: EdgeInsets.only(
-                bottom: getBottomPadding()+ getSize(55),
+                bottom: getBottomPadding() + getSize(55),
                 right: _StoresTheme.spacingMD,
                 left: _StoresTheme.spacingMD,
                 top: _StoresTheme.spacingSM,
               ),
-              physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics()),
               controller: controller.scrollController,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 mainAxisExtent: getVerticalSize(260),
@@ -361,11 +425,14 @@ class Storesscreen extends StatelessWidget {
                 mainAxisSpacing: _StoresTheme.spacingMD,
                 crossAxisSpacing: _StoresTheme.spacingMD,
               ),
-              itemCount: stores.isEmpty ? 0 : stores.length,
+              // Add cacheExtent for smoother scrolling
+              cacheExtent: 500,
+              // Use addAutomaticKeepAlives for better scroll performance
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: true,
+              itemCount: stores.length,
               itemBuilder: (context, index) {
-                return AnimatedOpacity(
-                  opacity: isFiltering ? 0.5 : 1.0,
-                  duration: const Duration(milliseconds: 200),
+                return RepaintBoundary(
                   child: _StoreCard(
                     store: stores[index],
                     index: index,
@@ -376,101 +443,99 @@ class Storesscreen extends StatelessWidget {
               },
             ),
           ),
-          
-          // Filtering overlay with shimmer effect
+
+          // Filtering overlay
           if (isFiltering)
-            Positioned.fill(
+            const Positioned.fill(
               child: IgnorePointer(
-                child: AnimatedOpacity(
-                  opacity: isFiltering ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    color: _StoresTheme.background.withOpacity(0.3),
-                    child: Center(
-                      child: _buildFilteringIndicator(),
-                    ),
-                  ),
-                ),
+                child: _FilteringOverlay(),
               ),
             ),
         ],
       );
     });
   }
+}
 
-  Widget _buildFilteringIndicator() {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.8, end: 1.0),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Transform.scale(scale: value, child: child);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _StoresTheme.spacingXL,
-          vertical: _StoresTheme.spacingLG,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
-          boxShadow: [
-            BoxShadow(
-              color: _StoresTheme.accent.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation(_StoresTheme.accent),
+// ═══════════════════════════════════════════════════════════════════════════
+// ⏳ FILTERING OVERLAY - Lightweight indicator
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _FilteringOverlay extends StatelessWidget {
+  const _FilteringOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: _StoresTheme.background.withOpacity(0.3),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _StoresTheme.spacingXL,
+            vertical: _StoresTheme.spacingLG,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+            boxShadow: [
+              BoxShadow(
+                color: _StoresTheme.accent.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
               ),
-            ),
-            const SizedBox(height: _StoresTheme.spacingMD),
-            Text(
-              'Filtering stores...'.tr,
-              style: TextStyle(
-                color: _StoresTheme.textPrimary,
-                fontSize: getFontSize(14),
-                fontWeight: FontWeight.w600,
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation(_StoresTheme.accent),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: _StoresTheme.spacingMD),
+              Text(
+                'Filtering stores...'.tr,
+                style: TextStyle(
+                  color: _StoresTheme.textPrimary,
+                  fontSize: getFontSize(14),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚫 EMPTY STATE
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.8, end: 1.0),
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.elasticOut,
-            builder: (context, value, child) {
-              return Transform.scale(scale: value, child: child);
-            },
-            child: Container(
-              padding: const EdgeInsets.all(_StoresTheme.spacingXL),
-              decoration: BoxDecoration(
-                color: _StoresTheme.accent.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.store_mall_directory_outlined,
-                size: 60,
-                color: _StoresTheme.accent,
-              ),
+          Container(
+            padding: const EdgeInsets.all(_StoresTheme.spacingXL),
+            decoration: BoxDecoration(
+              color: _StoresTheme.accent.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.store_mall_directory_outlined,
+              size: 60,
+              color: _StoresTheme.accent,
             ),
           ),
           const SizedBox(height: _StoresTheme.spacingLG),
@@ -494,77 +559,49 @@ class Storesscreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildShimmerLoading() {
+// ═══════════════════════════════════════════════════════════════════════════
+// ✨ SHIMMER LOADING - Lightweight version
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _ShimmerLoading extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
         top: getTopPadding() + _StoresTheme.spacingXL * 3,
         left: _StoresTheme.spacingMD,
         right: _StoresTheme.spacingMD,
       ),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          mainAxisExtent: getVerticalSize(260),
-          crossAxisCount: 2,
-          mainAxisSpacing: _StoresTheme.spacingMD,
-          crossAxisSpacing: _StoresTheme.spacingMD,
-        ),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            mainAxisExtent: getVerticalSize(260),
+            crossAxisCount: 2,
+            mainAxisSpacing: _StoresTheme.spacingMD,
+            crossAxisSpacing: _StoresTheme.spacingMD,
+          ),
+          itemCount: 6,
+          itemBuilder: (context, index) {
+            return Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
               ),
-              child: Column(
-                children: [
-                  // Header shimmer
-                  Container(
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(_StoresTheme.radiusLG),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  // Image shimmer
-                  Container(
-                    height: getVerticalSize(80),
-                    width: getVerticalSize(100),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(_StoresTheme.radiusSM),
-                    ),
-                  ),
-                  const Spacer(),
-                  // Buttons shimmer
-                  Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(_StoresTheme.radiusLG),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🏪 STORE CARD - Premium Design
+// 🏪 STORE CARD - Optimized with cached decorations
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _StoreCard extends StatelessWidget {
@@ -572,6 +609,66 @@ class _StoreCard extends StatelessWidget {
   final int index;
   final StoreController controller;
   final String tag;
+
+  // Static cached decorations to avoid recreation
+  static final _topAccentDecoration = BoxDecoration(
+    gradient: _StoresTheme.goldGradient,
+    borderRadius: const BorderRadius.vertical(
+      top: Radius.circular(_StoresTheme.radiusLG),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: _StoresTheme.accent.withOpacity(0.5),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
+  static final _shopBadgeDecoration = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        _StoresTheme.accent,
+        _StoresTheme.accent.withOpacity(0.9),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+    border: Border.all(
+      color: Colors.white.withOpacity(0.25),
+      width: 1.5,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: _StoresTheme.accent.withOpacity(0.5),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+      BoxShadow(
+        color: Colors.black.withOpacity(0.2),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
+  static final _infoBadgeDecoration = BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.25),
+        blurRadius: 10,
+        offset: const Offset(0, 3),
+      ),
+      BoxShadow(
+        color: _StoresTheme.accent.withOpacity(0.15),
+        blurRadius: 4,
+        offset: const Offset(0, 1),
+      ),
+    ],
+  );
 
   const _StoreCard({
     required this.store,
@@ -586,274 +683,86 @@ class _StoreCard extends StatelessWidget {
     final storeName = unescape.convert(store.value.store_name ?? 'No Name');
     final mainImage = store.value.main_image ?? "";
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 400 + (index * 50).clamp(0, 200)),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
-      child: _AnimatedPressable(
-        onTap: _onShopTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Full-size background image
-                CustomImageView(
-                  image: mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
-                  placeHolder: AssetPaths.placeholder,
-                  fit: BoxFit.cover,
-                ),
-                
-                // Gradient overlay for text readability
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.15),
-                          Colors.black.withOpacity(0.05),
-                          Colors.black.withOpacity(0.35),
-                          Colors.black.withOpacity(0.85),
-                        ],
-                        stops: const [0.0, 0.25, 0.6, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Top accent border with glow
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      gradient: _StoresTheme.goldGradient,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(_StoresTheme.radiusLG),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _StoresTheme.accent.withOpacity(0.5),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                // Info badge - Top right corner
-                Positioned(
-                  top: _StoresTheme.spacingMD,
-                  right: _StoresTheme.spacingSM,
-                  child: _buildInfoBadge(),
-                ),
-                
-                // Store name and Shop button - Bottom area
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(_StoresTheme.spacingMD),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.1),
-                        ],
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Store name with enhanced styling
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: _StoresTheme.spacingSM,
-                            vertical: _StoresTheme.spacingXS,
-                          ),
-                          child: Text(
-                            storeName,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: getFontSize(16),
-                              letterSpacing: 0.4,
-                              height: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.7),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.4),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: _StoresTheme.spacingMD),
-                        
-                        // Shop button badge
-                        _buildShopBadge(),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Frosted-glass style Shop badge
-  Widget _buildShopBadge() {
-    return _AnimatedPressable(
+    return GestureDetector(
       onTap: _onShopTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _StoresTheme.spacingLG,
-          vertical: _StoresTheme.spacingSM + 4,
-        ),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              _StoresTheme.accent,
-              _StoresTheme.accent.withOpacity(0.9),
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: _StoresTheme.cardDecoration,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Full-size background image with caching
+              CustomImageView(
+                image:
+                    mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
+                placeHolder: AssetPaths.placeholder,
+                fit: BoxFit.cover,
+              ),
+
+              // Gradient overlay - using cached gradient
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: _StoresTheme.cardOverlayGradient,
+                ),
+                child: const SizedBox.expand(),
+              ),
+
+              // Top accent border
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: DecoratedBox(
+                  decoration: _topAccentDecoration,
+                  child: const SizedBox(height: 4),
+                ),
+              ),
+
+              // Info badge - Top right corner
+              Positioned(
+                top: _StoresTheme.spacingMD,
+                right: _StoresTheme.spacingSM,
+                child: _InfoBadge(onTap: _onInfoTap),
+              ),
+
+              // Store name and Shop button - Bottom area
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(_StoresTheme.spacingMD),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Store name
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: _StoresTheme.spacingSM,
+                          vertical: _StoresTheme.spacingXS,
+                        ),
+                        child: Text(
+                          storeName,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _StoresTheme.storeNameStyle,
+                        ),
+                      ),
+
+                      const SizedBox(height: _StoresTheme.spacingMD),
+
+                      // Shop button badge
+                      _ShopBadge(onTap: _onShopTap),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.25),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _StoresTheme.accent.withOpacity(0.5),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.storefront_rounded,
-              color: Colors.white,
-              size: getFontSize(18),
-            ),
-            const SizedBox(width: _StoresTheme.spacingSM),
-            Text(
-              "Shop".tr,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: getFontSize(14),
-                letterSpacing: 0.8,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Modern solid-style Info badge with high visibility
-  Widget _buildInfoBadge() {
-    return _AnimatedPressable(
-      onTap: _onInfoTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _StoresTheme.spacingMD,
-          vertical: _StoresTheme.spacingSM,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-            BoxShadow(
-              color: _StoresTheme.accent.withOpacity(0.15),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: _StoresTheme.accent.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.info_rounded,
-                color: _StoresTheme.accent,
-                size: getFontSize(14),
-              ),
-            ),
-            const SizedBox(width: _StoresTheme.spacingXS + 2),
-            Text(
-              "Info".tr,
-              style: TextStyle(
-                color: _StoresTheme.textPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: getFontSize(12),
-                letterSpacing: 0.3,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -874,7 +783,8 @@ class _StoreCard extends StatelessWidget {
       controller.refreshStores.value = true;
       store.value.main_image = globalController.storeImage.value;
       store.refresh();
-      controller.stores[index].value.main_image = globalController.storeImage.value;
+      controller.stores[index].value.main_image =
+          globalController.storeImage.value;
       controller.stores[index].refresh();
       Future.delayed(const Duration(milliseconds: 500)).then((value) {
         controller.refreshStores.value = false;
@@ -885,38 +795,100 @@ class _StoreCard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🎯 ANIMATED PRESSABLE - Tap Feedback Widget
+// 🛒 SHOP BADGE - Lightweight stateless widget
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _AnimatedPressable extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
+class _ShopBadge extends StatelessWidget {
+  final VoidCallback onTap;
 
-  const _AnimatedPressable({required this.child, this.onTap});
-
-  @override
-  State<_AnimatedPressable> createState() => _AnimatedPressableState();
-}
-
-class _AnimatedPressableState extends State<_AnimatedPressable> {
-  bool _isPressed = false;
+  const _ShopBadge({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onTap,
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        scale: _isPressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: _isPressed ? 0.85 : 1.0,
-          duration: const Duration(milliseconds: 100),
-          child: widget.child,
+      child: DecoratedBox(
+        decoration: _StoreCard._shopBadgeDecoration,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _StoresTheme.spacingLG,
+            vertical: _StoresTheme.spacingSM + 4,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.storefront_rounded,
+                color: Colors.white,
+                size: getFontSize(18),
+              ),
+              const SizedBox(width: _StoresTheme.spacingSM),
+              Text(
+                "Shop".tr,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: getFontSize(14),
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ℹ️ INFO BADGE - Lightweight stateless widget
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _InfoBadge extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _InfoBadge({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: _StoreCard._infoBadgeDecoration,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _StoresTheme.spacingMD,
+            vertical: _StoresTheme.spacingSM,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: _StoresTheme.accent.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.info_rounded,
+                  color: _StoresTheme.accent,
+                  size: getFontSize(14),
+                ),
+              ),
+              const SizedBox(width: _StoresTheme.spacingXS + 2),
+              Text(
+                "Info".tr,
+                style: TextStyle(
+                  color: _StoresTheme.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: getFontSize(12),
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
