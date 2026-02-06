@@ -12,8 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../utils/ShColors.dart';
- ExitAlert(context) {
-  var alert = AwesomeDialog(width: MediaQuery.of(context).size.width<1000?350:600,
+
+ExitAlert(context) {
+  var alert = AwesomeDialog(
+      width: MediaQuery.of(context).size.width < 1000 ? 350 : 600,
       context: context,
       dialogType: DialogType.info,
       body: Stack(
@@ -27,13 +29,14 @@ import '../utils/ShColors.dart';
                 children: [
                   Text(
                     'Warning'.tr,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   const SizedBox(
                     height: 5,
                   ),
                   Text(
-                    "${'Are you sure you want to exit '.tr}IQ Mall?",
+                    "${'Are you sure you want to exit '.tr}Zahabna?",
                     style: const TextStyle(fontSize: 15),
                   ),
                   Expanded(
@@ -51,7 +54,7 @@ import '../utils/ShColors.dart';
                             SystemNavigator.pop();
                           },
                           child: Text('Yes'.tr,
-                              style: const TextStyle( color: Colors.white)),
+                              style: const TextStyle(color: Colors.white)),
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
@@ -66,7 +69,6 @@ import '../utils/ShColors.dart';
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
-                    
                         Text(''),
                       ],
                     ),

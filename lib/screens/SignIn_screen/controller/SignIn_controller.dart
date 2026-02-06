@@ -21,7 +21,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:iq_mall/screens/HomeScreenPage/ShHomeScreen.dart';
 import 'package:country_picker/country_picker.dart';
 
@@ -76,7 +75,7 @@ class SignInController extends GetxController {
     });
 
     prefs?.setString('seen', "true");
-    Firebase.initializeApp();
+    // Firebase is already initialized in main.dart, no need to initialize again
     _googleSignIn.disconnect();
     FirebaseAuth.instance;
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
@@ -208,11 +207,20 @@ class SignInController extends GetxController {
   Future<bool?> socialmedialogin(type, resp, Facebooktoken) async {
     bool success = false;
     loggin_in.value = true;
-    await firebaseMessaging.getToken().then((String? token1) async {
-      client_token = token1;
-      prefs?.setString("token", client_token!);
-      prefs?.setString("login_type", type.toString());
-    });
+    try {
+      await firebaseMessaging.getToken().then((String? token1) async {
+        client_token = token1;
+        prefs?.setString("token", client_token!);
+        prefs?.setString("login_type", type.toString());
+      }).catchError((e) {
+        debugPrint("Error getting token: $e");
+        prefs?.setString("token", "");
+        prefs?.setString("login_type", type.toString());
+      });
+    } catch (e) {
+      debugPrint("Error getting token: $e");
+      prefs?.setString("token", "");
+    }
 
     var data = json.encode(await getDeviceInfo());
 
@@ -240,7 +248,9 @@ class SignInController extends GetxController {
       'token': prefs!.getString("token") ?? "",
     };
     var response = await api.getData(pram, "users/login-third-party");
-    print(pram);
+    if (response != null && response['token'] != null) {
+      prefs?.setString("token", response['token'].toString());
+    }
 
     if (response.isNotEmpty) {
       success = response["succeeded"];
@@ -304,10 +314,18 @@ class SignInController extends GetxController {
   Future<bool?> Login() async {
     bool success = false;
     loggin_in.value = true;
-    await firebaseMessaging.getToken().then((String? token1) async {
-      client_token = token1;
-      prefs?.setString("token", client_token!);
-    });
+    try {
+      await firebaseMessaging.getToken().then((String? token1) async {
+        client_token = token1;
+        prefs?.setString("token", client_token!);
+      }).catchError((e) {
+        debugPrint("Error getting token: $e");
+        prefs?.setString("token", "");
+      });
+    } catch (e) {
+      debugPrint("Error getting token: $e");
+      prefs?.setString("token", "");
+    }
     prefs?.setString("login_type", 'normal'.toString());
 
     var data = json.encode(await getDeviceInfo());
@@ -320,6 +338,9 @@ class SignInController extends GetxController {
       'token': prefs!.getString("token") ?? "",
     };
     Map<String, dynamic> response = await api.getData(param, "users/sign-in");
+    if (response != null && response['token'] != null) {
+      prefs?.setString("token", response['token'].toString());
+    }
 
     try {
       if (response.isNotEmpty) {
@@ -406,10 +427,18 @@ class SignInController extends GetxController {
       client_token = generateToken();
       prefs?.setString("token", client_token!);
     } else {
-      await firebaseMessaging.getToken().then((String? token1) async {
-        client_token = token1;
-        prefs?.setString("token", client_token!);
-      });
+      try {
+        await firebaseMessaging.getToken().then((String? token1) async {
+          client_token = token1;
+          prefs?.setString("token", client_token!);
+        }).catchError((e) {
+          debugPrint("Error getting token: $e");
+          prefs?.setString("token", "");
+        });
+      } catch (e) {
+        debugPrint("Error getting token: $e");
+        prefs?.setString("token", "");
+      }
     }
     signing.value = true;
     var url = "${con!}users/apple-login";
@@ -541,12 +570,11 @@ Future<void> switchtoaccount() async {
   );
 }
 
-generateToken() {
-  const _chars =
+String generateToken() {
+  const chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-  Random _rnd = Random();
+  Random rnd = Random();
 
-  String? getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
-  return getRandomString.toString();
+  return String.fromCharCodes(Iterable.generate(
+      32, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
 }

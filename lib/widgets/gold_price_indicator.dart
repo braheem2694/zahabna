@@ -190,15 +190,13 @@ class _MiniGoldPriceCardState extends State<MiniGoldPriceCard>
     required IconData icon,
     required Color iconColor,
   }) {
-    final up = change >= 0;
+    final up = change > 0;
+    final down = change < 0;
     final color = change == 0
         ? Colors.grey
         : up
             ? Colors.green
             : Colors.red;
-
-    final prevPrice = (price != null) ? price - change : 0.0;
-    final pct = (prevPrice != 0) ? (change / prevPrice) * 100 : 0.0;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -220,10 +218,19 @@ class _MiniGoldPriceCardState extends State<MiniGoldPriceCard>
           ),
         ),
 
-        // Price + Variation
+        // Price + Change Indicator + Refresh
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Price
+            const Text(
+              '\$ ',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               child: Text(
@@ -236,39 +243,37 @@ class _MiniGoldPriceCardState extends State<MiniGoldPriceCard>
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              transitionBuilder: (child, anim) => FadeTransition(
-                opacity: anim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                          begin: const Offset(0, 0.3), end: Offset.zero)
-                      .animate(anim),
-                  child: child,
+            const SizedBox(width: 6),
+            
+            // Change indicator with arrow
+            if (change != 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      up ? Icons.arrow_upward : Icons.arrow_downward,
+                      size: 12,
+                      color: color,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      change.abs().toStringAsFixed(2),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: (price != null)
-                  ? Row(
-                      key: ValueKey(up),
-                      children: [
-                        Icon(
-                          up ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                          color: color,
-                          size: 18,
-                        ),
-                        Text(
-                          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: color,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            
             const SizedBox(width: 4),
             RotationTransition(
               turns: _refreshController,

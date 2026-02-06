@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:progressive_image/progressive_image.dart';
+import 'package:iq_mall/widgets/ui.dart';
 
 import '../../../Product_widget/Product_widget.dart';
 import '../../../cores/math_utils.dart';
@@ -38,8 +39,12 @@ class CustomSliverAppBar extends StatelessWidget {
           pinned: true,
           leading: SizedBox(),
           leadingWidth: 0,
-          expandedHeight: !controller.animateSubCategories.value ? getSize(133 - value) : getSize(60),
-          collapsedHeight: !controller.animateSubCategories.value ? getSize(133 - value) : getSize(60),
+          expandedHeight: !controller.animateSubCategories.value
+              ? getSize(133 - value)
+              : getSize(60),
+          collapsedHeight: !controller.animateSubCategories.value
+              ? getSize(133 - value)
+              : getSize(60),
           backgroundColor: ColorConstant.whiteA700,
           flexibleSpace: DecoratedBox(
             decoration: BoxDecoration(color: ColorConstant.whiteA700),
@@ -52,21 +57,27 @@ class CustomSliverAppBar extends StatelessWidget {
                 height: categories.isEmpty
                     ? 0
                     : !controller.animateSubCategories.value
-                    ? getSize(133 - value)
-                    : getSize(60),
+                        ? getSize(133 - value)
+                        : getSize(60),
                 child: ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.all(0),
                   itemCount: globalController.homeDataList.value.categories!
-                      .where((category) => category.parent.toString() == controller.category.value.toString())
+                      .where((category) =>
+                          category.parent.toString() ==
+                          controller.category.value.toString())
                       .length,
                   itemBuilder: (BuildContext context, int index) {
-                    var filteredCategories = globalController.homeDataList.value.categories!
-                        .where((category) => category.parent == int.parse(controller.category.value))
+                    var filteredCategories = globalController
+                        .homeDataList.value.categories!
+                        .where((category) =>
+                            category.parent ==
+                            int.parse(controller.category.value))
                         .toList();
                     var unescape = HtmlUnescape();
-                    var text = unescape.convert(filteredCategories[index].categoryName);
+                    var text = unescape
+                        .convert(filteredCategories[index].categoryName);
 
                     return GestureDetector(
                       onTap: () {
@@ -81,76 +92,113 @@ class CustomSliverAppBar extends StatelessWidget {
                           'id': int.parse(category.id.toString()),
                           'type': jsonString,
                         }, parameters: {
-                          'tag': "${int.parse(category.id.toString())}:${category.categoryName.toString()}"
+                          'tag':
+                              "${int.parse(category.id.toString())}:${category.categoryName.toString()}"
                         });
                       },
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 8.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 800),
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                return ScaleTransition(scale: animation, child: child);
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                return ScaleTransition(
+                                    scale: animation, child: child);
                               },
                               child: Obx(() {
                                 return !controller.animateSubCategories.value
                                     ? ClipRRect(
-                                  borderRadius: BorderRadius.all(Radius.circular(50)),
-                                  child: ProgressiveImage(
-                                    key: UniqueKey(),
-                                    placeholder: AssetImage(AssetPaths.placeholderCircle),
-                                    thumbnail: CachedNetworkImageProvider(
-                                      convertToThumbnailUrl(filteredCategories[index].main_image ?? '', isBlurred: true),
-                                    ),
-                                    blur: 0,
-                                    image: CachedNetworkImageProvider(
-                                      convertToThumbnailUrl(filteredCategories[index].main_image ?? "", isBlurred: false) ?? '',
-                                    ),
-                                    height: getSize(78 - value),
-                                    width: getSize(76 - value),
-                                    fit: BoxFit.cover,
-                                    fadeDuration: Duration(milliseconds: 200),
-                                  ),
-                                )
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(50)),
+                                        child: ProgressiveImage(
+                                          key: UniqueKey(),
+                                          placeholder: AssetImage(
+                                              AssetPaths.placeholderCircle),
+                                          thumbnail: Ui.isValidUri(
+                                                  convertToThumbnailUrl(
+                                                      filteredCategories[index]
+                                                              .main_image ??
+                                                          '',
+                                                      isBlurred: true))
+                                              ? CachedNetworkImageProvider(
+                                                  convertToThumbnailUrl(
+                                                      filteredCategories[index]
+                                                              .main_image ??
+                                                          '',
+                                                      isBlurred: true),
+                                                )
+                                              : const AssetImage(AssetPaths
+                                                      .placeholderCircle)
+                                                  as ImageProvider,
+                                          blur: 0,
+                                          image: Ui.isValidUri(
+                                                  convertToThumbnailUrl(
+                                                      filteredCategories[index]
+                                                              .main_image ??
+                                                          "",
+                                                      isBlurred: false))
+                                              ? CachedNetworkImageProvider(
+                                                  convertToThumbnailUrl(
+                                                          filteredCategories[
+                                                                      index]
+                                                                  .main_image ??
+                                                              "",
+                                                          isBlurred: false) ??
+                                                      '',
+                                                )
+                                              : const AssetImage(AssetPaths
+                                                      .placeholderCircle)
+                                                  as ImageProvider,
+                                          height: getSize(78 - value),
+                                          width: getSize(76 - value),
+                                          fit: BoxFit.cover,
+                                          fadeDuration:
+                                              Duration(milliseconds: 200),
+                                        ),
+                                      )
                                     : SizedBox();
                               }),
                             ),
                             SizedBox(height: spacing_control),
                             value < 30
                                 ? SizedBox(
-                              width: getSize(76 - (value / 2)),
-                              child: Text(
-                                text,
-                                maxLines: 2,
-                                softWrap: true,
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  overflow: TextOverflow.visible,
-                                  color: Colors.black,
-                                  fontSize: getFontSize(15),
-                                ),
-                              ),
-                            )
+                                    width: getSize(76 - (value / 2)),
+                                    child: Text(
+                                      text,
+                                      maxLines: 2,
+                                      softWrap: true,
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        overflow: TextOverflow.visible,
+                                        color: Colors.black,
+                                        fontSize: getFontSize(15),
+                                      ),
+                                    ),
+                                  )
                                 : Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
-                              ),
-                              padding: EdgeInsets.all(5),
-                              child: Text(
-                                text,
-                                maxLines: 1,
-                                softWrap: true,
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  overflow: TextOverflow.visible,
-                                  color: Colors.black,
-                                  fontSize: getFontSize(15),
-                                ),
-                              ),
-                            ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                          color: ColorConstant.logoSecondColor,
+                                          width: 1),
+                                    ),
+                                    padding: EdgeInsets.all(5),
+                                    child: Text(
+                                      text,
+                                      maxLines: 1,
+                                      softWrap: true,
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        overflow: TextOverflow.visible,
+                                        color: Colors.black,
+                                        fontSize: getFontSize(15),
+                                      ),
+                                    ),
+                                  ),
                           ],
                         ),
                       ),
@@ -164,8 +212,6 @@ class CustomSliverAppBar extends StatelessWidget {
       },
     );
   }
-
-
 }
 
 // Define ColorConstant and other missing classes/variables based on your existing codebase.

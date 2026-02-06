@@ -28,31 +28,38 @@ class BrandsScreen extends GetView<BrandsScreenController> {
         () => SingleChildScrollView(
           controller: controller.ScrollListener.value,
           key: UniqueKey(),
-          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics()),
           child: Center(
             child: Padding(
               padding: const EdgeInsets.only(top: 16.0, bottom: 16),
               child: Obx(
                 () => controller.loading.value
-                    ? SizedBox(height: Get.height, child: Center(child: Ui.circularIndicator(color: MainColor)))
+                    ? SizedBox(
+                        height: Get.height,
+                        child: Center(
+                            child: Ui.circularIndicator(color: MainColor)))
                     : controller.brands.isNotEmpty
                         ? Column(
                             children: [
-                              Obx(()=>
-                                  GridView.builder(
+                              Obx(() => GridView.builder(
                                     shrinkWrap: true,
                                     // Important to keep within a Column
                                     physics: NeverScrollableScrollPhysics(),
                                     // Since it's inside a SingleChildScrollView
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
                                       crossAxisSpacing: 10,
                                       mainAxisSpacing: 10,
-                                      childAspectRatio: (MediaQuery.of(context).size.width * 0.44) / getVerticalSize(160),
+                                      childAspectRatio:
+                                          (MediaQuery.of(context).size.width *
+                                                  0.44) /
+                                              getVerticalSize(160),
                                     ),
                                     itemCount: controller.brands.length,
                                     itemBuilder: (context, index) {
-                                      var brands =controller.brands;
+                                      var brands = controller.brands;
                                       return InkWell(
                                         onTap: () {
                                           // Your onTap functionality
@@ -60,59 +67,137 @@ class BrandsScreen extends GetView<BrandsScreenController> {
                                         child: Column(
                                           children: [
                                             SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.44,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.44,
                                               child: InkWell(
                                                 onTap: () {
                                                   var f = {
                                                     "brands": [
-                                                      brands[index].id.toString(),
+                                                      brands[index]
+                                                          .id
+                                                          .toString(),
                                                     ],
                                                   };
-                                                  String jsonString = jsonEncode(f);
+                                                  String jsonString =
+                                                      jsonEncode(f);
 
-                                                  Get.toNamed(AppRoutes.View_All_Products, arguments: {
-                                                    'title': brands[index].brandName.toString(),
-                                                    'id': brands[index].id.toString(),
-                                                    'type': jsonString,
-                                                  });
+                                                  Get.toNamed(
+                                                      AppRoutes
+                                                          .View_All_Products,
+                                                      arguments: {
+                                                        'title': brands[index]
+                                                            .brandName
+                                                            .toString(),
+                                                        'id': brands[index]
+                                                            .id
+                                                            .toString(),
+                                                        'type': jsonString,
+                                                      });
                                                 },
                                                 child: Column(
                                                   children: [
                                                     Container(
-                                                      decoration: const BoxDecoration(
-                                                          borderRadius: BorderRadius.only(
-                                                            topLeft: Radius.circular(8.0),
-                                                            topRight: Radius.circular(8.0),
-                                                            bottomLeft: Radius.circular(8.0),
-                                                            bottomRight: Radius.circular(8.0),
-                                                          ),
-                                                          color: Colors.transparent),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        8.0),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        8.0),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        8.0),
+                                                                bottomRight: Radius
+                                                                    .circular(
+                                                                        8.0),
+                                                              ),
+                                                              color: Colors
+                                                                  .transparent),
                                                       child: ClipRRect(
-                                                        borderRadius: const BorderRadius.only(
-                                                          topLeft: Radius.circular(8.0),
-                                                          topRight: Radius.circular(8.0),
-                                                          bottomLeft: Radius.circular(8.0),
-                                                          bottomRight: Radius.circular(8.0),
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                .only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  8.0),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  8.0),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  8.0),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  8.0),
                                                         ),
                                                         child: Stack(
                                                           children: [
-                                                            ProgressiveImage(
-                                                              placeholder: const AssetImage(AssetPaths.placeholder),
+                                                            !Ui.isValidUri(brands[
+                                                                        index]
+                                                                    .main_image)
+                                                                ? Image.asset(
+                                                                    AssetPaths
+                                                                        .placeholder,
+                                                                    height:
+                                                                        getVerticalSize(
+                                                                            160),
+                                                                    width: Get
+                                                                        .size
+                                                                        .width,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                  )
+                                                                : ProgressiveImage(
+                                                                    placeholder:
+                                                                        const AssetImage(
+                                                                            AssetPaths.placeholder),
 
-                                                              // size: 1.87KB
-                                                              thumbnail: CachedNetworkImageProvider(
-                                                                convertToThumbnailUrl(brands[index].main_image ?? '', isBlurred: true),
-                                                                errorListener: (p0) {},
-                                                              ),
-                                                              blur: 0,
-                                                              // size: 1.29MB
-                                                              image: CachedNetworkImageProvider(convertToThumbnailUrl(brands[index].main_image ?? '', isBlurred: false)),
-                                                              height: getVerticalSize(160),
-                                                              width: Get.size.width,
-                                                              fit: BoxFit.cover,
-
-                                                              fadeDuration: Duration(milliseconds: 200),
-                                                            )
+                                                                    // size: 1.87KB
+                                                                    thumbnail: Ui.isValidUri(convertToThumbnailUrl(
+                                                                            brands[index]
+                                                                                .main_image,
+                                                                            isBlurred:
+                                                                                true))
+                                                                        ? CachedNetworkImageProvider(
+                                                                            convertToThumbnailUrl(brands[index].main_image ?? '',
+                                                                                isBlurred: true),
+                                                                            errorListener:
+                                                                                (p0) {},
+                                                                          )
+                                                                        : const AssetImage(AssetPaths.placeholder)
+                                                                            as ImageProvider,
+                                                                    blur: 0,
+                                                                    // size: 1.29MB
+                                                                    image: Ui.isValidUri(convertToThumbnailUrl(
+                                                                            brands[index]
+                                                                                .main_image,
+                                                                            isBlurred:
+                                                                                false))
+                                                                        ? CachedNetworkImageProvider(
+                                                                            convertToThumbnailUrl(brands[index].main_image ?? '',
+                                                                                isBlurred: false),
+                                                                          )
+                                                                        : const AssetImage(AssetPaths.placeholder)
+                                                                            as ImageProvider,
+                                                                    height:
+                                                                        getVerticalSize(
+                                                                            160),
+                                                                    width: Get
+                                                                        .size
+                                                                        .width,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                    fadeDuration:
+                                                                        const Duration(
+                                                                            milliseconds:
+                                                                                200),
+                                                                  )
                                                           ],
                                                         ),
                                                       ),
@@ -125,15 +210,19 @@ class BrandsScreen extends GetView<BrandsScreenController> {
                                         ),
                                       );
                                     },
-                                  )
-                              ),
-                              Obx(() => controller.loadingMore.value ? Ui.circularIndicator(color: MainColor) : const SizedBox())
+                                  )),
+                              Obx(() => controller.loadingMore.value
+                                  ? Ui.circularIndicator(color: MainColor)
+                                  : const SizedBox())
                             ],
                           )
                         : Center(
                             child: Text(
                             'Brands List is Empty',
-                            style: TextStyle(color: Button_color, fontSize: 23, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Button_color,
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold),
                           )),
               ),
             ),

@@ -15,6 +15,7 @@
 
     <application
         android:allowBackup="false"
+        android:extractNativeLibs="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:exported="true"
         android:icon="@mipmap/launcher_icon"

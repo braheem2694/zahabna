@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.1.4+15
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
@@ -23,7 +23,7 @@ dependencies:
   shrink_sidemenu: ^2.0.0+2-null-safety
   persistent_bottom_nav_bar: ^6.2.1
   device_info_plus:
-  flutter_facebook_auth: ^7.1.1
+
   carousel_slider: ^5.0.0
   mime_type:
   random_string: ^2.3.1
@@ -230,7 +230,7 @@ flutter_native_splash:
   # https://developer.apple.com/documentation/uikit/uiview/contentmode): scaleToFill,
   # scaleAspectFit, scaleAspectFill, center, top, bottom, left, right, topLeft, topRight,
   # bottomLeft, or bottomRight.
-  #ios_content_mode: center
+  ios_content_mode: scaleAspectFit
   #
   # web_image_mode can be one of the following modes: center, contain, stretch, and cover.
   #web_image_mode: center

@@ -10,99 +10,105 @@ import '../routes/app_routes.dart';
 import '../screens/tabs_screen/controller/tabs_controller.dart';
 import '../utils/ShColors.dart';
 
+// Top-level callback handlers for awesome_notifications
+// These MUST be top-level functions (outside any class) for background isolates to work
+
+@pragma('vm:entry-point')
+Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  // Use WidgetsBinding to ensure navigation happens after app initialization
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (Get.currentRoute != AppRoutes.NotificationsScreen) {
+      Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
+    }
+  });
+}
+
+@pragma('vm:entry-point')
+Future<void> onNotificationCreatedMethod(
+    ReceivedNotification receivedNotification) async {
+  // Handle notification creation if needed
+}
+
+@pragma('vm:entry-point')
+Future<void> onNotificationDisplayedMethod(
+    ReceivedNotification receivedNotification) async {
+  // Handle notification display if needed
+}
+
+@pragma('vm:entry-point')
+Future<void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {
+  // Handle notification dismissal if needed
+}
+
 class FirebaseInitialize {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
   Future<void> initializeFirebase() async {
-    // Initialize Awesome Notifications
-    await AwesomeNotifications().initialize(
-      'resource://drawable/ic_launcher.png',
-      [
-        NotificationChannel(
-          channelKey: 'basic_channel',
-          channelName: 'Basic notifications',
-          channelDescription: 'Notification channel for basic tests',
-          defaultColor: ColorConstant.logoFirstColor,
-          ledColor: Colors.white,
-          importance: NotificationImportance.High,
-        )
-      ],
-    );
+    try {
+      // Initialize Awesome Notifications
+      await AwesomeNotifications().initialize(
+        'resource://drawable/ic_launcher.png',
+        [
+          NotificationChannel(
+            channelKey: 'basic_channel',
+            channelName: 'Basic notifications',
+            channelDescription: 'Notification channel for basic tests',
+            defaultColor: ColorConstant.logoFirstColor,
+            ledColor: Colors.white,
+            importance: NotificationImportance.High,
+          )
+        ],
+      );
 
-    // Set up notification action handlers
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: onActionReceivedMethod,
-      onNotificationCreatedMethod: onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: onDismissActionReceivedMethod,
-    );
+      // Set up notification action handlers
+      AwesomeNotifications().setListeners(
+        onActionReceivedMethod: onActionReceivedMethod,
+        onNotificationCreatedMethod: onNotificationCreatedMethod,
+        onNotificationDisplayedMethod: onNotificationDisplayedMethod,
+        onDismissActionReceivedMethod: onDismissActionReceivedMethod,
+      );
 
-    // Request notification permissions
-    await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
-      if (!isAllowed) {
-        AwesomeNotifications().requestPermissionToSendNotifications();
-      }
-    });
+      // Request notification permissions
+      await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+        if (!isAllowed) {
+          AwesomeNotifications().requestPermissionToSendNotifications();
+        }
+      });
 
-    // Initialize Firebase Messaging
-    await FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-      if (message != null) {
-        // Store the initial message to handle navigation after app initialization
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-            Get.toNamed(AppRoutes.NotificationsScreen,
-                arguments: {'reload': true});
-          }
-        });
-      }
-    });
-    await FirebaseMessaging.instance.subscribeToTopic('global');
+      // Initialize Firebase Messaging
+      await FirebaseMessaging.instance
+          .getInitialMessage()
+          .then((RemoteMessage? message) {
+        if (message != null) {
+          // Store the initial message to handle navigation after app initialization
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (Get.currentRoute != AppRoutes.NotificationsScreen) {
+              Get.toNamed(AppRoutes.NotificationsScreen,
+                  arguments: {'reload': true});
+            }
+          });
+        }
+      });
+      await FirebaseMessaging.instance.subscribeToTopic('global');
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      if (notification != null && android != null && !kIsWeb) {
-        createNotification(message);
-      }
-    });
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        RemoteNotification? notification = message.notification;
+        AndroidNotification? android = message.notification?.android;
+        if (notification != null && android != null && !kIsWeb) {
+          createNotification(message);
+        }
+      });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-        Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
-      }
-    });
-  }
-
-  @pragma('vm:entry-point')
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
-    // Use WidgetsBinding to ensure navigation happens after app initialization
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Get.currentRoute != AppRoutes.NotificationsScreen) {
-        Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
-      }
-    });
-  }
-
-  @pragma('vm:entry-point')
-  static Future<void> onNotificationCreatedMethod(
-      ReceivedNotification receivedNotification) async {
-    // Handle notification creation if needed
-  }
-
-  @pragma('vm:entry-point')
-  static Future<void> onNotificationDisplayedMethod(
-      ReceivedNotification receivedNotification) async {
-    // Handle notification display if needed
-  }
-
-  @pragma('vm:entry-point')
-  static Future<void> onDismissActionReceivedMethod(
-      ReceivedAction receivedAction) async {
-    // Handle notification dismissal if needed
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        if (Get.currentRoute != AppRoutes.NotificationsScreen) {
+          Get.toNamed(AppRoutes.NotificationsScreen, arguments: {'reload': true});
+        }
+      });
+    } catch (e) {
+      debugPrint('Firebase initialization error: $e');
+      // Continue app execution even if Firebase fails
+    }
   }
 
   Future createNotification(RemoteMessage message) async {

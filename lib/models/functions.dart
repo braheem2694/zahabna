@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iq_mall/widgets/ShWidget.dart';
@@ -86,30 +87,94 @@ class function {
     final ImagePicker _picker = ImagePicker();
     XFile? _selectedImage;
 
-    // Check and request permissions
-    PermissionStatus status;
-    if (source == ImageSource.camera) {
-      status = await Permission.camera.request();
-    } else {
-      // On Android, pickImage may access storage even for gallery
-      status = await Permission.photos.request(); // iOS
-      if (status.isDenied || status.isPermanentlyDenied) {
-        status = await Permission.storage.request(); // Android fallback
-      }
-    }
-
-    if (!status.isGranted) {
-      print("Permission denied: $status");
-      return null;
-    }
-
     try {
-      final XFile? image = await _picker.pickImage(source: source);
+      // On iOS, image_picker handles permission requests automatically
+      // Just call pickImage and it will show the system permission dialog
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
       if (image != null) {
         _selectedImage = image;
       }
     } catch (e) {
       print("Image picker error: $e");
+      
+      // Check if it's a permission error
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('permission') || 
+          errorStr.contains('denied') || 
+          errorStr.contains('authorized')) {
+        
+        // Check current permission status
+        PermissionStatus cameraStatus = await Permission.camera.status;
+        PermissionStatus photosStatus = await Permission.photos.status;
+        
+        final relevantStatus = source == ImageSource.camera ? cameraStatus : photosStatus;
+        
+        if (relevantStatus.isPermanentlyDenied || relevantStatus.isDenied) {
+          // Show dialog to open settings
+          final shouldOpenSettings = await Get.dialog<bool>(
+            AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    source == ImageSource.camera ? Icons.camera_alt : Icons.photo_library,
+                    color: Colors.orange,
+                  ),
+                  SizedBox(width: 8),
+                  Text('Permission Required'.tr),
+                ],
+              ),
+              content: Text(
+                source == ImageSource.camera
+                    ? 'Camera access is required to take photos. Please enable it in Settings.'.tr
+                    : 'Photo library access is required. Please enable it in Settings.'.tr,
+                style: TextStyle(fontSize: 15),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(result: false),
+                  child: Text('Cancel'.tr, style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                  onPressed: () => Get.back(result: true),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.orange.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Open Settings'.tr,
+                    style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldOpenSettings == true) {
+            await openAppSettings();
+          }
+        } else {
+          // Permission can still be requested
+          toaster(
+            Get.context!,
+            source == ImageSource.camera
+                ? 'Camera permission is required to take photos'.tr
+                : 'Photo library permission is required'.tr,
+          );
+        }
+      } else {
+        toaster(Get.context!, 'Failed to pick image'.tr);
+      }
     }
 
     return _selectedImage;

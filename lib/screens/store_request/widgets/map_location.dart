@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart' show Get;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/foundation.dart';
-import 'package:iq_mall/cores/math_utils.dart';
-import 'package:iq_mall/utils/ShColors.dart';
-
-import '../../../widgets/Ui.dart';
-import '../store_request_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:iq_mall/cores/math_utils.dart';
+import 'package:iq_mall/utils/ShColors.dart';
+import '../../../widgets/Ui.dart';
+import '../store_request_controller.dart';
 
 // for Factory
 class StoreLocationPicker extends StatefulWidget {
@@ -31,11 +29,6 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
   void initState() {
     super.initState();
     _updateTextFields();
-    Future.delayed(const Duration(milliseconds: 100)).then((value) {
-      if (controller.args == null) {
-        fetchUserLocation(Get.context!);
-      }
-    });
   }
 
   void fetchUserLocation(BuildContext context) async {
@@ -45,7 +38,8 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
       controller.latController.text = position.latitude.toString();
       controller.lngController.text = position.longitude.toString();
       controller.markerPosition = LatLng(position.latitude, position.longitude);
-      mapController?.animateCamera(CameraUpdate.newLatLng(controller.markerPosition));
+      mapController
+          ?.animateCamera(CameraUpdate.newLatLng(controller.markerPosition));
       // Use lat/lng as needed
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,34 +54,41 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
     });
 
     try {
-      // Request permission if needed
-      if (await Permission.location.isDenied || await Permission.location.isRestricted) {
-        var result = await Permission.location.request();
-        if (!result.isGranted) {
-          await openAppSettings(); // Ask to enable manually
-          // Delay and re-check
-          await Future.delayed(const Duration(seconds: 3));
-          if (!await Permission.location.isGranted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permission is still denied.')),
-            );
-            setState(() => fetchingLocation = false);
-            return null;
-          }
-        }
-      }
-
-      // Check if location services are on
+      // Check if location services are enabled
       if (!await Geolocator.isLocationServiceEnabled()) {
         await Geolocator.openLocationSettings();
-        await Future.delayed(const Duration(seconds: 3)); // wait a bit after settings
+        await Future.delayed(const Duration(seconds: 2));
+        
         if (!await Geolocator.isLocationServiceEnabled()) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location services are still disabled.')),
+            SnackBar(content: Text('Location services are disabled. Please enable them in Settings.'.tr)),
           );
           setState(() => fetchingLocation = false);
           return null;
         }
+      }
+
+      // Check and request location permission using Geolocator native methods
+      LocationPermission permission = await Geolocator.checkPermission();
+      
+      if (permission == LocationPermission.denied) {
+        // Request permission - this will show iOS native dialog
+        permission = await Geolocator.requestPermission();
+        
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location permission is required to find your store location.'.tr)),
+          );
+          setState(() => fetchingLocation = false);
+          return null;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        // Show dialog to open settings
+        _showPermissionDialog(context);
+        setState(() => fetchingLocation = false);
+        return null;
       }
 
       // Get location
@@ -99,16 +100,69 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
       return position;
     } catch (e) {
       setState(() => fetchingLocation = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting location: $e')),
-      );
+      
+      // Check if it's a permission error
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('permission') || errorStr.contains('denied')) {
+        _showPermissionDialog(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error getting location: $e'.tr)),
+        );
+      }
       return null;
     }
   }
 
+  void _showPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.location_on, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Location Permission'.tr),
+          ],
+        ),
+        content: Text(
+          'Location permission is required to find your store on the map. Please enable it in Settings.'.tr,
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'.tr, style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Open Settings'.tr,
+              style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _updateTextFields() {
-    controller.latController.text = controller.markerPosition.latitude.toStringAsFixed(12);
-    controller.lngController.text = controller.markerPosition.longitude.toStringAsFixed(12);
+    controller.latController.text =
+        controller.markerPosition.latitude.toStringAsFixed(12);
+    controller.lngController.text =
+        controller.markerPosition.longitude.toStringAsFixed(12);
   }
 
   void _updateMarkerFromText() {
@@ -117,7 +171,8 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
     if (lat != null && lng != null) {
       setState(() {
         controller.markerPosition = LatLng(lat, lng);
-        mapController?.animateCamera(CameraUpdate.newLatLng(controller.markerPosition));
+        mapController
+            ?.animateCamera(CameraUpdate.newLatLng(controller.markerPosition));
       });
     }
   }
@@ -162,6 +217,8 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
                         zoom: 15,
                       ),
                       onMapCreated: (controller) => mapController = controller,
+                      myLocationButtonEnabled: false,
+                      myLocationEnabled: false,
                       markers: {
                         Marker(
                           markerId: const MarkerId("store"),
@@ -175,49 +232,93 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
                       zoomGesturesEnabled: _isDraggable,
                       rotateGesturesEnabled: _isDraggable,
                       tiltGesturesEnabled: _isDraggable,
-                      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                        Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+                      gestureRecognizers: <Factory<
+                          OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                            () => EagerGestureRecognizer()),
                       },
                     ),
-                    fetchingLocation ? Ui.circularIndicatorDefault(color: ColorConstant.logoFirstColorConstant, width: 50, height: 50) : const SizedBox(),
+                    fetchingLocation
+                        ? Ui.circularIndicatorDefault(
+                            color: ColorConstant.logoFirstColorConstant,
+                            width: 50,
+                            height: 50)
+                        : const SizedBox(),
                   ],
                 ),
               ),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  if (_isDraggable) {
-                    // Save and exit edit mode
-                    setState(() {
-                      _isDraggable = false;
-                    });
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        if (_isDraggable) {
+                          // Save and exit edit mode
+                          setState(() {
+                            _isDraggable = false;
+                          });
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Location saved")),
-                    );
-                  } else {
-                    // Enter edit mode
-                    setState(() {
-                      _isDraggable = true;
-                    });
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      decoration: BoxDecoration(
-                        color: _isDraggable ? Colors.green[400] : Colors.blue[400],
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 5,
-                            offset: const Offset(-2, 2),
-                          ),
-                        ],
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Location saved")),
+                          );
+                        } else {
+                          // Enter edit mode
+                          setState(() {
+                            _isDraggable = true;
+                          });
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                            decoration: BoxDecoration(
+                              color: _isDraggable
+                                  ? Colors.green[400]
+                                  : Colors.blue[400],
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 5,
+                                  offset: const Offset(-2, 2),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Icon(
+                                _isDraggable
+                                    ? Icons.save
+                                    : Icons.edit_location_alt,
+                                color: Colors.white,
+                                size: getSize(30))),
                       ),
-                      padding: const EdgeInsets.all(5),
-                      child: Icon(_isDraggable ? Icons.save : Icons.edit_location_alt, color: Colors.white, size: getSize(30))),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => fetchUserLocation(context),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 5,
+                                  offset: const Offset(-2, 2),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Icon(Icons.my_location,
+                                color: Colors.blue[400], size: getSize(30))),
+                      ),
+                    ),
+                  ],
                 ),
               )
             ],
@@ -229,7 +330,8 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
             children: [
               TextField(
                 controller: controller.latController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   labelText: 'Latitude',
                   border: OutlineInputBorder(),
@@ -239,7 +341,8 @@ class _StoreLocationPickerState extends State<StoreLocationPicker> {
               const SizedBox(height: 12),
               TextField(
                 controller: controller.lngController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   labelText: 'Longitude',
                   border: OutlineInputBorder(),

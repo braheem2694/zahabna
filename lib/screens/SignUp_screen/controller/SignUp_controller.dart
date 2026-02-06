@@ -91,13 +91,14 @@ class SignUpController extends GetxController with WidgetsBindingObserver {
     if (response.isNotEmpty) {
       success = response["succeeded"];
       if (success) {
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_LONG, MainColor, whiteA700);
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_LONG,
+            MainColor, whiteA700);
 
         SignUp(context);
       } else {
         signing.value = false;
-        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_LONG, MainColor, whiteA700);
-
+        Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_LONG,
+            MainColor, whiteA700);
       }
     } else {
       signing.value = false;
@@ -112,17 +113,27 @@ class SignUpController extends GetxController with WidgetsBindingObserver {
   Future<bool?> SignUp(context) async {
     bool success = false;
 
-
-    Get.toNamed(AppRoutes.Phoneverificationscreen,
-        arguments: {'change_password': 'ShSignUp', "country_code": country_code.value.toString().replaceAll('+', ''), "number": phone_number.text.toString()})?.then((value) {
+    Get.toNamed(AppRoutes.Phoneverificationscreen, arguments: {
+      'change_password': 'ShSignUp',
+      "country_code": country_code.value.toString().replaceAll('+', ''),
+      "number": phone_number.text.toString()
+    })?.then((value) {
       signing.value = false;
       loggin_in.value = false;
     });
 
-    await firebaseMessaging.getToken().then((String? token1) async {
-      client_token = token1;
-      prefs?.setString("token", client_token!);
-    });
+    try {
+      await firebaseMessaging.getToken().then((String? token1) async {
+        client_token = token1;
+        prefs?.setString("token", client_token!);
+      }).catchError((e) {
+        debugPrint("Error getting token: $e");
+        prefs?.setString("token", "");
+      });
+    } catch (e) {
+      debugPrint("Error getting token: $e");
+      prefs?.setString("token", "");
+    }
     var data = json.encode(await getDeviceInfo());
     Map<String, dynamic> response = await api.getData({
       'firstName': first_namecontroller.text.toString(),
@@ -141,8 +152,11 @@ class SignUpController extends GetxController with WidgetsBindingObserver {
         prefs?.setString("last_name", lastNamecontroller.text.toString());
         prefs?.setInt('selectedaddress', 0);
         loggin_in.value = false;
-        Get.toNamed(AppRoutes.Phoneverificationscreen,
-            arguments: {'change_password': 'ShSignUp', "country_code": country_code.value.toString().replaceAll('+', ''), "number": phone_number.text.toString()})?.then((value) {
+        Get.toNamed(AppRoutes.Phoneverificationscreen, arguments: {
+          'change_password': 'ShSignUp',
+          "country_code": country_code.value.toString().replaceAll('+', ''),
+          "number": phone_number.text.toString()
+        })?.then((value) {
           signing.value = false;
           loggin_in.value = false;
         });

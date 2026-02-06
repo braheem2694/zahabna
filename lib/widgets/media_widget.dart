@@ -35,7 +35,8 @@ Widget mediaVideoWidget(imageUrl, String asset,
     String formUserName = "",
     String formFeedBack = '',
     String videoThumb = '',
-    videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    videoUrl =
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     imageVideoUrl =
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Femqube.com%2Fblog%2Fvideo-marketing-a-new-normal%2F&psig=AOvVaw0YJ_jZSLY0B-7hQtY6kyap&ust=1670758396179000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCMigvpf67vsCFQAAAAAdAAAAABAE",
     resolution = const {"": ""}}) {
@@ -50,7 +51,8 @@ Widget mediaVideoWidget(imageUrl, String asset,
       finalVideoUrl += "/$element";
     }
   }
-  Future<Uint8List> _getBytesFromCachedImage(CachedNetworkImageProvider imageProvider) async {
+  Future<Uint8List> _getBytesFromCachedImage(
+      CachedNetworkImageProvider imageProvider) async {
     final imageStream = imageProvider.resolve(ImageConfiguration());
     final Completer<Uint8List> completer = Completer();
     ImageStreamListener listener;
@@ -76,9 +78,28 @@ Widget mediaVideoWidget(imageUrl, String asset,
     return completer.future;
   }
 
-  CachedNetworkImageProvider cachedThumbnailImage = CachedNetworkImageProvider(convertToThumbnailUrl(imageUrl, isBlurred: true), maxWidth: 250, maxHeight: 250);
-  CachedNetworkImageProvider cachedBlurImage = CachedNetworkImageProvider(convertToThumbnailUrl(imageUrl, isBlurred: true), maxWidth: 250, maxHeight: 250);
-  CachedNetworkImageProvider cachedMainImage = CachedNetworkImageProvider(imageUrl ?? "", maxWidth: 500, maxHeight: 500);
+  bool isValidUrl = Ui.isValidUri(imageUrl?.toString());
+
+  CachedNetworkImageProvider? cachedThumbnailImage;
+  CachedNetworkImageProvider? cachedBlurImage;
+  CachedNetworkImageProvider? cachedMainImage;
+
+  if (isValidUrl) {
+    try {
+      cachedThumbnailImage = CachedNetworkImageProvider(
+          convertToThumbnailUrl(imageUrl.toString(), isBlurred: true),
+          maxWidth: 250,
+          maxHeight: 250);
+      cachedBlurImage = CachedNetworkImageProvider(
+          convertToThumbnailUrl(imageUrl.toString(), isBlurred: true),
+          maxWidth: 250,
+          maxHeight: 250);
+      cachedMainImage = CachedNetworkImageProvider(imageUrl.toString(),
+          maxWidth: 500, maxHeight: 500);
+    } catch (_) {
+      isValidUrl = false;
+    }
+  }
 
   return Align(
     alignment: Alignment.center,
@@ -86,7 +107,7 @@ Widget mediaVideoWidget(imageUrl, String asset,
       width: width != 0 ? width : Get.width,
       height: height != 0 ? height : getVerticalSize(250),
       child: !isVideo && !isForm
-          ? imageUrl?.isEmpty ?? true
+          ? (!isValidUrl || (imageUrl?.isEmpty ?? true))
               ? Image.asset(
                   asset,
                   height: height != 0 ? height : getVerticalSize(250),
@@ -98,17 +119,22 @@ Widget mediaVideoWidget(imageUrl, String asset,
                       children: [
                         FutureBuilder(
                           future: Future.wait([
-                            _getBytesFromCachedImage(cachedBlurImage),
-                            _getBytesFromCachedImage(cachedMainImage),
+                            _getBytesFromCachedImage(cachedBlurImage!),
+                            _getBytesFromCachedImage(cachedMainImage!),
                           ]),
-                          builder: (BuildContext context, AsyncSnapshot<List<Uint8List>> snapshot) {
-                            if (snapshot.connectionState == ConnectionState.done) {
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Uint8List>> snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
                               return TweenAnimationBuilder(
                                 tween: Tween<double>(begin: 0.0, end: 1.0),
                                 duration: const Duration(milliseconds: 100),
-                                builder: (BuildContext context, double value, Widget? child) {
+                                builder: (BuildContext context, double value,
+                                    Widget? child) {
                                   return Image.memory(
-                                    value < 0.5 ? snapshot.data![0] : snapshot.data![1],
+                                    value < 0.5
+                                        ? snapshot.data![0]
+                                        : snapshot.data![1],
                                     width: width,
                                     height: height,
                                     fit: fit,
@@ -120,7 +146,8 @@ Widget mediaVideoWidget(imageUrl, String asset,
                             } else {
                               return Center(
                                 // Wrap CircularProgressIndicator in a Center widget to center it on the screen
-                                child: CircularProgressIndicator(), // Show a loading indicator while fetching image data
+                                child:
+                                    CircularProgressIndicator(), // Show a loading indicator while fetching image data
                               );
                             }
                           },
@@ -173,14 +200,23 @@ Widget mediaVideoWidget(imageUrl, String asset,
                           children: [
                             Padding(
                               padding: getPadding(all: 10.0),
-                              child:
-                                  Text(imgTitle, style: TextStyle(height: 1.50, color: ColorConstant.white, overflow: TextOverflow.ellipsis, fontWeight: FontWeight.bold, fontSize: getFontSize(17))),
+                              child: Text(imgTitle,
+                                  style: TextStyle(
+                                      height: 1.50,
+                                      color: ColorConstant.white,
+                                      overflow: TextOverflow.ellipsis,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: getFontSize(17))),
                             ),
                             Padding(
                               padding: getPadding(all: 10.0),
                               child: Text(
                                 imgBody,
-                                style: TextStyle(height: 1.50, overflow: TextOverflow.ellipsis, color: ColorConstant.white, fontSize: getFontSize(17)),
+                                style: TextStyle(
+                                    height: 1.50,
+                                    overflow: TextOverflow.ellipsis,
+                                    color: ColorConstant.white,
+                                    fontSize: getFontSize(17)),
                               ),
                             )
                           ],
@@ -191,8 +227,8 @@ Widget mediaVideoWidget(imageUrl, String asset,
                   // CustomCachedNetworkImage(imageUrl: imageUrl, width: width, height: height, fit: fit, asset: asset,)
                   FadeInImage(
                       fadeInDuration: Duration(milliseconds: 200),
-                      placeholder: cachedThumbnailImage,
-                      image: cachedMainImage,
+                      placeholder: cachedThumbnailImage!,
+                      image: cachedMainImage!,
                       width: width,
                       height: height,
                       fit: fit,
@@ -203,18 +239,20 @@ Widget mediaVideoWidget(imageUrl, String asset,
                           fit: fit,
                         );
                       },
-                      placeholderErrorBuilder: (context, exception, stackTrace) {
+                      placeholderErrorBuilder:
+                          (context, exception, stackTrace) {
                         return FadeInImage(
                           fadeInDuration: Duration(milliseconds: 200),
-                          placeholder: cachedBlurImage,
-                          image: cachedThumbnailImage,
+                          placeholder: cachedBlurImage!,
+                          image: cachedThumbnailImage!,
                           width: width,
                           height: height,
                           fit: fit,
                           imageErrorBuilder: (context, exception, stackTrace) {
                             return Image.asset(
                               asset,
-                              height: height != 0 ? height : getVerticalSize(250),
+                              height:
+                                  height != 0 ? height : getVerticalSize(250),
                               fit: fit,
                             );
                           },
@@ -234,30 +272,37 @@ Widget mediaVideoWidget(imageUrl, String asset,
                             borderRadius: BorderRadius.circular(10.0),
                             child: FadeInImage(
                               fadeInDuration: Duration(milliseconds: 200),
-                              placeholder: cachedBlurImage,
-                              image: cachedMainImage,
+                              placeholder: cachedBlurImage!,
+                              image: cachedMainImage!,
                               width: getHorizontalSize(70),
                               height: getHorizontalSize(70),
                               fit: fit,
-                              imageErrorBuilder: (context, exception, stackTrace) {
+                              imageErrorBuilder:
+                                  (context, exception, stackTrace) {
                                 return Image.asset(
                                   asset,
-                                  height: height != 0 ? height : getVerticalSize(250),
+                                  height: height != 0
+                                      ? height
+                                      : getVerticalSize(250),
                                   fit: fit,
                                 );
                               },
-                              placeholderErrorBuilder: (context, exception, stackTrace) {
+                              placeholderErrorBuilder:
+                                  (context, exception, stackTrace) {
                                 return FadeInImage(
                                   fadeInDuration: Duration(milliseconds: 200),
-                                  placeholder: cachedBlurImage,
-                                  image: cachedThumbnailImage,
+                                  placeholder: cachedBlurImage!,
+                                  image: cachedThumbnailImage!,
                                   width: width,
                                   height: height,
                                   fit: fit,
-                                  imageErrorBuilder: (context, exception, stackTrace) {
+                                  imageErrorBuilder:
+                                      (context, exception, stackTrace) {
                                     return Image.asset(
                                       asset,
-                                      height: height != 0 ? height : getVerticalSize(250),
+                                      height: height != 0
+                                          ? height
+                                          : getVerticalSize(250),
                                       fit: fit,
                                     );
                                   },
@@ -270,7 +315,10 @@ Widget mediaVideoWidget(imageUrl, String asset,
                           padding: getPadding(all: 10.0),
                           child: Text(
                             formUserName,
-                            style: TextStyle(height: 1.50, overflow: TextOverflow.ellipsis, fontSize: getFontSize(15)),
+                            style: TextStyle(
+                                height: 1.50,
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: getFontSize(15)),
                           ),
                         )
                       ],
@@ -282,14 +330,20 @@ Widget mediaVideoWidget(imageUrl, String asset,
                           padding: getPadding(left: 20.0),
                           child: Text(
                             formName,
-                            style: TextStyle(height: 1.50, overflow: TextOverflow.ellipsis, fontSize: getFontSize(15)),
+                            style: TextStyle(
+                                height: 1.50,
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: getFontSize(15)),
                           ),
                         ),
                         Padding(
                           padding: getPadding(left: 20.0),
                           child: Text(
                             formFeedBack,
-                            style: TextStyle(color: ColorConstant.black900, overflow: TextOverflow.visible, fontSize: getFontSize(18)),
+                            style: TextStyle(
+                                color: ColorConstant.black900,
+                                overflow: TextOverflow.visible,
+                                fontSize: getFontSize(18)),
                           ),
                         ),
                       ],
@@ -298,7 +352,6 @@ Widget mediaVideoWidget(imageUrl, String asset,
                 )
               : SizedBox(
                   width: double.infinity,
-
                   child: ChewieVideoPlayer(
                     initialQuality: isConverted ? "360" : "720",
                     autoPlay: true,

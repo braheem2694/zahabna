@@ -66,24 +66,41 @@ class HomeData {
         succeeded: json["succeeded"],
         message: json["message"],
         isRetail: json["is_retail"],
-        requestPrice: double.parse(json["request_price"].toString()),
-        requestFees: double.parse(json["request_fees"].toString()),
+        requestPrice:
+            double.tryParse(json["request_price"]?.toString() ?? "0") ?? 0.0,
+        requestFees:
+            double.tryParse(json["request_fees"]?.toString() ?? "0") ?? 0.0,
         requestTerms: json["request_terms_conditions"],
         deleteTermsConditions: json["delete_terms_conditions"],
         paymentRequestTerms: json["payment_request_terms_conditions"],
         categoryType: json["categoryType"],
-        categories: List<Category>.from(json["categories"]?.map((x) => Category.fromJson(x)) ?? []),
-        productTypes: List<ProductType>.from(json["metals"]?.map((x) => ProductType.fromJson(x)) ?? []),
-        productSections: List<ProductSection>.from(json["product_sections"]?.map((x) => ProductSection.fromJson(x)) ?? []).obs,
-        products: List<Product>.from(json["products"]?.map((x) => Product.fromJson(x)) ?? []),
-        brands: List<Brand>.from(json["brands"]?.map((x) => Brand.fromJson(x)) ?? []),
-        flashSales: List<FlashSale>.from(json["flash_sales"]?.map((x) => FlashSale.fromJson(x)) ?? []),
-        flashProducts: List<Product>.from(json["flash_products"]?.map((x) => Product.fromJson(x)) ?? []),
-        hours: List<Hour>.from(json["hours"]?.map((x) => Hour.fromJson(x)) ?? []),
-        gridElements: List<GridElement>.from(json["grid_elements"]?.map((x) => GridElement.fromJson(x)) ?? []),
-        socials: List<SocialMedia>.from(json["socials"]?.map((x) => SocialMedia.fromJson(x)) ?? []),
-        socialMedia: List<SocialMedia>.from(json["owner_data"]?.map((x) => SocialMedia.fromJson(x)) ?? []),
-        gemstoneStyles: List<ProductType>.from(json["gemstones_styles"]?.map((x) => ProductType.fromJson(x)) ?? []),
+        categories: List<Category>.from(
+            json["categories"]?.map((x) => Category.fromJson(x)) ?? []),
+        productTypes: List<ProductType>.from(
+            json["metals"]?.map((x) => ProductType.fromJson(x)) ?? []),
+        productSections: List<ProductSection>.from(json["product_sections"]
+                    ?.map((x) => ProductSection.fromJson(x)) ??
+                [])
+            .obs,
+        products: List<Product>.from(
+            json["products"]?.map((x) => Product.fromJson(x)) ?? []),
+        brands: List<Brand>.from(
+            json["brands"]?.map((x) => Brand.fromJson(x)) ?? []),
+        flashSales: List<FlashSale>.from(
+            json["flash_sales"]?.map((x) => FlashSale.fromJson(x)) ?? []),
+        flashProducts: List<Product>.from(
+            json["flash_products"]?.map((x) => Product.fromJson(x)) ?? []),
+        hours:
+            List<Hour>.from(json["hours"]?.map((x) => Hour.fromJson(x)) ?? []),
+        gridElements: List<GridElement>.from(
+            json["grid_elements"]?.map((x) => GridElement.fromJson(x)) ?? []),
+        socials: List<SocialMedia>.from(
+            json["socials"]?.map((x) => SocialMedia.fromJson(x)) ?? []),
+        socialMedia: List<SocialMedia>.from(
+            json["owner_data"]?.map((x) => SocialMedia.fromJson(x)) ?? []),
+        gemstoneStyles: List<ProductType>.from(
+            json["gemstones_styles"]?.map((x) => ProductType.fromJson(x)) ??
+                []),
       );
 
   Map<String, dynamic> toJson() => {
@@ -91,13 +108,16 @@ class HomeData {
         "message": message,
         "is_retail": isRetail,
         "categories": List<dynamic>.from(categories!.map((x) => x.toJson())),
-        "product_sections": List<dynamic>.from(productSections!.map((x) => x.toJson())),
+        "product_sections":
+            List<dynamic>.from(productSections!.map((x) => x.toJson())),
         "products": List<dynamic>.from(products!.map((x) => x.toJson())),
         "brands": List<dynamic>.from(brands!.map((x) => x.toJson())),
         "flash_sales": List<dynamic>.from(flashSales!.map((x) => x.toJson())),
-        "flash_products": List<dynamic>.from(flashProducts!.map((x) => x.toJson())),
+        "flash_products":
+            List<dynamic>.from(flashProducts!.map((x) => x.toJson())),
         "hours": List<dynamic>.from(hours!.map((x) => x.toJson())),
-        "grid_elements": List<dynamic>.from(gridElements!.map((x) => x.toJson())),
+        "grid_elements":
+            List<dynamic>.from(gridElements!.map((x) => x.toJson())),
         "socials": List<dynamic>.from(socials!.map((x) => x.toJson())),
       };
 }
@@ -146,15 +166,20 @@ class ProductType {
       metalId: metalId ?? this.metalId,
       isEdited: isEdited ?? this.isEdited,
       items: items != null
-          ? List<ItemFormField>.from(items.map((item) => item.copyWith())) // ✅ Deep copy items
+          ? List<ItemFormField>.from(
+              items.map((item) => item.copyWith())) // ✅ Deep copy items
           : this.items != null
-              ? List<ItemFormField>.from(this.items!.map((item) => item.copyWith())) // ✅ Deep copy fallback
+              ? List<ItemFormField>.from(this
+                  .items!
+                  .map((item) => item.copyWith())) // ✅ Deep copy fallback
               : [],
       // ✅ Ensure non-null
       gemstoneMetals: gemstoneMetals != null
-          ? List<GemstoneMetal>.from(gemstoneMetals.map((g) => g.copyWith())) // ✅ Deep copy gemstoneMetals
+          ? List<GemstoneMetal>.from(gemstoneMetals
+              .map((g) => g.copyWith())) // ✅ Deep copy gemstoneMetals
           : this.gemstoneMetals != null
-              ? List<GemstoneMetal>.from(this.gemstoneMetals!.map((g) => g.copyWith()))
+              ? List<GemstoneMetal>.from(
+                  this.gemstoneMetals!.map((g) => g.copyWith()))
               : [],
     );
   }
@@ -164,9 +189,14 @@ class ProductType {
         name: json["name"],
         type: json["type"],
         metalName: json["metalName"],
-        metalId: json["metalId"] != null && json["metalId"] != "" ? int.parse(json["metalId"].toString()) : null,
+        metalId: json["metalId"] != null && json["metalId"] != ""
+            ? int.parse(json["metalId"].toString())
+            : null,
         isEdited: json["isEdited"] ?? false,
-        items: json["properties"] != null ? List<ItemFormField>.from(json["properties"]?.map((x) => ItemFormField.fromJson(x)) ?? []) : [],
+        items: json["properties"] != null
+            ? List<ItemFormField>.from(
+                json["properties"]?.map((x) => ItemFormField.fromJson(x)) ?? [])
+            : [],
       );
 
   /// ✅ Ensures all fields are properly serialized to JSON
@@ -178,8 +208,12 @@ class ProductType {
         "metalName": metalName ?? "",
         "metalId": metalId ?? 0,
         "isEdited": isEdited,
-        "items": items != null ? List<dynamic>.from(items!.map((x) => x.toJson())) : [],
-        "gemstoneMetals": gemstoneMetals != null ? List<dynamic>.from(gemstoneMetals!.map((x) => x.toJson())) : [],
+        "items": items != null
+            ? List<dynamic>.from(items!.map((x) => x.toJson()))
+            : [],
+        "gemstoneMetals": gemstoneMetals != null
+            ? List<dynamic>.from(gemstoneMetals!.map((x) => x.toJson()))
+            : [],
       };
 }
 
@@ -252,9 +286,12 @@ class ItemFormField {
       fieldType: fieldType ?? this.fieldType,
       unit: unit ?? this.unit,
       options: options != null
-          ? List<ItemOption>.from(options.map((option) => option.copyWith())) // ✅ Ensure new list
+          ? List<ItemOption>.from(
+              options.map((option) => option.copyWith())) // ✅ Ensure new list
           : this.options != null
-              ? List<ItemOption>.from(this.options!.map((option) => option.copyWith())) // ✅ Deep copy fallback
+              ? List<ItemOption>.from(this
+                  .options!
+                  .map((option) => option.copyWith())) // ✅ Deep copy fallback
               : [], // ✅ Ensure non-null value
     );
   }
@@ -267,7 +304,8 @@ class ItemFormField {
         isRequired: json["is_required"] == 0 ? false : true,
         fieldType: json["type"] ?? "Text",
         options: json["values"] is List
-            ? List<ItemOption>.from(json["values"].map((x) => ItemOption.fromJson(x)))
+            ? List<ItemOption>.from(
+                json["values"].map((x) => ItemOption.fromJson(x)))
             : (json["values"] is Map<String, dynamic>)
                 ? [ItemOption.fromJson(json["values"])]
                 : [],
@@ -276,7 +314,8 @@ class ItemFormField {
   void resetField() {
     fieldValue = ""; // ✅ Reset fieldValue to an empty string
     isEdited = false; // ✅ Reset isEdited to false
-    options?.forEach((option) => option.resetOption()); // ✅ Reset all options inside
+    options?.forEach(
+        (option) => option.resetOption()); // ✅ Reset all options inside
   }
 
   /// ✅ Properly serializes all fields to JSON
@@ -287,7 +326,9 @@ class ItemFormField {
         "unit_of_measurement": unit ?? "",
         "is_required": isRequired == true ? 1 : 0, // Convert boolean to integer
         "type": fieldType ?? "Text",
-        "values": options != null ? List<dynamic>.from(options!.map((x) => x.toJson())) : [],
+        "values": options != null
+            ? List<dynamic>.from(options!.map((x) => x.toJson()))
+            : [],
       };
 }
 
@@ -314,8 +355,10 @@ class ItemOption {
     return ItemOption(
       id: id ?? this.id,
       value: value ?? this.value,
-      isSelected: isSelected ?? this.isSelected, // ✅ Properly updates `isSelected`
-      isRequired: isRequired ?? this.isRequired, // ✅ Properly updates `isRequired`
+      isSelected:
+          isSelected ?? this.isSelected, // ✅ Properly updates `isSelected`
+      isRequired:
+          isRequired ?? this.isRequired, // ✅ Properly updates `isRequired`
     );
   }
 
@@ -522,8 +565,14 @@ class Product {
   Product.fromJson(Map<String, dynamic> json)
       : product_id = json["id"] ?? json["product_id"],
         product_name = json["product_name"],
-        variations = (json["variations"] != null && (json["variations"] as List).isNotEmpty) ? (json["variations"] as List).map((v) => Variation.fromJson(v)).toList() : null,
-        fields = List<ItemFormField>.from(json["fields"]?.map((x) => ItemFormField.fromJson(x)) ?? []),
+        variations = (json["variations"] != null &&
+                (json["variations"] as List).isNotEmpty)
+            ? (json["variations"] as List)
+                .map((v) => Variation.fromJson(v))
+                .toList()
+            : null,
+        fields = List<ItemFormField>.from(
+            json["fields"]?.map((x) => ItemFormField.fromJson(x)) ?? []),
         join = json['in_cart'].toString() == '0' ? '0' : '1',
         quantity = json['quantity'],
         cityName = json['city_name'],
@@ -549,7 +598,10 @@ class Product {
         price_after_discount = json["price_after_discount"]?.toDouble(),
         main_image = json["main_image"],
         is_liked = json["is_liked"] ?? 0,
-        more_images = json["more_images"] != null ? List<MoreImage>.from(json["more_images"].map((x) => MoreImage.fromJson(x))) : [],
+        more_images = json["more_images"] != null
+            ? List<MoreImage>.from(
+                json["more_images"].map((x) => MoreImage.fromJson(x)))
+            : [],
         productTypeName = json["product_type"],
         productTypeId = json["product_type_id"],
         store = Store.fromJson({
@@ -560,17 +612,26 @@ class Product {
         }),
         product_code = json["product_code"],
         opening_qty = json["opening_qty"],
-        product_qty_left = int.tryParse(json["product_qty_left"].toString()) ?? 0,
+        product_qty_left =
+            int.tryParse(json["product_qty_left"].toString()) ?? 0,
         vat = json["vat"],
-        product_weight = json["product_weight"] == null ? null : double.parse(json["product_weight"].toString()),
+        product_weight = json["product_weight"] == null
+            ? null
+            : double.parse(json["product_weight"].toString()),
         boolean_percent_discount = json["boolean_percent_discount"],
-        sales_discount = json["sales_discount"] != null ? json["sales_discount"].toInt() : null,
+        sales_discount = json["sales_discount"] != null
+            ? json["sales_discount"].toInt()
+            : null,
         free_shipping = json["free_shipping"],
         loading = false,
         flat_rate = json["flat_rate"],
         multi_shipping = json["multi_shipping"],
-        shipping_cost = json["shipping_cost"] == null ? null : double.parse(json["shipping_cost"].toString()),
-        rate = json["rating"] == null ? 0 : int.parse(double.parse(json["rating"]).toStringAsFixed(0)),
+        shipping_cost = json["shipping_cost"] == null
+            ? null
+            : double.parse(json["shipping_cost"].toString()),
+        rate = json["rating"] == null
+            ? 0
+            : int.parse(double.parse(json["rating"]).toStringAsFixed(0)),
         reviews_count = json["reviews_count"],
         in_cart = json["in_cart"],
         orders_count = json["orders_count"];
@@ -596,7 +657,9 @@ class Product {
         "price_after_discount": price_after_discount,
         "main_image": main_image,
         "is_liked": is_liked,
-        "more_images": more_images == null ? [] : List<dynamic>.from(more_images!.map((x) => x)),
+        "more_images": more_images == null
+            ? []
+            : List<dynamic>.from(more_images!.map((x) => x)),
         // New fields
         "product_code": product_code,
         "model": model,
@@ -627,8 +690,11 @@ class ProductMetals {
   });
 
   factory ProductMetals.fromJson(Map<String, dynamic> json) => ProductMetals(
-        metal: List<ProductType>.from(json["metals"]?.map((x) => ProductType.fromJson(x)) ?? []),
-        gemstoneStyle: List<ProductType>.from(json["gemstones_styles"]?.map((x) => ProductType.fromJson(x)) ?? []),
+        metal: List<ProductType>.from(
+            json["metals"]?.map((x) => ProductType.fromJson(x)) ?? []),
+        gemstoneStyle: List<ProductType>.from(
+            json["gemstones_styles"]?.map((x) => ProductType.fromJson(x)) ??
+                []),
       );
 
   Map<String, dynamic> toJson() => {
@@ -715,7 +781,10 @@ class GridElement {
       h: json["h"],
       main_image: json["main_image"].toString(),
       actions: actionsList.map<Actions>((x) => Actions.fromJson(x)).toList(),
-      more_images: json["more_images"] == null ? [] : List<MoreImage>.from(json["more_images"].map((x) => MoreImage.fromJson(x))),
+      more_images: json["more_images"] == null
+          ? []
+          : List<MoreImage>.from(
+              json["more_images"].map((x) => MoreImage.fromJson(x))),
     );
   }
 
@@ -831,7 +900,10 @@ class ProductSection {
         sectionName: json["section_name"],
         slider_type: json["slider_type"],
         rGridId: json["r_grid_id"],
-        gridElements: json["grid_elements"] == null ? [] : List<GridElement>.from(json["grid_elements"]!.map((x) => GridElement.fromJson(x))),
+        gridElements: json["grid_elements"] == null
+            ? []
+            : List<GridElement>.from(
+                json["grid_elements"]!.map((x) => GridElement.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -840,7 +912,9 @@ class ProductSection {
         "section_name": sectionName,
         "slider_type": slider_type,
         "r_grid_id": rGridId,
-        "grid_elements": gridElements == null ? [] : List<dynamic>.from(gridElements!.map((x) => x.toJson())),
+        "grid_elements": gridElements == null
+            ? []
+            : List<dynamic>.from(gridElements!.map((x) => x.toJson())),
       };
 }
 
@@ -900,7 +974,8 @@ class ProductCategories {
     required this.categoryName,
   });
 
-  factory ProductCategories.fromJson(Map<String, dynamic> json) => ProductCategories(
+  factory ProductCategories.fromJson(Map<String, dynamic> json) =>
+      ProductCategories(
         id: json["id"],
         categoryImage: json["main_image"],
         categoryName: json["category_name"],

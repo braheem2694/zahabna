@@ -39,13 +39,18 @@ class ProductWidget extends StatefulWidget {
   final String? fromKey;
   final int? index;
 
-  ProductWidget({required this.product, this.fromKey, this.tag = '/ShProductDetail', this.index});
+  ProductWidget(
+      {required this.product,
+      this.fromKey,
+      this.tag = '/ShProductDetail',
+      this.index});
 
   @override
   ProductWidgetState createState() => ProductWidgetState();
 }
 
-class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMixin {
+class ProductWidgetState extends State<ProductWidget>
+    with TickerProviderStateMixin {
   final random = Random();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -105,7 +110,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
       enableDrag: true,
 
       isScrollControlled: true,
-      transitionAnimationController: AnimationController(vsync: this, duration: const Duration(milliseconds: 250)),
+      transitionAnimationController: AnimationController(
+          vsync: this, duration: const Duration(milliseconds: 250)),
       // Set this to true to make the sheet full-screen.
       builder: (BuildContext context) {
         // Return the screen you want to show as a bottom sheet
@@ -115,7 +121,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
       refreshing.value = true;
       // globalController.productDetails_screenController.dispose();
       // GetInstance().delete(tag: globalController.productDetails_screenController);
-      Get.delete<ProductDetails_screenController>(tag: "${widget.product.product_id}");
+      Get.delete<ProductDetails_screenController>(
+          tag: "${widget.product.product_id}");
       Future.delayed(const Duration(milliseconds: 350)).then((value) {
         globalController.isLiked.value;
 
@@ -142,8 +149,12 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
     print(widget.product.product_name);
     print(isLiked.value);
     isReallyLiked.value = widget.product.is_liked == 0 ? false : true;
-    imageCount.value =
-        (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) < 4 ? (widget.product.more_images?.length ?? 0 + (widget.product.main_image != null ? 1 : 0)) : 4;
+    imageCount.value = (widget.product.more_images?.length ??
+                0 + (widget.product.main_image != null ? 1 : 0)) <
+            4
+        ? (widget.product.more_images?.length ??
+            0 + (widget.product.main_image != null ? 1 : 0))
+        : 4;
     return InkWell(
       key: scaffoldKey,
       focusColor: Colors.transparent,
@@ -163,7 +174,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
         //   images.add(CachedNetworkImageProvider(widget.product.more_images![i].file_path));
         //
         // }
-        globalController.updateProductLike(widget.product.is_liked == 1 ? true : false);
+        globalController
+            .updateProductLike(widget.product.is_liked == 1 ? true : false);
 
         // if (Platform.isAndroid) {
         // await  Get.delete<ProductDetails_screenController>(tag: "${widget.product.product_id}").then((value) {
@@ -188,9 +200,14 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
         //
         // }
 
-        Get.toNamed(AppRoutes.Productdetails_screen,
-            arguments: {'product': widget.product, 'fromCart': false, 'productSlug': null, 'tag': "${widget.product.product_id}"},
-            parameters: {'tag': "${UniqueKey()}${widget.product.product_id}"})?.then((value) {
+        Get.toNamed(AppRoutes.Productdetails_screen, arguments: {
+          'product': widget.product,
+          'fromCart': false,
+          'productSlug': null,
+          'tag': "${widget.product.product_id}"
+        }, parameters: {
+          'tag': "${UniqueKey()}${widget.product.product_id}"
+        })?.then((value) {
           refreshing.value = true;
           globalController.updateCurrentRout(AppRoutes.tabsRoute);
           globalController.cartCount = 0;
@@ -198,7 +215,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
 
           Future.delayed(const Duration(milliseconds: 200)).then((value) {
             widget.product.is_liked = globalController.isLiked.value ? 1 : 0;
-            globalController.updateFavoriteProduct(widget.product.product_id, globalController.isLiked.value ? 1 : 0);
+            globalController.updateFavoriteProduct(widget.product.product_id,
+                globalController.isLiked.value ? 1 : 0);
             refreshing.value = false;
           });
         });
@@ -224,7 +242,9 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
       },
       child: Obx(() {
         return Container(
-          height: getScreenRatio() > 1 ? (Get.height / getScreenRatio()) / 1.3 : (Get.height / getScreenRatio()) / 2,
+          height: getScreenRatio() > 1
+              ? (Get.height / getScreenRatio()) / 1.3
+              : (Get.height / getScreenRatio()) / 2,
           width: getHorizontalSize(187),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.only(
@@ -242,125 +262,131 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
               Stack(
                 children: [
                   Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      alignment: Alignment.topCenter,
-                      height: getScreenRatio() > 1 ? (Get.height / getScreenRatio()) / 1.7 : (Get.height / getScreenRatio()) / 2.5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    alignment: Alignment.topCenter,
+                    height: getScreenRatio() > 1
+                        ? (Get.height / getScreenRatio()) / 1.7
+                        : (Get.height / getScreenRatio()) / 2.5,
 
-                      // set height
+                    // set height
 
-                      child: widget.fromKey == "filter"
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.zero, bottomRight: Radius.zero),
-                              child: (widget.product.main_image?.toLowerCase().endsWith('avif') ?? false)
-                                  ? Container(
-                                      height: (Get.height / getScreenRatio()) / 1.3,
-                                      width: Get.width,
-                                      decoration: const BoxDecoration(image: DecorationImage(image: AssetImage(AssetPaths.placeholder))),
-                                      child: AvifImage.network(
-                                        widget.product.main_image!,
-                                        fit: BoxFit.cover,
-                                        height: (Get.height / getScreenRatio()) / 1.3,
-                                        width: Get.width,
-                                      ),
-                                    )
-                                  : ProgressiveImage(
-                                      placeholder: const AssetImage(AssetPaths.placeholder),
-                                      thumbnail: CachedNetworkImageProvider(
-                                        convertToThumbnailUrl(widget.product.main_image ?? '', isBlurred: true),
-                                        scale: 1,
-                                        cacheManager: CacheManager(
-                                          Config(
-                                            widget.product.product_id.toString(),
-                                            stalePeriod: const Duration(seconds: 10),
-                                            maxNrOfCacheObjects: 50,
-                                          ),
-                                        ),
-                                      ),
-                                      blur: 1,
-                                      image: CachedNetworkImageProvider(
-                                        convertToThumbnailUrl(widget.product.main_image ?? "", isBlurred: false) ?? '',
-                                        scale: 1,
-                                        cacheManager: CacheManager(
-                                          Config(
-                                            widget.product.product_id.toString(),
-                                            stalePeriod: const Duration(seconds: 10),
-                                            maxNrOfCacheObjects: 50,
-                                          ),
-                                        ),
-                                        errorListener: (p0) {},
-                                      ),
-                                      height: (Get.height / getScreenRatio()) / 1.3,
-                                      width: Get.width,
-                                      fit: BoxFit.cover,
-                                      fadeDuration: const Duration(milliseconds: 200),
-                                      key: Key(widget.product.product_id.toString()),
-                                    ),
-                            )
-                          : ClipRRect(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.zero, bottomRight: Radius.zero),
-                              child: (widget.product.main_image?.toLowerCase().endsWith('avif') ?? false)
-                                  ? Container(
-                                      height: (Get.height / getScreenRatio()) / 1.3,
-                                      width: Get.width,
-                                      decoration: const BoxDecoration(image: DecorationImage(image: AssetImage(AssetPaths.placeholder))),
-                                      child: AvifImage.network(
-                                        widget.product.main_image!,
-                                        fit: BoxFit.cover,
-                                        height: (Get.height / getScreenRatio()) / 1.3,
-                                        width: Get.width,
-                                      ),
-                                    )
-                                  : ProgressiveImage(
-                                      placeholder: const AssetImage(AssetPaths.placeholder),
-                                      // size: 1.87KB
-                                      thumbnail: CachedNetworkImageProvider(
-                                        convertToThumbnailUrl(widget.product.main_image ?? '', isBlurred: true),
-                                        scale: 1,
-                                        cacheManager: CacheManager(
-                                          Config(
-                                            widget.product.product_id.toString(),
-                                            stalePeriod: const Duration(seconds: 10), // Adjust based on how long you want items to stay in the cache
-                                            maxNrOfCacheObjects: 50,
-
-                                            // Maximum number of images to keep in cache
-                                            // You can add other configurations like fileService or repo here
-                                          ),
-                                        ),
-                                      ),
-                                      blur: 1,
-                                      // size: 1.29MB
-                                      image: CachedNetworkImageProvider(
-                                        convertToThumbnailUrl(widget.product.main_image ?? "", isBlurred: false) ?? '',
-                                        scale: 1,
-
-                                        cacheManager: CacheManager(
-                                          Config(
-                                            widget.product.product_id.toString(),
-                                            stalePeriod: const Duration(seconds: 10), // Adjust based on how long you want items to stay in the cache
-                                            maxNrOfCacheObjects: 50,
-
-                                            // Maximum number of images to keep in cache
-                                            // You can add other configurations like fileService or repo here
-                                          ),
-                                        ),
-                                        errorListener: (p0) {},
-                                        // maxWidth: int.parse(getHorizontalSize(180).round().toString()),
-                                        // maxHeight: int.parse(getVerticalSize(220).round().toString()),
-                                      ),
-                                      height: (Get.height / getScreenRatio()) / 1.3,
-
-                                      width: Get.width,
-                                      fit: BoxFit.cover,
-                                      fadeDuration: const Duration(milliseconds: 200),
-                                      key: Key(widget.product.product_id.toString()),
-                                    ),
-                            )),
+                    child: !Ui.isValidUri(widget.product.main_image)
+                        ? ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
+                                bottomLeft: Radius.zero,
+                                bottomRight: Radius.zero),
+                            child: Image.asset(
+                              AssetPaths.placeholder,
+                              fit: BoxFit.cover,
+                              height: (Get.height / getScreenRatio()) / 1.3,
+                              width: Get.width,
+                            ),
+                          )
+                        : ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
+                                bottomLeft: Radius.zero,
+                                bottomRight: Radius.zero),
+                            child: (widget.product.main_image!
+                                    .toLowerCase()
+                                    .endsWith('avif'))
+                                ? Container(
+                                    height:
+                                        (Get.height / getScreenRatio()) / 1.3,
+                                    width: Get.width,
+                                    decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                AssetPaths.placeholder))),
+                                    child:
+                                        Ui.isValidUri(widget.product.main_image)
+                                            ? AvifImage.network(
+                                                widget.product.main_image!,
+                                                fit: BoxFit.cover,
+                                                height: (Get.height /
+                                                        getScreenRatio()) /
+                                                    1.3,
+                                                width: Get.width,
+                                              )
+                                            : Image.asset(
+                                                AssetPaths.placeholder,
+                                                fit: BoxFit.cover,
+                                                height: (Get.height /
+                                                        getScreenRatio()) /
+                                                    1.3,
+                                                width: Get.width,
+                                              ),
+                                  )
+                                : ProgressiveImage(
+                                    placeholder: const AssetImage(
+                                        AssetPaths.placeholder),
+                                    thumbnail: Ui.isValidUri(
+                                            convertToThumbnailUrl(
+                                                widget.product.main_image!,
+                                                isBlurred: true))
+                                        ? CachedNetworkImageProvider(
+                                            convertToThumbnailUrl(
+                                                widget.product.main_image!,
+                                                isBlurred: true),
+                                            scale: 1,
+                                            cacheManager: CacheManager(
+                                              Config(
+                                                widget.product.product_id
+                                                    .toString(),
+                                                stalePeriod:
+                                                    const Duration(seconds: 10),
+                                                maxNrOfCacheObjects: 50,
+                                              ),
+                                            ),
+                                          )
+                                        : const AssetImage(
+                                                AssetPaths.placeholder)
+                                            as ImageProvider,
+                                    blur: 1,
+                                    image: Ui.isValidUri(convertToThumbnailUrl(
+                                            widget.product.main_image!,
+                                            isBlurred: false))
+                                        ? CachedNetworkImageProvider(
+                                            convertToThumbnailUrl(
+                                                    widget.product.main_image!,
+                                                    isBlurred: false) ??
+                                                '',
+                                            scale: 1,
+                                            cacheManager: CacheManager(
+                                              Config(
+                                                widget.product.product_id
+                                                    .toString(),
+                                                stalePeriod:
+                                                    const Duration(seconds: 10),
+                                                maxNrOfCacheObjects: 50,
+                                              ),
+                                            ),
+                                            errorListener: (p0) {},
+                                          )
+                                        : const AssetImage(
+                                                AssetPaths.placeholder)
+                                            as ImageProvider,
+                                    height:
+                                        (Get.height / getScreenRatio()) / 1.3,
+                                    width: Get.width,
+                                    fit: BoxFit.cover,
+                                    fadeDuration:
+                                        const Duration(milliseconds: 200),
+                                    key: Key(
+                                        widget.product.product_id.toString()),
+                                  ),
+                          ),
+                  ),
                   widget.product.product_qty_left.toInt() < 1
                       ? Container()
                       : Positioned(
-                          top: 0, // Adjust the value as needed for spacing from the top
+                          top:
+                              0, // Adjust the value as needed for spacing from the top
                           right: 0,
                           child: widget.fromKey == "my_store"
                               ? GestureDetector(
@@ -372,18 +398,34 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                                           product: widget.product,
                                         ))?.then(
                                       (value) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          globalController.selectedGemstoneStyle.clear();
-                                          globalController.itemGemstoneStyles.clear();
-                                          globalController.gemstonesDropDownMap.clear();
-                                          globalController.gemstonStylesDropList.removeRange(1, globalController.gemstonStylesDropList.length);
-                                          globalController.resetMetalFields(globalController.metals, globalController.gemstones);
-                                          globalController.resetGemstonStylesDropList();
-                                          globalController.resetgemstonesDropDownMap();
-                                          globalController.updateAddItemDropDownLists();
-                                          globalController.description.value = "";
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          globalController.selectedGemstoneStyle
+                                              .clear();
+                                          globalController.itemGemstoneStyles
+                                              .clear();
+                                          globalController.gemstonesDropDownMap
+                                              .clear();
+                                          globalController.gemstonStylesDropList
+                                              .removeRange(
+                                                  1,
+                                                  globalController
+                                                      .gemstonStylesDropList
+                                                      .length);
+                                          globalController.resetMetalFields(
+                                              globalController.metals,
+                                              globalController.gemstones);
+                                          globalController
+                                              .resetGemstonStylesDropList();
+                                          globalController
+                                              .resetgemstonesDropDownMap();
+                                          globalController
+                                              .updateAddItemDropDownLists();
+                                          globalController.description.value =
+                                              "";
                                           try {
-                                            MyStoreController controller = Get.find();
+                                            MyStoreController controller =
+                                                Get.find();
                                             controller.getProducts(1);
                                           } catch (e) {
                                             print(e);
@@ -394,21 +436,35 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                                   },
                                   behavior: HitTestBehavior.translucent,
                                   child: Container(
-                                      padding: getPadding(top: 14, right: 10, left: 10, bottom: 10),
+                                      padding: getPadding(
+                                          top: 14,
+                                          right: 10,
+                                          left: 10,
+                                          bottom: 10),
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            Colors.blue.withOpacity(0.5), // Lighter black at the top left
-                                            Colors.blue.withOpacity(0.6), // Darker black at the bottom right
-                                            Colors.blue.withOpacity(0.7), // Darker black at the bottom right
-                                            Colors.blue.withOpacity(0.8), // Darker black at the bottom right
+                                            Colors.blue.withOpacity(
+                                                0.5), // Lighter black at the top left
+                                            Colors.blue.withOpacity(
+                                                0.6), // Darker black at the bottom right
+                                            Colors.blue.withOpacity(
+                                                0.7), // Darker black at the bottom right
+                                            Colors.blue.withOpacity(
+                                                0.8), // Darker black at the bottom right
                                           ],
                                         ),
-                                        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                                        borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(10),
+                                            topRight: Radius.circular(10)),
                                         boxShadow: [
-                                          BoxShadow(color: Colors.black12.withOpacity(0.1), blurRadius: 3, offset: const Offset(0, 2)),
+                                          BoxShadow(
+                                              color: Colors.black12
+                                                  .withOpacity(0.1),
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 2)),
                                         ],
                                       ),
                                       child: Icon(
@@ -434,10 +490,14 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Colors.green.withOpacity(0.5), // Lighter black at the top left
-                                        Colors.green.withOpacity(0.6), // Darker black at the bottom right
-                                        Colors.green.withOpacity(0.7), // Darker black at the bottom right
-                                        Colors.green.withOpacity(0.8), // Darker black at the bottom right
+                                        Colors.green.withOpacity(
+                                            0.5), // Lighter black at the top left
+                                        Colors.green.withOpacity(
+                                            0.6), // Darker black at the bottom right
+                                        Colors.green.withOpacity(
+                                            0.7), // Darker black at the bottom right
+                                        Colors.green.withOpacity(
+                                            0.8), // Darker black at the bottom right
                                       ],
                                     ),
                                     borderRadius: const BorderRadius.only(
@@ -497,9 +557,14 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price
+                                  widget.product.price_after_discount != null &&
+                                          widget.product.price_after_discount !=
+                                              widget.product.product_price
                                       ? Text(
-                                          sign.toString() + widget.product.price_after_discount.toString(),
+                                          sign.toString() +
+                                              widget
+                                                  .product.price_after_discount
+                                                  .toString(),
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: price_color,
@@ -512,19 +577,52 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                                     child: Padding(
                                       padding: getPadding(left: 4.0),
                                       child: Text(
-                                        sign.toString() + widget.product.product_price.toString(),
+                                        sign.toString() +
+                                            widget.product.product_price
+                                                .toString(),
                                         style: TextStyle(
-                                          fontWeight: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ||
-                                                  widget.product.price_after_discount.toString() == 'null'
+                                          fontWeight: (widget.product
+                                                              .price_after_discount !=
+                                                          null &&
+                                                      widget.product
+                                                              .price_after_discount !=
+                                                          widget.product
+                                                              .product_price) ||
+                                                  widget.product
+                                                          .price_after_discount
+                                                          .toString() ==
+                                                      'null'
                                               ? FontWeight.bold
                                               : FontWeight.normal,
-                                          color:
-                                              (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ? discount_price_color : price_color,
-                                          fontSize: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price) ||
-                                                  widget.product.price_after_discount.toString() == 'null'
+                                          color: (widget.product
+                                                          .price_after_discount !=
+                                                      null &&
+                                                  widget.product
+                                                          .price_after_discount !=
+                                                      widget.product
+                                                          .product_price)
+                                              ? discount_price_color
+                                              : price_color,
+                                          fontSize: (widget.product
+                                                              .price_after_discount !=
+                                                          null &&
+                                                      widget.product
+                                                              .price_after_discount !=
+                                                          widget.product
+                                                              .product_price) ||
+                                                  widget.product
+                                                          .price_after_discount
+                                                          .toString() ==
+                                                      'null'
                                               ? getFontSize(14)
                                               : getFontSize(12),
-                                          decoration: (widget.product.price_after_discount != null && widget.product.price_after_discount != widget.product.product_price)
+                                          decoration: (widget.product
+                                                          .price_after_discount !=
+                                                      null &&
+                                                  widget.product
+                                                          .price_after_discount !=
+                                                      widget.product
+                                                          .product_price)
                                               ? TextDecoration.lineThrough
                                               : TextDecoration.none,
                                         ),
@@ -543,29 +641,47 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                             child: Obx(() => GestureDetector(
                                       onTap: () {
                                         isLiked.value = !isLiked.value;
-                                        widget.product.is_liked = isLiked.value ? 1 : 0;
-                                        globalController.homeDataList.value.products?.firstWhere((element) => element.product_id == widget.product.product_id).is_liked = isLiked.value ? 1 : 0;
+                                        widget.product.is_liked =
+                                            isLiked.value ? 1 : 0;
+                                        globalController
+                                            .homeDataList.value.products
+                                            ?.firstWhere((element) =>
+                                                element.product_id ==
+                                                widget.product.product_id)
+                                            .is_liked = isLiked.value ? 1 : 0;
                                         globalController.update();
                                         globalController.refresh();
-                                        function.setFavorite(widget.product, false, isLiked.value).then((value) {
-                                          widget.product.is_liked = isLiked.value ? 1 : 0;
-                                          WishlistController _controller = Get.find();
+                                        function
+                                            .setFavorite(widget.product, false,
+                                                isLiked.value)
+                                            .then((value) {
+                                          widget.product.is_liked =
+                                              isLiked.value ? 1 : 0;
+                                          WishlistController _controller =
+                                              Get.find();
                                           _controller.GetFavorite().then(
                                             (value) {
-                                              widget.product.is_liked = isLiked.value ? 1 : 0;
+                                              widget.product.is_liked =
+                                                  isLiked.value ? 1 : 0;
                                             },
                                           );
                                         });
                                       },
                                       child: AnimatedSwitcher(
-                                          duration: const Duration(milliseconds: 300),
-                                          transitionBuilder: (Widget child, Animation<double> animation) {
-                                            return ScaleTransition(scale: animation, child: child);
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          transitionBuilder: (Widget child,
+                                              Animation<double> animation) {
+                                            return ScaleTransition(
+                                                scale: animation, child: child);
                                           },
                                           child: Icon(
-                                            widget.product.is_liked == 1 ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                            widget.product.is_liked == 1
+                                                ? Icons.favorite_rounded
+                                                : Icons.favorite_border_rounded,
                                             key: ValueKey<bool>(isLiked.value),
-                                            color: ColorConstant.logoSecondColor,
+                                            color:
+                                                ColorConstant.logoSecondColor,
                                             size: getSize(27),
                                           )),
                                     )
@@ -604,7 +720,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
                     alignment: Alignment.topLeft,
                     child: Text(
                       widget.product.product_name ?? '',
-                      style: TextStyle(color: Colors.black, fontSize: getFontSize(12)),
+                      style: TextStyle(
+                          color: Colors.black, fontSize: getFontSize(12)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -620,7 +737,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
 
   onTapWhatsapp(Product product) {
     makeWhatsappContact('+96176600252',
-        text: "I want to ask about this product: ${product.product_name}\n${Uri.parse(product.main_image.toString().replaceAll(" ", "%20"))}\n${product.description}\n"
+        text:
+            "I want to ask about this product: ${product.product_name}\n${Uri.parse(product.main_image.toString().replaceAll(" ", "%20"))}\n${product.description}\n"
             "$conVersion/product/${product.slug}");
   }
 }
@@ -628,7 +746,8 @@ class ProductWidgetState extends State<ProductWidget> with TickerProviderStateMi
 Future<void> makeWhatsappContact(String phone, {required String text}) async {
   // normalize phone (remove spaces/plus if your API expects digits only)
   final normalized = phone.replaceAll(' ', '').replaceAll('+', '');
-  final uri = Uri.https('wa.me', '/$normalized', {'text': text}); // auto-encodes
+  final uri =
+      Uri.https('wa.me', '/$normalized', {'text': text}); // auto-encodes
   await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
@@ -652,6 +771,20 @@ String? progImages(String? image, fromKey) {
 }
 
 String convertToThumbnailUrl(String originalUrl, {bool isBlurred = false}) {
+  if (originalUrl.isEmpty) return "";
+
+  // Check if it's a valid URL with a host if it starts with http
+  if (originalUrl.toLowerCase().startsWith("http")) {
+    try {
+      final uri = Uri.parse(originalUrl);
+      if (!uri.hasAuthority || uri.host.isEmpty) {
+        return "";
+      }
+    } catch (_) {
+      return "";
+    }
+  }
+
   // Find the last dot to get the file extension
   int lastDot = originalUrl.lastIndexOf('.');
 

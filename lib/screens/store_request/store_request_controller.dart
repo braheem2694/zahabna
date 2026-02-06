@@ -12,6 +12,7 @@ import '../../models/store_request.dart';
 import '../../widgets/ui.dart';
 import '../../cores/assets.dart';
 import '../SignIn_screen/controller/SignIn_controller.dart';
+import '../../utils/device_data.dart';
 
 class StoreRequestController extends GetxController {
   // Form fields
@@ -140,6 +141,8 @@ class StoreRequestController extends GetxController {
       final response =
           await api.getData(formData, "stores/update-store-request");
 
+      debugPrint('📦 [update-store-request] Response: $response');
+      
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
@@ -152,7 +155,8 @@ class StoreRequestController extends GetxController {
           subscriberName: subscriberNameController.text,
           motherName: motherNameController.text,
           storeName: storeNameController.text,
-          phoneNumber: "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
+          phoneNumber:
+              "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
           country: globalController.countryName.value,
           region: regionController.text,
           address: addressController.text,
@@ -164,11 +168,16 @@ class StoreRequestController extends GetxController {
           startDate: args!.startDate,
           registerDate: args!.registerDate,
           status: args!.status,
-          recordNumber: recordNumber.text != "" ? double.tryParse(recordNumber.text) ?? 0.0 : 0.0,
+          recordNumber: recordNumber.text != ""
+              ? double.tryParse(recordNumber.text) ?? 0.0
+              : 0.0,
           branchCount: int.tryParse(branchCountController.text) ?? 1,
-          subscriptionMonths: int.tryParse(subscriptionMonthsController.text) ?? 1,
+          subscriptionMonths:
+              int.tryParse(subscriptionMonthsController.text) ?? 1,
           agreedToTerms: agreedToTerms.value,
-          userTermsANdConditions: termsConditions.value != "" ? termsConditions.value : globalController.homeDataList.value.requestTerms ?? '',
+          userTermsANdConditions: termsConditions.value != ""
+              ? termsConditions.value
+              : globalController.homeDataList.value.requestTerms ?? '',
           latitude: double.tryParse(latController.text),
           longitude: double.tryParse(lngController.text),
           images: args!.images,
@@ -204,6 +213,8 @@ class StoreRequestController extends GetxController {
       },
       "stores/reactivate-request",
     );
+
+    debugPrint('📦 [reactivate-request] Response: $response');
 
     try {
       if (response['success'] == true) {
@@ -251,14 +262,16 @@ class StoreRequestController extends GetxController {
         "stores/delete-store-request",
       );
 
+      debugPrint('📦 [delete-store-request] Response: $response');
+
       if (response['success'] == true) {
         deletingRequest.value = false;
         args!.status = "Deleted";
-        
+
         // Update stores list and refresh tabs
         await FetchStores();
         _refreshTabsAfterStoreDeletion();
-        
+
         Ui.flutterToast(response["message"].toString().tr, Toast.LENGTH_SHORT,
             Colors.black45, Colors.white);
 
@@ -340,7 +353,7 @@ class StoreRequestController extends GetxController {
   /// Build list of images to upload for the background service
   List<Map<String, dynamic>> _buildPendingImagesList() {
     final images = <Map<String, dynamic>>[];
-    
+
     if (_shouldUpload(idImage, 201)) {
       images.add({
         'filePath': idImage.value!,
@@ -348,7 +361,7 @@ class StoreRequestController extends GetxController {
         'type': 201,
       });
     }
-    
+
     if (_shouldUpload(id2Image, 202)) {
       images.add({
         'filePath': id2Image.value!,
@@ -356,7 +369,7 @@ class StoreRequestController extends GetxController {
         'type': 202,
       });
     }
-    
+
     if (_shouldUpload(selfieImage, 205)) {
       images.add({
         'filePath': selfieImage.value!,
@@ -364,7 +377,7 @@ class StoreRequestController extends GetxController {
         'type': 205,
       });
     }
-    
+
     if (_shouldUpload(storeImage, 203)) {
       images.add({
         'filePath': storeImage.value!,
@@ -372,7 +385,7 @@ class StoreRequestController extends GetxController {
         'type': 203,
       });
     }
-    
+
     if (_shouldUpload(logoImage, 206)) {
       images.add({
         'filePath': logoImage.value!,
@@ -380,30 +393,31 @@ class StoreRequestController extends GetxController {
         'type': 206,
       });
     }
-    
+
     return images;
   }
 
   /// Enqueue images for background upload.
-  /// 
+  ///
   /// This method delegates to [BackgroundUploadService] which:
   /// - Continues uploads even after this controller is disposed
   /// - Prevents duplicate uploads
   /// - Provides observable progress via streams
-  /// 
+  ///
   /// The method returns immediately - uploads continue in background.
   Future<void> uploadImageInBackground(Map<String, dynamic> argsMap) async {
     // Don't block if already uploading via service
-    if (BackgroundUploadService.instance.hasActiveUploads(argsMap['row_id'].toString())) {
+    if (BackgroundUploadService.instance
+        .hasActiveUploads(argsMap['row_id'].toString())) {
       debugPrint('📤 Upload already in progress for row: ${argsMap['row_id']}');
       return;
     }
-    
+
     sendingRequest.value = false;
 
     // Build list of images that need uploading
     final images = _buildPendingImagesList();
-    
+
     if (images.isEmpty) {
       debugPrint('📤 No images to upload');
       return;
@@ -415,8 +429,9 @@ class StoreRequestController extends GetxController {
     uploadProgress.value = 0;
 
     // Capture token at call time (before any navigation might invalidate prefs)
-    final token = argsMap['token']?.toString() ?? prefs?.getString("token") ?? "";
-    
+    final token =
+        argsMap['token']?.toString() ?? prefs?.getString("token") ?? "";
+
     // Delegate to background service - this continues even if controller is disposed
     BackgroundUploadService.instance.enqueueUpload(
       images: images,
@@ -424,12 +439,12 @@ class StoreRequestController extends GetxController {
       rowId: argsMap['row_id'].toString(),
       token: token,
     );
-    
+
     // Optional: Subscribe to progress updates for UI
     // This subscription is automatically cleaned up when controller is disposed
     _subscribeToUploadProgress(argsMap['row_id'].toString());
   }
-  
+
   /// Subscribe to upload progress from background service.
   /// This is safe - if controller is disposed, the subscription is cleaned up.
   void _subscribeToUploadProgress(String rowId) {
@@ -438,7 +453,7 @@ class StoreRequestController extends GetxController {
       (event) {
         // Only process events for our row
         if (event.batchId?.contains(rowId) != true) return;
-        
+
         switch (event.type) {
           case UploadEventType.progress:
             uploadProgress.value = event.current ?? 0;
@@ -647,7 +662,36 @@ class StoreRequestController extends GetxController {
   }
 
   Future<void> submitRequestForm() async {
-    final token = prefs!.getString("token") ?? "";
+    String token = prefs!.getString("token") ?? "";
+    if (token.isEmpty) {
+      try {
+        token = await firebaseMessaging.getToken() ?? "";
+        if (token.isNotEmpty) {
+          prefs!.setString("token", token);
+        }
+      } catch (e) {}
+    }
+
+    // Still empty? Fallback to device ID
+    if (token.isEmpty) {
+      token = prefs?.getString("deviceId") ?? "";
+      if (token.isEmpty || token == "N/A") {
+        try {
+          final deviceInfo = await getDeviceInfo();
+          token = deviceInfo['deviceId'] ?? "";
+        } catch (e) {}
+      }
+    }
+
+    // Last resort: generate a random token
+    if (token.isEmpty || token == "N/A") {
+      token = generateToken();
+    }
+
+    if (token.isNotEmpty) {
+      prefs?.setString("token", token);
+    }
+
     sendingRequest.value = true;
     final Map<String, dynamic> formData = {
       'token': token,
@@ -674,15 +718,23 @@ class StoreRequestController extends GetxController {
     if (formKey.currentState?.validate() != true) {
       Ui.flutterToast("Please fill all required fields".tr, Toast.LENGTH_SHORT,
           Colors.red, Colors.white);
+      sendingRequest.value = false;
       return;
     }
 
     try {
+      debugPrint('📤 [create-store-request] Sending formData: $formData');
+      
       final response =
           await api.getData(formData, "stores/create-store-request");
+
+      debugPrint('📦 [create-store-request] Response: $response');
+      
       sendingRequest.value = false;
 
-      if ((response['success'] ?? false) == true) {
+      bool isSuccess =
+          (response['succeeded'] ?? response['success'] ?? false) == true;
+      if (isSuccess) {
         // Upload images after successful form submission
         await uploadImageInBackground({
           'row_id': response['row_id'],
@@ -690,16 +742,35 @@ class StoreRequestController extends GetxController {
           'token': token,
         });
 
-        Ui.flutterToast("Subscription submitted successfully".tr,
-            Toast.LENGTH_LONG, Colors.green, Colors.white);
+        Ui.flutterToast(
+            response['message'] ?? "Subscription submitted successfully".tr,
+            Toast.LENGTH_LONG,
+            Colors.green,
+            Colors.white);
+
+        // Reset form fields
+        subscriberNameController.clear();
+        motherNameController.clear();
+        storeNameController.clear();
+        phoneNumberController.clear();
+        addressController.clear();
+        regionController.clear();
+        emailController.clear();
+        birthDay.clear();
+        branchCountController.clear();
+        subscriptionMonthsController.clear();
+
+        // Close the screen
         Get.back();
       } else {
         Ui.flutterToast(response['message'] ?? "Submission failed".tr,
             Toast.LENGTH_LONG, Colors.red, Colors.white);
       }
     } catch (e) {
-      Ui.flutterToast(
-          "Request error".tr, Toast.LENGTH_LONG, Colors.red, Colors.white);
+      sendingRequest.value = false;
+      debugPrint("❌ API Error: $e");
+      Ui.flutterToast("An error occurred during submission".tr,
+          Toast.LENGTH_LONG, Colors.red, Colors.white);
     }
   }
 

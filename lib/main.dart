@@ -39,6 +39,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'services/background_upload_service.dart';
+import 'firebase_options.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +69,14 @@ FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 FirebaseInitialize firebaseInitialize = new FirebaseInitialize();
 RxBool loading = true.obs;
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+}
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 var subscription;
@@ -80,28 +88,53 @@ Future<void> main() async {
   // 3️⃣ Debug: Ensure the app starts with the correct locale
 
   globalController.updateFullName();
-  await Firebase.initializeApp();
+
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+
+    // Register background message handler
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    debugPrint("Firebase initialization failed: $e");
+  }
 
   // 1️⃣ Load translations before launching the app
-  await api.getDataaa({'date': getTranslationPref() ?? "1970-01-01 00:00:00"},
-      "master/get-translations", true).then((value) async {
-    try {
-      appLocalization = AppLocalization();
-      await appLocalization.loadTranslations(value);
-      Get.put(appLocalization); // ✅ Register in GetX
-    } catch (e) {
-      debugPrint("Error loading translations: $e");
-    }
-  });
+  try {
+    await api.getDataaa({'date': getTranslationPref() ?? "1970-01-01 00:00:00"},
+        "master/get-translations", true).then((value) async {
+      try {
+        appLocalization = AppLocalization();
+        await appLocalization.loadTranslations(value);
+        Get.put(appLocalization); // ✅ Register in GetX
+      } catch (e) {
+        debugPrint("Error loading translations: $e");
+      }
+    });
+  } catch (e) {
+    debugPrint("Error fetching translations: $e");
+  }
 
   // 2️⃣ Fetch the locale before running the app
-  Locale initialLocale = await getInitialLocale();
-  Get.updateLocale(initialLocale);
-
-  bool initializationComplete = await initializeApp();
-  if (initializationComplete) {
-    runApp(MyApp(initialLocale: initialLocale));
+  Locale initialLocale;
+  try {
+    initialLocale = await getInitialLocale();
+    Get.updateLocale(initialLocale);
+  } catch (e) {
+    debugPrint("Error getting initial locale: $e");
+    initialLocale = const Locale('en', 'US');
   }
+
+  try {
+    await initializeApp();
+  } catch (e) {
+    debugPrint("App initialization failed: $e");
+  }
+
+  runApp(MyApp(initialLocale: initialLocale));
 }
 
 Future<Locale> getInitialLocale() async {
@@ -186,45 +219,61 @@ Future<bool> FetchStores() async {
 
   try {
     if (response.isNotEmpty) {
-      List StoresInfo = response["stores"];
-      success = response["succeeded"];
+      success = response["succeeded"] ?? false;
       if (success) {
+        List? StoresInfo = response["stores"];
+        if (StoresInfo == null || StoresInfo.isEmpty) {
+          debugPrint("No stores found in response");
+          loading.value = false;
+          return false;
+        }
+
         prefs!.setString('stp_key', response["stp_key"].toString());
 
         prefs!.setBool('multi_store', true);
-        branches_countries = response["branches_countries"];
-        prefs!.setString(
-            'Stores_page_background', response['section'][0]['main_image']);
-        prefs!.setString(
-            'welcome_text', response['section'][0]['welcome_text'].toString());
-        prefs!.setString(
-            'brief_text', response['section'][0]['brief_text'].toString());
-        prefs!.setString(
-            'gif_image', response['section'][0]['gif_image'].toString());
+        branches_countries = response["branches_countries"] ?? [];
 
-        payment_methods = response["payment_types"];
-        GiftCards_payment_methods = response["gift_cards_payment_types"];
+        if (response['section'] != null &&
+            (response['section'] as List).isNotEmpty) {
+          prefs!.setString('Stores_page_background',
+              response['section'][0]['main_image'] ?? "");
+          prefs!.setString('welcome_text',
+              response['section'][0]['welcome_text'].toString());
+          prefs!.setString(
+              'brief_text', response['section'][0]['brief_text'].toString());
+          prefs!.setString(
+              'gif_image', response['section'][0]['gif_image'].toString());
+        }
+
+        payment_methods = response["payment_types"] ?? [];
+        GiftCards_payment_methods = response["gift_cards_payment_types"] ?? [];
         storeList.clear();
-        StoresInfo = response["stores"];
 
         for (int i = 0; i < StoresInfo.length; i++) {
           StoreClass.fromJson(StoresInfo[i]);
         }
-        prefs!.setString(
-            'main_image',
-            storeList
-                    .firstWhere(
-                      (element) =>
-                          element.id == globalController.currentStoreId,
-                    )
-                    .main_image ??
-                '');
+
+        if (storeList.isNotEmpty) {
+          try {
+            var currentStore = storeList.firstWhere(
+              (element) => element.id == globalController.currentStoreId,
+              orElse: () => storeList[0],
+            );
+            prefs!.setString('main_image', currentStore.main_image ?? '');
+          } catch (e) {
+            debugPrint("Error setting main_image: $e");
+          }
+        }
+
         globalController.updateStoreImage("fetchstoresmainfirst");
 
-        globalController.companySettings.value = CompanySettings.fromJson(
-          (response["company_settings"] as List<dynamic>).first
-              as Map<String, dynamic>,
-        );
+        if (response["company_settings"] != null &&
+            (response["company_settings"] as List).isNotEmpty) {
+          globalController.companySettings.value = CompanySettings.fromJson(
+            (response["company_settings"] as List<dynamic>).first
+                as Map<String, dynamic>,
+          );
+        }
 
         globalController.stores.clear();
         globalController.stores.addAll(storeList.where((element) =>
@@ -237,12 +286,18 @@ Future<bool> FetchStores() async {
         prefs!.setString('express_delivery_img',
             response['express_delivery_img'].toString());
 
-        ChangeStroredStore(
-            storeList[0], response["newsLetters"], "fetchstoresmain");
+        if (storeList.isNotEmpty) {
+          ChangeStroredStore(
+              storeList[0], response["newsLetters"], "fetchstoresmain");
+        }
         loading.value = false;
-        globalController.stores.firstWhere(
-          (element) => element.ownerId.toString() == prefs?.getString("id"),
-        );
+        try {
+          globalController.stores.firstWhere(
+            (element) => element.ownerId.toString() == prefs?.getString("id"),
+          );
+        } catch (_) {
+          // No matching store found, ignore
+        }
       }
     } else {}
   } catch (e) {
@@ -256,7 +311,7 @@ Future<bool> initializeApp() async {
   try {
     // Initialize background upload service (lives for app lifetime)
     await BackgroundUploadService.init();
-    
+
     // Perform necessary initializations here (e.g., API calls, reading SharedPreferences, etc.)
     await Future.wait([
       CheckAutoLogin(),
@@ -301,15 +356,7 @@ Widget buildMenu(context) {
                     child: Row(
                       children: <Widget>[
                         CustomImageView(
-                            image: prefs!
-                                    .getString('Profile_image')
-                                    .toString()
-                                    .toLowerCase()
-                                    .startsWith("http")
-                                ? prefs!.getString('Profile_image')
-                                : null,
-                            url: prefs!.getString('Profile_image'),
-                            // svgUrl: prefs!.getString('Profile_image') ?? null,
+                            image: prefs!.getString('Profile_image'),
                             imagePath: AssetPaths.placeholder,
                             height: getSize(60),
                             width: getSize(60),

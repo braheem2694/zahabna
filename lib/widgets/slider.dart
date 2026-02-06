@@ -16,7 +16,6 @@ import '../utils/ShImages.dart';
 import 'chewie_player.dart';
 import 'custom_image_view.dart';
 
-
 //ignore @immutable;
 class slider extends StatefulWidget {
   static String? tag = '/slider';
@@ -32,14 +31,15 @@ class slider extends StatefulWidget {
 
 class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
   int currentIndex = 0;
-  SwiperController swiperController = SwiperController(); // SwiperController added
+  SwiperController swiperController =
+      SwiperController(); // SwiperController added
 
   @override
   void initState() {
     super.initState();
     currentIndex = widget.index;
     swiperController = SwiperController();
-    swiperController.index= widget.index;// Initialize SwiperController
+    swiperController.index = widget.index; // Initialize SwiperController
   }
 
   TabController? tabController;
@@ -60,7 +60,6 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
         ),
       ),
       body: Column(
-
         children: [
           Align(
             alignment: Alignment.topCenter,
@@ -68,11 +67,11 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
               alignment: Alignment.bottomRight,
               children: [
                 Container(
-                 color: Colors.transparent,
-
+                  color: Colors.transparent,
                   height: MediaQuery.of(context).size.height * 0.6,
                   child: Swiper(
-                    controller: swiperController, // Assign the controller to Swiper
+                    controller:
+                        swiperController, // Assign the controller to Swiper
                     itemHeight: MediaQuery.of(context).size.height * 0.6,
                     viewportFraction: 1,
                     scale: 0.95,
@@ -90,18 +89,21 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
                   ),
                 ),
                 Padding(
-                  padding: getPadding(bottom: 40.0,right: 10),
+                  padding: getPadding(bottom: 40.0, right: 10),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(15.0),
-
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 3.0,bottom: 3,right: 8,left: 8),
+                      padding: const EdgeInsets.only(
+                          top: 3.0, bottom: 3, right: 8, left: 8),
                       child: Text(
                         '${currentIndex + 1} / ${widget.list!.length}',
-                        style:  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: getFontSize(12)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: getFontSize(12)),
                       ),
                     ),
                   ),
@@ -117,7 +119,8 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
                   padding: const EdgeInsets.only(bottom: 30),
                   child: GridView.builder(
                     shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisSpacing: 0,
                       mainAxisSpacing: 0,
                       crossAxisCount: 4,
@@ -128,16 +131,20 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
                         onTap: () {
                           setState(() {
                             currentIndex = index;
-                            swiperController.move(index); // Update the Swiper index
+                            swiperController
+                                .move(index); // Update the Swiper index
                           });
                         },
-                        child:!widget.list![index].file_path.toString().toLowerCase().endsWith("avif")? buildThumbnail(widget.list![index], index):
-                        CustomImageView(
-                          fit: BoxFit.cover,
-                          color: ColorConstant.logoFirstColor,
-                          image:widget.list![index].file_path!,
-                        )
-                        ,
+                        child: !widget.list![index].file_path
+                                .toString()
+                                .toLowerCase()
+                                .endsWith("avif")
+                            ? buildThumbnail(widget.list![index], index)
+                            : CustomImageView(
+                                fit: BoxFit.cover,
+                                color: ColorConstant.logoFirstColor,
+                                image: widget.list![index].file_path!,
+                              ),
                       );
                     },
                   ),
@@ -152,25 +159,22 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
 
   Widget buildMediaContent(MoreImage item) {
     if (isVideo(item.file_path)) {
-      return
-        ChewieVideoPlayer(
-          initialQuality: item.file_path!,
-          isMuted: false,
-          videoThumb: AssetPaths.placeholder,
-          videoQualities: {
-            "360": item.file_path!.toString(),
-            "720": item.file_path!.toString(),
-          },
-          isGeneral: false,
-          looping: false,
-
-
-        );
-
-
+      return ChewieVideoPlayer(
+        initialQuality: item.file_path!,
+        isMuted: false,
+        videoThumb: AssetPaths.placeholder,
+        videoQualities: {
+          "360": item.file_path!.toString(),
+          "720": item.file_path!.toString(),
+        },
+        isGeneral: false,
+        looping: false,
+      );
     } else {
       return PhotoView(
-        imageProvider: CachedNetworkImageProvider(item.file_path!),
+        imageProvider: Ui.isValidUri(item.file_path)
+            ? CachedNetworkImageProvider(item.file_path!)
+            : const AssetImage(AssetPaths.placeholder) as ImageProvider,
         backgroundDecoration: const BoxDecoration(color: Colors.transparent),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.covered * 2.5,
@@ -181,6 +185,7 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
       );
     }
   }
+
   Widget buildThumbnail(MoreImage item, int index) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -195,9 +200,10 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10.0),
-          child:  CachedNetworkImage(
-            imageUrl:isVideo(item.file_path)
-                ?AssetPaths.videoThumb: item.file_path!,
+          child: CachedNetworkImage(
+            imageUrl: isVideo(item.file_path)
+                ? AssetPaths.videoThumb
+                : item.file_path!,
             width: double.infinity, // Ensures the image takes full width
             height: double.infinity, // Ensures the image takes full height
             fit: BoxFit.cover, // Ensures the image fills the entire container
@@ -205,13 +211,14 @@ class _sliderState extends State<slider> with SingleTickerProviderStateMixin {
               convertToThumbnailUrl(item.file_path!, isBlurred: true),
               fit: BoxFit.cover,
             ),
-            errorWidget: (context, url, error) =>
-                Image.asset(isVideo(item.file_path)
-                    ?AssetPaths.videoThumb:AssetPaths.placeholder, fit: BoxFit.cover),
+            errorWidget: (context, url, error) => Image.asset(
+                isVideo(item.file_path)
+                    ? AssetPaths.videoThumb
+                    : AssetPaths.placeholder,
+                fit: BoxFit.cover),
           ),
         ),
       ),
     );
   }
-
 }

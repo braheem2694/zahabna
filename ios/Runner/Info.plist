@@ -13,17 +13,23 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>Lebanon Jewelry</string>
+		<string>Zahabna</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Add images to the item</string>
+		<string>We need access to your photo library to upload documents and images for your store registration.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>to capture image of new item</string>
+		<string>We need access to your camera to capture documents and images for your store registration.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>We need access to save images to your photo library.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>We need your location to show your store on the map and for delivery address.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>We need your location to show your store on the map and for delivery address.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>We need your location to show your store on the map and for delivery address.</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>CFBundleVersion</key>
@@ -35,6 +41,10 @@
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>remote-notification</string>
+		</array>
+		<key>NSBonjourServices</key>
+		<array>
+			<string>_dartobservatory._tcp</string>
 		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
@@ -57,5 +67,16 @@
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.214358315657-748j1301qcp32rio0jdeg8mrp7mvac7h</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

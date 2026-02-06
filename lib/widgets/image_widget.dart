@@ -53,13 +53,15 @@ Widget mediaWidget(imageUrl, String asset,
     String formUserName = "",
     String formFeedBack = '',
     String videoThumb = '',
-    videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    videoUrl =
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     imageVideoUrl =
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Femqube.com%2Fblog%2Fvideo-marketing-a-new-normal%2F&psig=AOvVaw0YJ_jZSLY0B-7hQtY6kyap&ust=1670758396179000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCMigvpf67vsCFQAAAAAdAAAAABAE",
     resolution = const {"": ""}}) {
   RxBool isImageLoaded = false.obs;
 
-  Future<Uint8List> _getBytesFromCachedImage(CachedNetworkImageProvider imageProvider) async {
+  Future<Uint8List> _getBytesFromCachedImage(
+      CachedNetworkImageProvider imageProvider) async {
     final imageStream = imageProvider.resolve(ImageConfiguration());
     final Completer<Uint8List> completer = Completer();
     ImageStreamListener? listener;
@@ -73,12 +75,14 @@ Widget mediaWidget(imageUrl, String asset,
             completer.completeError(Exception("ByteData is null"));
           }
         });
-        imageStream.removeListener(listener!); // Remove the listener after completion
+        imageStream
+            .removeListener(listener!); // Remove the listener after completion
       }
     }, onError: (Object exception, StackTrace? stackTrace) {
       if (!completer.isCompleted) {
         completer.completeError(exception, stackTrace);
-        imageStream.removeListener(listener!); // Remove the listener in case of an error
+        imageStream.removeListener(
+            listener!); // Remove the listener in case of an error
       }
     });
 
@@ -104,83 +108,84 @@ Widget mediaWidget(imageUrl, String asset,
                         bottomRight: Radius.circular(bottomRightBorder))
                     : const BorderRadius.all(Radius.circular(5)),
             shape: isCategory ? BoxShape.circle : BoxShape.rectangle),
-        child: imageUrl?.isEmpty ?? true
-            ? Image.asset(
-                asset,
-                height: height != 0 ? height : getVerticalSize(250),
-                fit: fit,
-              )
-            :
-            // CustomCachedNetworkImage(imageUrl: imageUrl, width: width, height: height, fit: fit, asset: asset,)
-            ClipRRect(
-                borderRadius: isProduct
-                    ? BorderRadius.only(
-                        topLeft: Radius.circular(topLeftBorder),
-                        topRight: Radius.circular(topRightBorder),
-                        bottomLeft: Radius.circular(bottomLeftBorder),
-                        bottomRight: Radius.circular(bottomRightBorder))
-                    : const BorderRadius.all(Radius.circular(5)),
-                child: isHomeBanner
-                    ? FadeInImage(
-                        fadeInDuration: const Duration(milliseconds: 200),
-                        placeholder: AssetImage(asset),
-                        image: CachedNetworkImageProvider(imageUrl),
-                        width: width,
-                        height: height,
-                        fit: fit,
-                        imageErrorBuilder: (context, exception, stackTrace) {
-                          return Image.asset(
-                            asset,
-                            height: height != 0 ? height : getVerticalSize(250),
-                            fit: placeholderFit ? BoxFit.cover : fit,
-                          );
-                        },
-                      )
-                    : CachedNetworkImage(
-                        height: height,
-                        width: width,
-                        fit: BoxFit.cover,
-                        imageUrl: convertToThumbnailUrl(imageUrl, isBlurred: false),
-                        placeholder: (context, url) {
-                          return CachedNetworkImage(
-                              imageUrl: convertToThumbnailUrl(imageUrl, isBlurred: true),
-                              placeholderFadeInDuration: const Duration(milliseconds: 100),
-                              placeholder: (context, url) {
-                                return Image.asset(
-                                  AssetPaths.placeholder,
-                                  width: Get.size.width,
-                                  height: Get.size.height,
-                                  fit: BoxFit.cover,
-                                );
-                              });
-                        },
-                        errorWidget: (context, s, a) {
-                          return Center(
-                            child: Image.asset(
-                              AssetPaths.placeholder,
-                              width: Get.size.width,
-                              height: Get.size.height,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        },
-                      ),
-                // ProgressiveImage(
-                //         placeholder: AssetImage(asset),
-                //         // size: 1.87KB
-                //         thumbnail: CachedNetworkImageProvider(
-                //           convertToThumbnailUrl(imageUrl ?? '', isBlurred: true),
-                //         ),
-                //         blur: 0,
-                //         // size: 1.29MB
-                //         image:
-                //             CachedNetworkImageProvider(convertToThumbnailUrl(imageUrl ?? "", isBlurred: false) ?? ''),
-                //         width: width != 0 ? width : getHorizontalSize(390),
-                //         height: height != 0 ? height : getVerticalSize(250),
-                //
-                //         fit: BoxFit.cover,
-                //         fadeDuration: const Duration(milliseconds: 200),
-                //       )
-              )),
+        child: () {
+          bool isValidUrl = false;
+          if (imageUrl != null &&
+              imageUrl.toString().toLowerCase().startsWith("http")) {
+            try {
+              final uri = Uri.parse(imageUrl.toString());
+              if (uri.hasAuthority && uri.host.isNotEmpty) {
+                isValidUrl = true;
+              }
+            } catch (_) {}
+          }
+
+          if (!isValidUrl || (imageUrl?.isEmpty ?? true)) {
+            return Image.asset(
+              asset,
+              height: height != 0 ? height : getVerticalSize(250),
+              fit: fit,
+            );
+          }
+
+          return ClipRRect(
+              borderRadius: isProduct
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(topLeftBorder),
+                      topRight: Radius.circular(topRightBorder),
+                      bottomLeft: Radius.circular(bottomLeftBorder),
+                      bottomRight: Radius.circular(bottomRightBorder))
+                  : const BorderRadius.all(Radius.circular(5)),
+              child: isHomeBanner
+                  ? FadeInImage(
+                      fadeInDuration: const Duration(milliseconds: 200),
+                      placeholder: AssetImage(asset),
+                      image: Ui.isValidUri(imageUrl)
+                          ? CachedNetworkImageProvider(imageUrl)
+                          : AssetImage(asset) as ImageProvider,
+                      width: width,
+                      height: height,
+                      fit: fit,
+                      imageErrorBuilder: (context, exception, stackTrace) {
+                        return Image.asset(
+                          asset,
+                          height: height != 0 ? height : getVerticalSize(250),
+                          fit: placeholderFit ? BoxFit.cover : fit,
+                        );
+                      },
+                    )
+                  : CachedNetworkImage(
+                      height: height,
+                      width: width,
+                      fit: BoxFit.cover,
+                      imageUrl:
+                          convertToThumbnailUrl(imageUrl, isBlurred: false),
+                      placeholder: (context, url) {
+                        return CachedNetworkImage(
+                            imageUrl: convertToThumbnailUrl(imageUrl,
+                                isBlurred: true),
+                            placeholderFadeInDuration:
+                                const Duration(milliseconds: 100),
+                            placeholder: (context, url) {
+                              return Image.asset(
+                                AssetPaths.placeholder,
+                                width: Get.size.width,
+                                height: Get.size.height,
+                                fit: BoxFit.cover,
+                              );
+                            });
+                      },
+                      errorWidget: (context, s, a) {
+                        return Center(
+                          child: Image.asset(
+                            AssetPaths.placeholder,
+                            width: Get.size.width,
+                            height: Get.size.height,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ));
+        }()),
   );
 }

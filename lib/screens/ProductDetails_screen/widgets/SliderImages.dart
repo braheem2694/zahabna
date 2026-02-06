@@ -28,7 +28,8 @@ class SliderImages extends StatefulWidget {
   final Product? product;
   final Map? args;
 
-  const SliderImages({super.key, this.product, this.args, required this.newImages});
+  const SliderImages(
+      {super.key, this.product, this.args, required this.newImages});
 
   @override
   State<SliderImages> createState() => _SliderImagesState();
@@ -54,7 +55,8 @@ class _SliderImagesState extends State<SliderImages> {
     super.dispose();
   }
 
-  Future<Uint8List> _getBytesFromCachedImage(CachedNetworkImageProvider imageProvider, index) async {
+  Future<Uint8List> _getBytesFromCachedImage(
+      CachedNetworkImageProvider imageProvider, index) async {
     final imageStream = imageProvider.resolve(ImageConfiguration());
     final Completer<Uint8List> completer = Completer();
     ImageStreamListener? listener;
@@ -71,7 +73,8 @@ class _SliderImagesState extends State<SliderImages> {
               completer.completeError(Exception("ByteData is null"));
             }
           });
-          imageStream.removeListener(listener!); // Remove the listener after completion
+          imageStream.removeListener(
+              listener!); // Remove the listener after completion
         }
       }, onError: (Object exception, StackTrace? stackTrace) {
         completer.completeError(exception, stackTrace);
@@ -87,7 +90,8 @@ class _SliderImagesState extends State<SliderImages> {
   @override
   Widget build(BuildContext context) {
     RxInt currentIndex = 1.obs;
-    loadingImageList.value = List<bool>.generate(widget.newImages.length, (index) => true).obs;
+    loadingImageList.value =
+        List<bool>.generate(widget.newImages.length, (index) => true).obs;
 
     return Stack(
       alignment: Alignment.bottomRight,
@@ -120,8 +124,10 @@ class _SliderImagesState extends State<SliderImages> {
             loop: false,
             itemHeight: getVerticalSize(200),
             itemBuilder: (BuildContext context, int index) {
-              String? videoName = widget.newImages[index].toString().split("/").last;
-              List<String>? videoFinalUrlList = widget.newImages[index].toString().split("/");
+              String? videoName =
+                  widget.newImages[index].toString().split("/").last;
+              List<String>? videoFinalUrlList =
+                  widget.newImages[index].toString().split("/");
               String? finalVideoUrl = "";
               videoFinalUrlList.removeLast();
               for (var element in videoFinalUrlList) {
@@ -131,49 +137,66 @@ class _SliderImagesState extends State<SliderImages> {
                   finalVideoUrl += "/$element";
                 }
               }
-              if(!widget.newImages[index].file_path!.toString().toLowerCase().endsWith("avif")){
-                _getBytesFromCachedImage(CachedNetworkImageProvider(widget.newImages[index].file_path!), index);
-              }
-              else{
+              bool isValid = Ui.isValidUri(widget.newImages[index].file_path);
+              if (!widget.newImages[index].file_path!
+                      .toString()
+                      .toLowerCase()
+                      .endsWith("avif") &&
+                  isValid) {
+                _getBytesFromCachedImage(
+                    CachedNetworkImageProvider(
+                        widget.newImages[index].file_path!),
+                    index);
+              } else {
                 loadingImageList[index] = false;
               }
               return GestureDetector(
                   onTap: () {
                     print('------------------------------------');
                     if (widget.newImages[index].file_path!.isNotEmpty) {
-                      Get.to(() => slider(list: widget.newImages, product: widget.product, index: index), routeName: '/slider');
+                      Get.to(
+                          () => slider(
+                              list: widget.newImages,
+                              product: widget.product,
+                              index: index),
+                          routeName: '/slider');
                     }
-
                   },
                   child: isVideo(widget.newImages[index].file_path.toString())
-                      ?
-
-
-                  ChewieVideoPlayer(
-                    initialQuality: widget.newImages[index].file_path.toString(),
-                    isMuted: false,
-                    videoThumb: AssetPaths.placeholder,
-                    videoQualities : finalVideoUrl!.contains("cloudfront.net")
-                        ? {
-                      "360":  widget.newImages[index].file_path.toString(),
-                      "720":  widget.newImages[index].file_path.toString(),
-                    }
-                        : {
-                      "720": "$finalVideoUrl/$videoName",
-                    },
-                    isGeneral: false,
-                    looping: false,
-
-
-                  )                      :
+                      ? ChewieVideoPlayer(
+                          initialQuality:
+                              widget.newImages[index].file_path.toString(),
+                          isMuted: false,
+                          videoThumb: AssetPaths.placeholder,
+                          videoQualities:
+                              finalVideoUrl!.contains("cloudfront.net")
+                                  ? {
+                                      "360": widget.newImages[index].file_path
+                                          .toString(),
+                                      "720": widget.newImages[index].file_path
+                                          .toString(),
+                                    }
+                                  : {
+                                      "720": "$finalVideoUrl/$videoName",
+                                    },
+                          isGeneral: false,
+                          looping: false,
+                        )
+                      :
 
                       // widget.loaded??false?
 
-                      widget.newImages[index].file_path.toString().toLowerCase().endsWith("avif")
+                      widget.newImages[index].file_path
+                              .toString()
+                              .toLowerCase()
+                              .endsWith("avif")
                           ? Container(
                               height: getVerticalSize(500),
                               width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(image: DecorationImage(image: AssetImage(AssetPaths.placeholder))),
+                              decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image:
+                                          AssetImage(AssetPaths.placeholder))),
                               child: AvifImage.network(
                                 widget.newImages[index].file_path!,
                                 height: getVerticalSize(500),
@@ -181,29 +204,45 @@ class _SliderImagesState extends State<SliderImages> {
                                 width: MediaQuery.of(context).size.width,
                               ),
                             )
-                          : ProgressiveImage(
-                              placeholder: const AssetImage(AssetPaths.placeholder),
+                          : !isValid
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    AssetPaths.placeholder,
+                                    height: getVerticalSize(500),
+                                    fit: BoxFit.cover,
+                                    width: MediaQuery.of(context).size.width,
+                                  ),
+                                )
+                              : ProgressiveImage(
+                                  placeholder:
+                                      const AssetImage(AssetPaths.placeholder),
 
-                              // size: 1.87KB
-                              thumbnail: CachedNetworkImageProvider(
-                                convertToThumbnailUrl(widget.newImages[index].file_path ?? '', isBlurred: true),
-                                errorListener: (p0) {},
-                              ),
-                              blur: 0,
-                              // size: 1.29MB
-                              image: CachedNetworkImageProvider(
-                                // convertToThumbnailUrl(imagesList[index] ?? '', isBlurred: false)
-                                loadingImageList[index] ? convertToThumbnailUrl(widget.newImages[index].file_path ?? '', isBlurred: false) : widget.newImages[index].file_path!,
-                              ),
-                              height: getVerticalSize(500),
-                              fit: BoxFit.cover,
+                                  // size: 1.87KB
+                                  thumbnail: CachedNetworkImageProvider(
+                                    convertToThumbnailUrl(
+                                        widget.newImages[index].file_path ?? '',
+                                        isBlurred: true),
+                                    errorListener: (p0) {},
+                                  ),
+                                  blur: 0,
+                                  // size: 1.29MB
+                                  image: CachedNetworkImageProvider(
+                                    // convertToThumbnailUrl(imagesList[index] ?? '', isBlurred: false)
+                                    loadingImageList[index]
+                                        ? convertToThumbnailUrl(
+                                            widget.newImages[index].file_path ??
+                                                '',
+                                            isBlurred: false)
+                                        : widget.newImages[index].file_path!,
+                                  ),
+                                  height: getVerticalSize(500),
+                                  fit: BoxFit.cover,
 
-                              width: MediaQuery.of(context).size.width,
+                                  width: MediaQuery.of(context).size.width,
 
-                              fadeDuration: Duration(milliseconds: 200),
-                            )
-
-                  );
+                                  fadeDuration: Duration(milliseconds: 200),
+                                ));
             },
             indicatorLayout: PageIndicatorLayout.COLOR,
             autoplay: false,
@@ -213,22 +252,25 @@ class _SliderImagesState extends State<SliderImages> {
           ),
         ),
         Padding(
-          padding: getPadding(bottom: 40.0,right: 10),
+          padding: getPadding(bottom: 40.0, right: 10),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.5),
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(
-              padding: const EdgeInsets.only(top: 3.0, bottom: 3, right: 8, left: 8),
+              padding:
+                  const EdgeInsets.only(top: 3.0, bottom: 3, right: 8, left: 8),
               child: Obx(() => Text(
-                '${currentIndex.value} / ${widget.newImages.length}',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: getFontSize(12)),
-              )),
+                    '${currentIndex.value} / ${widget.newImages.length}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: getFontSize(12)),
+                  )),
             ),
           ),
         )
-
       ],
     );
   }

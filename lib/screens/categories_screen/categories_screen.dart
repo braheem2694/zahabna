@@ -22,6 +22,7 @@ import '../Cart_List_screen/widgets/continue_button.dart';
 import '../Filter_Products_screen/Filter_Products_screen.dart';
 import '../HomeScreenPage/ShHomeScreen.dart';
 import '../tabs_screen/controller/tabs_controller.dart';
+import 'package:iq_mall/widgets/ui.dart';
 // ignore_for_file: must_be_immutable
 
 class CategoriesScreen extends StatelessWidget {
@@ -53,11 +54,12 @@ class CategoriesScreen extends StatelessWidget {
                   : controller.parentCategories.isEmpty
                       ? Center(child: Image.asset(AssetPaths.noresultsfound))
                       : GestureDetector(
-                          onTap: () {
-                              
-                          },
+                          onTap: () {},
                           child: Padding(
-                            padding: EdgeInsets.only(top: getVerticalSize(Platform.isIOS ? 45 :  getTopPadding()) + AppBar().preferredSize.height),
+                            padding: EdgeInsets.only(
+                                top: getVerticalSize(
+                                        Platform.isIOS ? 45 : getTopPadding()) +
+                                    AppBar().preferredSize.height),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -74,7 +76,10 @@ class CategoriesScreen extends StatelessWidget {
 
   Widget buildCategoryList(context) {
     return Padding(
-      padding: getPadding(top: 8.0, right: 4, bottom: getBottomPadding(context: context) + getSize(50)),
+      padding: getPadding(
+          top: 8.0,
+          right: 4,
+          bottom: getBottomPadding(context: context) + getSize(50)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +105,8 @@ class CategoriesScreen extends StatelessWidget {
                     )),
                 child: ListView.builder(
                   padding: EdgeInsets.zero,
-                  physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                  physics: const AlwaysScrollableScrollPhysics(
+                      parent: ClampingScrollPhysics()),
                   itemCount: controller.parentCategories.length,
                   controller: controller.categoryScrollController.value,
                   itemBuilder: (context, index) {
@@ -109,19 +115,23 @@ class CategoriesScreen extends StatelessWidget {
                     var text = unescape.convert(parent.categoryName!);
                     return GestureDetector(
                       onTap: () {
-                        controller.setSelectedParent(parent.id!, parent, 'double_click');
-                          Future.delayed(Duration.zero, () {
-                            
-                          });
+                        controller.setSelectedParent(
+                            parent.id!, parent, 'double_click');
+                        Future.delayed(Duration.zero, () {});
 
                         controller.parent = parent;
                         // print((index - controller.selectedCategoryIndex.value).abs());
 
-                        if ((index - controller.selectedCategoryIndex.value).abs() > 3) {
+                        if ((index - controller.selectedCategoryIndex.value)
+                                .abs() >
+                            3) {
                           // Calculate the target scroll position
-                          double targetScrollPosition = getSize(50) * (index - controller.selectedCategoryIndex.value.abs());
+                          double targetScrollPosition = getSize(50) *
+                              (index -
+                                  controller.selectedCategoryIndex.value.abs());
 
-                          if (!controller.categoryScrollController.value.position.isScrollingNotifier.value) {
+                          if (!controller.categoryScrollController.value
+                              .position.isScrollingNotifier.value) {
                             // Check if the scroll position is not already animating
                             controller.categoryScrollController.value.animateTo(
                               targetScrollPosition,
@@ -130,13 +140,16 @@ class CategoriesScreen extends StatelessWidget {
                             );
                           } else {
                             // If the scroll position is animating, set it directly without animation
-                            controller.categoryScrollController.value.jumpTo(targetScrollPosition);
+                            controller.categoryScrollController.value
+                                .jumpTo(targetScrollPosition);
                           }
                         }
 
                         controller.selectedCategoryIndex.value = index;
                         try {
-                          controller.animationController.reverse().then((value) => controller.animationController.forward());
+                          controller.animationController.reverse().then(
+                              (value) =>
+                                  controller.animationController.forward());
                         } catch (e) {
                           print(e);
                         }
@@ -154,10 +167,28 @@ class CategoriesScreen extends StatelessWidget {
                                     return Obx(() => Container(
                                           height: getSize(50),
                                           decoration: BoxDecoration(
-                                            color: controller.selectedCategoryIndex.value == index ? controller.colorAnimation.value : Colors.transparent,
+                                            color: controller
+                                                        .selectedCategoryIndex
+                                                        .value ==
+                                                    index
+                                                ? controller
+                                                    .colorAnimation.value
+                                                : Colors.transparent,
                                             borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(index - 1 == controller.selectedCategoryIndex.value ? 10 : 0),
-                                                bottomRight: Radius.circular(index + 1 == controller.selectedCategoryIndex.value ? 10 : 0)),
+                                                topRight: Radius.circular(index -
+                                                            1 ==
+                                                        controller
+                                                            .selectedCategoryIndex
+                                                            .value
+                                                    ? 10
+                                                    : 0),
+                                                bottomRight: Radius.circular(
+                                                    index + 1 ==
+                                                            controller
+                                                                .selectedCategoryIndex
+                                                                .value
+                                                        ? 10
+                                                        : 0)),
                                           ),
                                           child: child,
                                         ));
@@ -167,26 +198,39 @@ class CategoriesScreen extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Obx(() {
-                                      return controller.selectedCategoryIndex.value == index
+                                      return controller.selectedCategoryIndex
+                                                  .value ==
+                                              index
                                           ? Container(
                                               height: getSize(50),
                                               width: 2,
-                                              color: ColorConstant.logoSecondColor,
+                                              color:
+                                                  ColorConstant.logoSecondColor,
                                             )
                                           : SizedBox();
                                     }),
                                     Expanded(
                                       child: Padding(
-                                        padding: getPadding(left: 4.0, right: 4),
+                                        padding:
+                                            getPadding(left: 4.0, right: 4),
                                         child: Obx(() => Text(
                                               text,
                                               maxLines: 2,
                                               textAlign: TextAlign.left,
                                               style: TextStyle(
                                                 fontSize: getFontSize(12),
-                                                fontWeight: controller.isSelectedParent(parent.id!) ? FontWeight.bold : FontWeight.normal,
+                                                fontWeight:
+                                                    controller.isSelectedParent(
+                                                            parent.id!)
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
                                                 overflow: TextOverflow.visible,
-                                                color: controller.selectedParentId.value == parent.id ? Button_color : Colors.black,
+                                                color: controller
+                                                            .selectedParentId
+                                                            .value ==
+                                                        parent.id
+                                                    ? Button_color
+                                                    : Colors.black,
                                               ),
                                             )),
                                       ),
@@ -221,19 +265,26 @@ class CategoriesScreen extends StatelessWidget {
           children: [
             Padding(
               padding: getPadding(top: 20.0, bottom: 8, left: 15, right: 24),
-              child: Align(alignment: Alignment.centerRight, child: buildStackedRow()),
+              child: Align(
+                  alignment: Alignment.centerRight, child: buildStackedRow()),
             ), // Your custom stacked row widget
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.only(left: 15, right: 15, bottom: getBottomPadding() + getSize(50)),
+                padding: EdgeInsets.only(
+                    left: 15,
+                    right: 15,
+                    bottom: getBottomPadding() + getSize(50)),
                 physics: ClampingScrollPhysics(parent: BouncingScrollPhysics()),
-                itemCount: (controller.getRelatedParentItems().length / calculateColumns(context)).ceil(),
+                itemCount: (controller.getRelatedParentItems().length /
+                        calculateColumns(context))
+                    .ceil(),
                 itemBuilder: (context, rowIndex) {
-                   List<Category> items = controller.getRelatedParentItems();
+                  List<Category> items = controller.getRelatedParentItems();
                   final startIndex = rowIndex * calculateColumns(context);
                   final endIndex = (rowIndex + 1) * calculateColumns(context);
                   return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align items to the start of the row
+                    crossAxisAlignment: CrossAxisAlignment
+                        .start, // Align items to the start of the row
                     children: List.generate(
                       calculateColumns(context),
                       (columnIndex) {
@@ -267,7 +318,8 @@ class CategoriesScreen extends StatelessWidget {
   int calculateColumns(BuildContext context) {
     // Calculate the number of columns based on the screen width
     double screenWidth = MediaQuery.of(context).size.width;
-    int columns = screenWidth ~/ 120; // Assuming each item width is 150, adjust this value as needed
+    int columns = screenWidth ~/
+        120; // Assuming each item width is 150, adjust this value as needed
     return columns > 0 ? columns : 1; // Ensure at least one column
   }
 
@@ -284,7 +336,8 @@ class CategoriesScreen extends StatelessWidget {
             isText: false,
             text: "Show All".tr,
             onTap: () {
-              controller.setSelectedParent(controller.parent.id!, controller.parent, "");
+              controller.setSelectedParent(
+                  controller.parent.id!, controller.parent, "");
             },
           ),
         ],
@@ -339,14 +392,29 @@ class CategoriesScreen extends StatelessWidget {
                       borderRadius: const BorderRadius.all(Radius.circular(50)),
                       child: ProgressiveImage(
                         key: UniqueKey(),
-                        placeholder: const AssetImage(AssetPaths.placeholderCircle),
+                        placeholder:
+                            const AssetImage(AssetPaths.placeholderCircle),
                         // size: 1.87KB
-                        thumbnail: CachedNetworkImageProvider(
-                          convertToThumbnailUrl(item.main_image ?? '', isBlurred: true),
-                        ),
+                        thumbnail: Ui.isValidUri(convertToThumbnailUrl(
+                                item.main_image ?? '',
+                                isBlurred: true))
+                            ? CachedNetworkImageProvider(
+                                convertToThumbnailUrl(item.main_image ?? '',
+                                    isBlurred: true),
+                              )
+                            : const AssetImage(AssetPaths.placeholderCircle)
+                                as ImageProvider,
                         blur: 0,
                         // size: 1.29MB
-                        image: CachedNetworkImageProvider(convertToThumbnailUrl(item.main_image ?? "", isBlurred: false) ?? ''),
+                        image: Ui.isValidUri(convertToThumbnailUrl(
+                                item.main_image ?? "",
+                                isBlurred: false))
+                            ? CachedNetworkImageProvider(convertToThumbnailUrl(
+                                    item.main_image ?? "",
+                                    isBlurred: false) ??
+                                '')
+                            : const AssetImage(AssetPaths.placeholderCircle)
+                                as ImageProvider,
                         height: getSize(70),
                         width: getSize(70),
 
@@ -370,7 +438,8 @@ class CategoriesScreen extends StatelessWidget {
             overflow: TextOverflow.visible,
             maxLines: 2,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: getFontSize(9), fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: getFontSize(9), fontWeight: FontWeight.bold),
           ),
         ],
       ),

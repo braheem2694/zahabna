@@ -26,12 +26,17 @@ class Ui {
   static GetBar ErrorSnackBar({String? title = 'Error', String? message}) {
     Get.log("[$title] $message", isError: true);
     return GetBar(
-      titleText: Text(title!.tr, style: Get.textTheme.titleLarge!.merge(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-      messageText: Text(message!, style: Get.textTheme.bodySmall!.merge(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+      titleText: Text(title!.tr,
+          style: Get.textTheme.titleLarge!.merge(const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold))),
+      messageText: Text(message!,
+          style: Get.textTheme.bodySmall!.merge(const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold))),
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(20),
       backgroundColor: Colors.redAccent,
-      icon: const Icon(Icons.remove_circle_outline, size: 32, color: Colors.white),
+      icon: const Icon(Icons.remove_circle_outline,
+          size: 32, color: Colors.white),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       borderRadius: 8,
       dismissDirection: DismissDirection.horizontal,
@@ -42,12 +47,17 @@ class Ui {
   static GetBar successSnackBar({String? title = 'Success', String? message}) {
     Get.log("[$title] $message", isError: false);
     return GetBar(
-      titleText: Text(title!.tr, style: Get.textTheme.titleLarge!.merge(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-      messageText: Text(message!, style: Get.textTheme.bodySmall!.merge(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+      titleText: Text(title!.tr,
+          style: Get.textTheme.titleLarge!.merge(const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold))),
+      messageText: Text(message!,
+          style: Get.textTheme.bodySmall!.merge(const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold))),
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(20),
       backgroundColor: ColorConstant.logoFirstColorConstant,
-      icon: const Icon(Icons.remove_circle_outline, size: 32, color: Colors.white),
+      icon: const Icon(Icons.remove_circle_outline,
+          size: 32, color: Colors.white),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       borderRadius: 8,
       dismissDirection: DismissDirection.horizontal,
@@ -55,36 +65,52 @@ class Ui {
     );
   }
 
-  static String progImages(String image, fromKey) {
-    List<String> newImageList = [];
+  static String progImages(String? image, String fromKey) {
+    if (image == null || image.isEmpty || !isValidUri(image))
+      return image ?? "";
 
-    String newImage = "";
-    if (fromKey == "blur") {
-      newImageList = image.split("/");
-      newImageList.insert(newImageList.length - 1, "blures");
-    } else if (fromKey == "thumbnails") {
-      newImageList = image.split("/");
-      newImageList.insert(newImageList.length - 1, "thumbnails");
-    }
+    try {
+      List<String> newImageList = image.split("/");
+      if (newImageList.length < 3) return image;
 
-    for (int i = 0; i < newImageList.length; i++) {
-      if (newImage != "") {
-        newImage += "/${newImageList[i]}";
-      } else {
-        newImage += newImageList[i];
+      if (fromKey == "blur") {
+        newImageList.insert(newImageList.length - 1, "blures");
+      } else if (fromKey == "thumbnails") {
+        newImageList.insert(newImageList.length - 1, "thumbnails");
       }
+
+      String newImage = "";
+      for (int i = 0; i < newImageList.length; i++) {
+        if (newImage == "") {
+          newImage += newImageList[i];
+        } else {
+          // Avoid double slashes if item is empty (e.g. after http:)
+          if (newImageList[i] == "" && newImage.endsWith(":")) {
+            newImage += "/";
+          } else {
+            newImage += "/" + newImageList[i];
+          }
+        }
+      }
+      return newImage;
+    } catch (_) {
+      return image;
     }
-    return newImage;
   }
 
-  static BoxDecoration getBoxDecoration({Color? color, double? radius, Border? border, Gradient? gradient}) {
+  static BoxDecoration getBoxDecoration(
+      {Color? color, double? radius, Border? border, Gradient? gradient}) {
     return BoxDecoration(
       color: color ?? Get.theme.primaryColor,
       borderRadius: BorderRadius.all(Radius.circular(radius ?? 10)),
       boxShadow: [
-        BoxShadow(color: Get.theme.focusColor.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+        BoxShadow(
+            color: Get.theme.focusColor.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5)),
       ],
-      border: border ?? Border.all(color: Get.theme.focusColor.withOpacity(0.05)),
+      border:
+          border ?? Border.all(color: Get.theme.focusColor.withOpacity(0.05)),
       gradient: gradient,
     );
   }
@@ -95,7 +121,26 @@ class Ui {
   }
 
   static flutterToast(msg, toast, backgroundColor, textColor) {
-    Fluttertoast.showToast(msg: msg, toastLength: toast, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, backgroundColor: backgroundColor, textColor: textColor, fontSize: 16.0);
+    Fluttertoast.showToast(
+        msg: msg,
+        toastLength: toast,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+        fontSize: 16.0);
+  }
+
+  static bool isValidUri(String? url) {
+    if (url == null || url.trim().isEmpty) return false;
+    final trimmed = url.trim();
+    if (!trimmed.toLowerCase().startsWith("http")) return false;
+    try {
+      final uri = Uri.parse(trimmed);
+      return uri.hasAuthority && uri.host.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
   }
 
   // static onTapWhatsapp(Product product, String? phoneNumber) {
@@ -118,7 +163,8 @@ class Ui {
       final s = v.toString().trim();
       if (s.isEmpty) return null;
       final lower = s.toLowerCase();
-      if (lower == 'null' || lower == 'undefined' || lower == 'nan') return null;
+      if (lower == 'null' || lower == 'undefined' || lower == 'nan')
+        return null;
       return s;
     }
 
@@ -185,7 +231,8 @@ class Ui {
     // writeI("Qty Left", product.product_qty_left);
     writeN("Weight", product.product_weight, unit: 'g');
 
-    if (product.product_kerat != null) buffer.writeln("• Karat: ${product.product_kerat}K");
+    if (product.product_kerat != null)
+      buffer.writeln("• Karat: ${product.product_kerat}K");
 
     // writeI("Boolean % Discount", product.boolean_percent_discount);
     writeI("Sales Discount", product.sales_discount);
@@ -215,12 +262,16 @@ class Ui {
     final typeName = cleanStr(product.productTypeName);
     final typeId = product.productTypeId;
     if (typeName != null || typeId != null) {
-      buffer.writeln("• Product Type: ${[if (typeName != null) typeName, if (typeId != null) "(ID: $typeId)"].join(' ')}");
+      buffer.writeln("• Product Type: ${[
+        if (typeName != null) typeName,
+        if (typeId != null) "(ID: $typeId)"
+      ].join(' ')}");
     }
 
     writeI("Flash ID", product.r_flash_id);
 
-    if (variationsCount > 0) buffer.writeln("• Variations Count: $variationsCount");
+    if (variationsCount > 0)
+      buffer.writeln("• Variations Count: $variationsCount");
     if (fieldsCount > 0) buffer.writeln("• Custom Fields Count: $fieldsCount");
 
     // Store
@@ -258,10 +309,12 @@ $productUrl
 Image: $imageUrl
 ''';
 
-    String whatsappUrl = "https://wa.me/$supportNumber?text=${Uri.encodeComponent(message)}";
+    String whatsappUrl =
+        "https://wa.me/$supportNumber?text=${Uri.encodeComponent(message)}";
 
     try {
-      await launchUrl(Uri.parse(whatsappUrl), mode: LaunchMode.externalApplication);
+      await launchUrl(Uri.parse(whatsappUrl),
+          mode: LaunchMode.externalApplication);
     } catch (e) {
       print("Failed to open WhatsApp: $e");
     }
@@ -327,7 +380,10 @@ Image: $imageUrl
     }
   }
 
-  static Widget backArrowIcon({Color iconColor = Colors.grey, String fromKey = "", void Function()? onTap}) {
+  static Widget backArrowIcon(
+      {Color iconColor = Colors.grey,
+      String fromKey = "",
+      void Function()? onTap}) {
     return InkWell(
       onTap: onTap ??
           () {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:iq_mall/cores/math_utils.dart';
 import 'package:iq_mall/utils/ShImages.dart';
@@ -12,9 +11,7 @@ import '../../../main.dart';
 import '../../../models/HomeData.dart';
 import '../../../routes/app_routes.dart';
 import '../../../utils/ShColors.dart';
-import '../../../widgets/image_widget.dart';
-import '../../Filter_Products_screen/Filter_Products_screen.dart';
-import '../controller/Home_screen_fragment_controller.dart';
+import '../../../widgets/ui.dart';
 
 class CategoriesWidget extends StatefulWidget {
   const CategoriesWidget({Key? key}) : super(key: key);
@@ -27,7 +24,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: getSize((prefs!.getString('category_grid') == 'Double Columns' ? getVerticalSize(260) : getVerticalSize(120))),
+      height: getSize((prefs!.getString('category_grid') == 'Double Columns'
+          ? getVerticalSize(260)
+          : getVerticalSize(120))),
       child: globalController.homeDataList.value.categories != null
           ? CustomScrollView(
               scrollDirection: Axis.horizontal,
@@ -37,15 +36,27 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                 SliverPadding(
                   padding: const EdgeInsets.only(left: 0.0, right: 0.0),
                   sliver: SliverGrid(
-                    gridDelegate:
-                        SliverGridDelegateWithFixedCrossAxisCount(mainAxisSpacing: 1, childAspectRatio: getScreenRatio() > 1 ? (Get.height / Get.width) / 1.7 : (Get.height / Get.width) / 0.9, crossAxisSpacing: 1.0, crossAxisCount: (prefs!.getString('category_grid') == 'Double Columns' ? 2 : 1)),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: 1,
+                        childAspectRatio: getScreenRatio() > 1
+                            ? (Get.height / Get.width) / 1.7
+                            : (Get.height / Get.width) / 0.9,
+                        crossAxisSpacing: 1.0,
+                        crossAxisCount: (prefs!.getString('category_grid') ==
+                                'Double Columns'
+                            ? 2
+                            : 1)),
                     delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                        var categories = globalController.homeDataList.value.categories?.where((category) => category.parent == null).toList();
+                        var categories = globalController
+                            .homeDataList.value.categories
+                            ?.where((category) => category.parent == null)
+                            .toList();
                         var unescape = HtmlUnescape();
                         String text = "";
                         if (categories != null) {
-                          text = unescape.convert(categories[index].categoryName);
+                          text =
+                              unescape.convert(categories[index].categoryName);
                         }
                         return GestureDetector(
                             onTap: () {
@@ -65,13 +76,20 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                               //   },
                               //   preventDuplicates: true,
                               // );
-                              Get.toNamed(AppRoutes.Filter_products, arguments: {
-                                'title': categories?[index].categoryName.toString(),
-                                'id': int.parse(categories != null ? categories[index].id.toString() : "0"),
-                                'type': jsonString,
-                              }, parameters: {
-                                'tag': "${int.parse(categories != null ? categories[index].id.toString() : "0")}:${categories?[index].categoryName.toString()}"
-                              });
+                              Get.toNamed(AppRoutes.Filter_products,
+                                  arguments: {
+                                    'title': categories?[index]
+                                        .categoryName
+                                        .toString(),
+                                    'id': int.parse(categories != null
+                                        ? categories[index].id.toString()
+                                        : "0"),
+                                    'type': jsonString,
+                                  },
+                                  parameters: {
+                                    'tag':
+                                        "${int.parse(categories != null ? categories[index].id.toString() : "0")}:${categories?[index].categoryName.toString()}"
+                                  });
                               // Get.toNamed(AppRoutes.Filter_products, arguments: {
                               //   'title': categories[index].categoryName,
                               //   'id': categories[index].id,
@@ -83,28 +101,69 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                                 Container(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: ColorConstant.logoSecondColorConstant, width: 1),
+                                    border: Border.all(
+                                        color: ColorConstant
+                                            .logoSecondColorConstant,
+                                        width: 1),
                                   ),
                                   padding: getPadding(all: 3),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(50),
-                                    child: ProgressiveImage(
-                                      key: UniqueKey(),
+                                    child: !Ui.isValidUri(
+                                            categories?[index].main_image)
+                                        ? Image.asset(
+                                            AssetPaths.placeholderCircle,
+                                            height: getSize(78),
+                                            width: getSize(76),
+                                            fit: BoxFit.contain,
+                                          )
+                                        : ProgressiveImage(
+                                            key: UniqueKey(),
 
-                                      placeholder: const AssetImage(AssetPaths.placeholderCircle),
-                                      // size: 1.87KB
-                                      thumbnail: CachedNetworkImageProvider(
-                                        convertToThumbnailUrl(categories?[index].main_image ?? '', isBlurred: true),
-                                      ),
-                                      blur: 0,
-                                      // size: 1.29MB
-                                      image: CachedNetworkImageProvider(convertToThumbnailUrl(categories?[index].main_image ?? "", isBlurred: false) ?? ''),
-                                      height: getSize(78),
-                                      width: getSize(76),
+                                            placeholder: const AssetImage(
+                                                AssetPaths.placeholderCircle),
+                                            // size: 1.87KB
+                                            thumbnail: Ui.isValidUri(
+                                                    convertToThumbnailUrl(
+                                                        categories?[index]
+                                                                .main_image ??
+                                                            '',
+                                                        isBlurred: true))
+                                                ? CachedNetworkImageProvider(
+                                                    convertToThumbnailUrl(
+                                                        categories?[index]
+                                                                .main_image ??
+                                                            '',
+                                                        isBlurred: true),
+                                                  )
+                                                : const AssetImage(AssetPaths
+                                                        .placeholderCircle)
+                                                    as ImageProvider,
+                                            blur: 0,
+                                            // size: 1.29MB
+                                            image: Ui.isValidUri(
+                                                    convertToThumbnailUrl(
+                                                        categories?[index]
+                                                                .main_image ??
+                                                            "",
+                                                        isBlurred: false))
+                                                ? CachedNetworkImageProvider(
+                                                    convertToThumbnailUrl(
+                                                            categories?[index]
+                                                                    .main_image ??
+                                                                "",
+                                                            isBlurred: false) ??
+                                                        '')
+                                                : const AssetImage(AssetPaths
+                                                        .placeholderCircle)
+                                                    as ImageProvider,
+                                            height: getSize(78),
+                                            width: getSize(76),
 
-                                      fit: BoxFit.contain,
-                                      fadeDuration: const Duration(milliseconds: 200),
-                                    ),
+                                            fit: BoxFit.contain,
+                                            fadeDuration: const Duration(
+                                                milliseconds: 200),
+                                          ),
                                   ),
                                 ),
                                 Expanded(
@@ -115,14 +174,18 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 2,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: getFontSize(11), fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontSize: getFontSize(11),
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
                               ],
                             ));
                       },
-                      childCount: globalController.homeDataList.value.categories?.where((category) => category.parent == null).length,
+                      childCount: globalController.homeDataList.value.categories
+                          ?.where((category) => category.parent == null)
+                          .length,
                     ),
                   ),
                 ),
@@ -134,26 +197,35 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
 
   Widget buildDynamicCategoriesWidget() {
     // Determine the layout based on preferences
-    final bool isDoubleColumn = prefs?.getString('category_grid') == 'Double Columns';
+    final bool isDoubleColumn =
+        prefs?.getString('category_grid') == 'Double Columns';
 
     // Access categories list once
-    final List<Category> categories = globalController.homeDataList.value.categories?.where((category) => category.parent == null).toList() ?? [];
+    final List<Category> categories = globalController
+            .homeDataList.value.categories
+            ?.where((category) => category.parent == null)
+            .toList() ??
+        [];
 
     // Calculate the height based on whether it's a double column or not
-    final double containerHeight = isDoubleColumn ? getVerticalSize(260) : getVerticalSize(120);
+    final double containerHeight =
+        isDoubleColumn ? getVerticalSize(260) : getVerticalSize(120);
 
     return Container(
       height: containerHeight,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: isDoubleColumn ? buildDoubleRowCategories(categories) : buildSingleRowCategories(categories),
+        child: isDoubleColumn
+            ? buildDoubleRowCategories(categories)
+            : buildSingleRowCategories(categories),
       ),
     );
   }
 
   Widget buildSingleRowCategories(List<Category> categories) {
     return Row(
-      children: List.generate(categories.length, (index) => buildCategoryItem(categories[index])),
+      children: List.generate(
+          categories.length, (index) => buildCategoryItem(categories[index])),
     );
   }
 
@@ -190,12 +262,18 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(50),
-                child: FadeInImage.assetNetwork(
-                  placeholder: AssetPaths.placeholderCircle,
-                  image: convertToThumbnailUrl(category.main_image ?? "", isBlurred: false),
-                  fit: BoxFit.contain,
-                  fadeInDuration: Duration(milliseconds: 200),
-                ),
+                child: !Ui.isValidUri(category.main_image)
+                    ? Image.asset(
+                        AssetPaths.placeholderCircle,
+                        fit: BoxFit.contain,
+                      )
+                    : FadeInImage.assetNetwork(
+                        placeholder: AssetPaths.placeholderCircle,
+                        image: convertToThumbnailUrl(category.main_image ?? "",
+                            isBlurred: false),
+                        fit: BoxFit.contain,
+                        fadeInDuration: Duration(milliseconds: 200),
+                      ),
               ),
             ),
             Padding(
@@ -236,14 +314,14 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   }
 }
 
-ImageProvider<Object> getAvatarImageProvider(dynamic filePath, String placeholderAsset) {
+ImageProvider<Object> getAvatarImageProvider(
+    dynamic filePath, String placeholderAsset) {
   if (filePath == null) {
     return AssetImage(placeholderAsset);
   }
 
   String strPath = filePath.toString();
-
-  if (strPath == 'null') {
+  if (!Ui.isValidUri(strPath)) {
     return AssetImage(placeholderAsset);
   }
 

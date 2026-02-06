@@ -105,7 +105,14 @@ class CustomImageView extends StatelessWidget {
                       {
                         if (!notOpen!)
                           {
-                            if (svgUrl != null || url != null || svgPath != null || (imagePath != null && !imagePath.toString().toLowerCase().startsWith("assets")))
+                            if (svgUrl != null ||
+                                url != null ||
+                                svgPath != null ||
+                                (imagePath != null &&
+                                    !imagePath
+                                        .toString()
+                                        .toLowerCase()
+                                        .startsWith("assets")))
                               {
                                 // Get.context!.pushTransparentRoute(HeroImageView(
                                 //   ImageUrl: svgUrl ?? url ?? svgPath ?? imagePath!,
@@ -113,7 +120,13 @@ class CustomImageView extends StatelessWidget {
                                 // ))
                               }
                             else
-                              {Ui.flutterToast("No Image".tr, Toast.LENGTH_LONG, MainColor, ColorConstant.whiteA700)}
+                              {
+                                Ui.flutterToast(
+                                    "No Image".tr,
+                                    Toast.LENGTH_LONG,
+                                    MainColor,
+                                    ColorConstant.whiteA700)
+                              }
                           }
                       }
                   },
@@ -139,7 +152,10 @@ class CustomImageView extends StatelessWidget {
   _buildImageWithBorder() {
     if (border != null) {
       return Container(
-        decoration: BoxDecoration(border: border, borderRadius: shape == null ? radius : null, shape: shape ?? BoxShape.circle),
+        decoration: BoxDecoration(
+            border: border,
+            borderRadius: shape == null ? radius : null,
+            shape: shape ?? BoxShape.circle),
         child: _buildImageView(),
       );
     } else {
@@ -153,7 +169,10 @@ class CustomImageView extends StatelessWidget {
         height: height,
         width: width,
         color: null,
-        decoration: BoxDecoration(borderRadius: shape == null ? borderRadius : null, shape: shape ?? BoxShape.rectangle, border: border),
+        decoration: BoxDecoration(
+            borderRadius: shape == null ? borderRadius : null,
+            shape: shape ?? BoxShape.rectangle,
+            border: border),
         child: image.toString().toLowerCase().startsWith("http")
             ? SvgPicture.network(
                 image!,
@@ -215,7 +234,9 @@ class CustomImageView extends StatelessWidget {
               ),
       );
     } else if (image != null) {
-      return image.toString().toLowerCase().startsWith("http")
+      bool isValidUrl = Ui.isValidUri(image);
+
+      return isValidUrl
           ? image.toString().toLowerCase().endsWith("avif")
               ? AvifImage.network(
                   image!,
@@ -224,7 +245,7 @@ class CustomImageView extends StatelessWidget {
                   fit: BoxFit.cover,
                 )
               : fadeImage()
-          : image!.startsWith("assets")
+          : image != null && image!.startsWith("assets")
               ? Image.asset(
                   image ?? AssetPaths.noresultsfound,
                   height: height,
@@ -247,27 +268,6 @@ class CustomImageView extends StatelessWidget {
                   width: width,
                   fit: fit ?? BoxFit.cover,
                 );
-      //   CachedNetworkImage(
-      //   height: height,
-      //   width: width,
-      //   fit: fit,
-      //   imageUrl: url!.replaceAll("medical.local", 'smcare.net',
-      //   color: color,
-      //   placeholder: (context, url) => Container(
-      //     height: 30,
-      //     width: 30,
-      //     child: LinearProgressIndicator(
-      //       color: Colors.grey.shade200,
-      //       backgroundColor: Colors.grey.shade100,
-      //     ),
-      //   ),
-      //   errorWidget: (context, url, error) => Image.asset(
-      //     placeHolder,
-      //     height: height,
-      //     width: width,
-      //     fit: fit ?? BoxFit.cover,
-      //   ),
-      // );
     } else if (image == null && file != null && file!.path.isNotEmpty) {
       return Image.file(
         file!,
@@ -295,38 +295,48 @@ class CustomImageView extends StatelessWidget {
   }
 
   Widget fadeImage() {
-    CachedNetworkImageProvider cachedThumbnailImage = CachedNetworkImageProvider(Ui.progImages(image!, "thumbnails"));
-    CachedNetworkImageProvider cachedBlurImage = CachedNetworkImageProvider(Ui.progImages(image!, "blur"));
-    CachedNetworkImageProvider cachedMainImage = CachedNetworkImageProvider(image!);
-
-    return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(10),
-      child: FadeInImage(
-        fadeInDuration: Duration(milliseconds: 200),
-        placeholder: AssetImage(
-          placeHolder,
-        ), // Asset placeholder
-        image: cachedMainImage,
+    if (!Ui.isValidUri(image)) {
+      return Image.asset(
+        placeHolder,
+        height: height != 0 ? height : getVerticalSize(250),
         width: width,
-        height: height,
         fit: fit,
-        imageErrorBuilder: (context, exception, stackTrace) {
-          return placeHolder != null
-              ? Image.asset(
-                  placeHolder,
-                  height: height != 0 ? height : getVerticalSize(250),
-                  width: width,
-                  fit: fit,
-                )
-              : SizedBox();
-        },
-        placeholderErrorBuilder: (context, exception, stackTrace) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: FadeInImage(
-              fadeInDuration: Duration(milliseconds: 200),
-              placeholder: AssetImage(placeHolder), // Asset placeholder
+      );
+    }
 
+    try {
+      CachedNetworkImageProvider cachedThumbnailImage =
+          CachedNetworkImageProvider(Ui.progImages(image!, "thumbnails"));
+      CachedNetworkImageProvider cachedBlurImage =
+          CachedNetworkImageProvider(Ui.progImages(image!, "blur"));
+      CachedNetworkImageProvider cachedMainImage =
+          CachedNetworkImageProvider(image!);
+
+      return ClipRRect(
+        borderRadius: borderRadius ?? BorderRadius.circular(10),
+        child: FadeInImage(
+          fadeInDuration: Duration(milliseconds: 200),
+          placeholder: AssetImage(
+            placeHolder,
+          ), // Asset placeholder
+          image: cachedMainImage,
+          width: width,
+          height: height,
+          fit: fit,
+          imageErrorBuilder: (context, exception, stackTrace) {
+            return placeHolder != null
+                ? Image.asset(
+                    placeHolder,
+                    height: height != 0 ? height : getVerticalSize(250),
+                    width: width,
+                    fit: fit,
+                  )
+                : SizedBox();
+          },
+          placeholderErrorBuilder: (context, exception, stackTrace) {
+            return FadeInImage(
+              fadeInDuration: Duration(milliseconds: 200),
+              placeholder: cachedBlurImage,
               image: cachedThumbnailImage,
               width: width,
               height: height,
@@ -341,10 +351,17 @@ class CustomImageView extends StatelessWidget {
                       )
                     : SizedBox();
               },
-            ),
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      return Image.asset(
+        placeHolder,
+        height: height != 0 ? height : getVerticalSize(250),
+        width: width,
+        fit: fit,
+      );
+    }
   }
 }

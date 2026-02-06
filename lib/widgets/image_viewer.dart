@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:iq_mall/widgets/custom_image_view.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
   final String? imageUrl;
@@ -10,7 +11,7 @@ class FullScreenImageViewer extends StatefulWidget {
     this.imageUrl,
     this.imageFile,
   })  : assert(imageUrl != null || imageFile != null,
-  'Either imageUrl or imageFile must be provided'),
+            'Either imageUrl or imageFile must be provided'),
         super(key: key);
 
   @override
@@ -23,7 +24,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
   double _opacity = 1.0;
 
   final TransformationController _transformationController =
-  TransformationController();
+      TransformationController();
   TapDownDetails? _doubleTapDetails;
 
   void _handleVerticalDragUpdate(DragUpdateDetails details) {
@@ -69,24 +70,9 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
         fit: BoxFit.contain,
       );
     } else {
-      return Image.network(
-        widget.imageUrl!,
+      return CustomImageView(
+        image: widget.imageUrl,
         fit: BoxFit.contain,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                  (loadingProgress.expectedTotalBytes ?? 1)
-                  : null,
-              color: Colors.white,
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.white, size: 48),
-        ),
       );
     }
   }

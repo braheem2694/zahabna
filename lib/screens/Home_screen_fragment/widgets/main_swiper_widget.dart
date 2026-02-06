@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_mall/screens/Home_screen_fragment/controller/Home_screen_fragment_controller.dart';
 import 'package:get/get.dart';
+import 'package:iq_mall/widgets/custom_image_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../main.dart';
@@ -33,7 +34,6 @@ class _main_swiperState extends State<main_swiper> {
     }
   }
 
-
   final PageController _pageController = PageController(
     initialPage: 0,
   );
@@ -46,7 +46,8 @@ class _main_swiperState extends State<main_swiper> {
     Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       return mounted
           ? setState(() {
-              if (_currentPage < globalController.homeDataList.value.gridElements!.length) {
+              if (_currentPage <
+                  globalController.homeDataList.value.gridElements!.length) {
                 _currentPage++;
               } else {
                 _currentPage.value = 0;
@@ -95,16 +96,18 @@ class _main_swiperState extends State<main_swiper> {
                     margin: const EdgeInsets.only(left: 10.0, right: 10),
                     child: Material(
                       // Wrap the Container with Material
-                      elevation: 4, // Adjust the elevation to control the shadow intensity
+                      elevation:
+                          4, // Adjust the elevation to control the shadow intensity
                       shadowColor: Colors.grey, // Define the shadow color
                       borderRadius: BorderRadius.circular(5.0),
                       child: SizedBox(
                         width: 1000.0,
                         height: 450,
                         child: ClipRRect(
-                          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                          child: Image.network(
-                            item.main_image,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(5.0)),
+                          child: CustomImageView(
+                            image: item.main_image,
                             fit: BoxFit.cover,
                           ),
                         ),

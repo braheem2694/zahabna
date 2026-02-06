@@ -213,10 +213,17 @@ class StoreRequestView extends GetView<StoreRequestController> {
                             _buildField(
                               label: 'Email Address',
                               controller: controller.emailController,
-                              focusNode: recordFocus,
+                              focusNode: emailFocusNode,
                               icon: Icons.email_outlined,
                               isReadOnly: isReadOnly,
                               keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Required'.tr;
+                                if (!GetUtils.isEmail(v))
+                                  return 'Invalid email'.tr;
+                                return null;
+                              },
                             ),
                           ],
                         ),
@@ -386,30 +393,30 @@ class StoreRequestView extends GetView<StoreRequestController> {
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       leading: _Pressable(
-            onTap: () {
-              if (controller.isUploading.value) {
-                Get.snackbar(
-                  'Upload in Progress'.tr,
-                  'Please wait for images to finish uploading'.tr,
-                  backgroundColor: _Theme.gold,
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
-                );
-                return;
-              }
-              Get.back();
-            },
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _Theme.gold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: _Theme.primary, size: 18),
-            ),
+        onTap: () {
+          if (controller.isUploading.value) {
+            Get.snackbar(
+              'Upload in Progress'.tr,
+              'Please wait for images to finish uploading'.tr,
+              backgroundColor: _Theme.gold,
+              colorText: Colors.white,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+            );
+            return;
+          }
+          Get.back();
+        },
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: _Theme.gold.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
           ),
+          child: Icon(Icons.arrow_back_ios_new_rounded,
+              color: _Theme.primary, size: 18),
+        ),
+      ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -653,8 +660,12 @@ class StoreRequestView extends GetView<StoreRequestController> {
                   ),
                   errorStyle: TextStyle(color: _Theme.error, fontSize: 11),
                 ),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'required'.tr : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Required'.tr;
+                  if (v.length < 8) return 'Phone number too short'.tr;
+                  if (v.length > 15) return 'Phone number too long'.tr;
+                  return null;
+                },
                 textDirection: prefs?.getString("locale") == "en"
                     ? TextDirection.ltr
                     : TextDirection.rtl,

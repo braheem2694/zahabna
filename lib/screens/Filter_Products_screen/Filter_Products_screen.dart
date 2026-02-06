@@ -15,6 +15,7 @@ import 'package:iq_mall/widgets/CommonWidget.dart';
 import 'package:get/get.dart';
 import 'package:iq_mall/widgets/custom_image_view.dart';
 import 'package:progressive_image/progressive_image.dart';
+import 'package:iq_mall/widgets/ui.dart';
 
 import '../../Product_widget/Product_widget.dart';
 import '../../main.dart';
@@ -28,9 +29,9 @@ import 'package:iq_mall/utils/ShImages.dart';
 class Filter_Productsscreen extends GetView<Filter_ProductsController> {
   Filter_Productsscreen({super.key});
 
-  final Filter_ProductsController controller = Get.find(tag: Get.parameters.values.first);
+  final Filter_ProductsController controller =
+      Get.find(tag: Get.parameters.values.first);
   final dynamic unescape = HtmlUnescape();
-
 
   @override
   Widget build(BuildContext context) {
@@ -60,208 +61,340 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
             return controller.getProducts(1);
           },
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics()),
             controller: controller.scrollController,
             shrinkWrap: true,
             slivers: [
               Obx(
-                    () {
-                  var categories = globalController.homeDataList.value.categories!.where((category) => category.parent.toString() == controller.category.value.toString()).toList();
+                () {
+                  var categories = globalController
+                      .homeDataList.value.categories!
+                      .where((category) =>
+                          category.parent.toString() ==
+                          controller.category.value.toString())
+                      .toList();
 
                   return categories.isNotEmpty
                       ? TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 800),
-                    curve: Curves.fastEaseInToSlowEaseOut,
-                    tween: Tween<double>(begin: 0.0, end: controller.pinnedTopPad.value),
-                    builder: (context, value, child) {
-                      // print(value);
-                      if (value > 30 && !controller.animateSubCategories.value) {
-                        controller.animateSubCategories.value = true;
-                      } else if (value < 30) {
-                        controller.animateSubCategories.value = false;
-                      }
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.fastEaseInToSlowEaseOut,
+                          tween: Tween<double>(
+                              begin: 0.0, end: controller.pinnedTopPad.value),
+                          builder: (context, value, child) {
+                            // print(value);
+                            if (value > 30 &&
+                                !controller.animateSubCategories.value) {
+                              controller.animateSubCategories.value = true;
+                            } else if (value < 30) {
+                              controller.animateSubCategories.value = false;
+                            }
 
-                      // print("valueeee: ${(Get.height / Get.width) / 1.5}");
-                      return SliverAppBar(
-                        pinned: true,
-                        leading: SizedBox.fromSize(),
-                        leadingWidth: 0,
-                        expandedHeight: !controller.animateSubCategories.value ? getSize(133 - value) : getSize(60),
-                        collapsedHeight: !controller.animateSubCategories.value ? getSize(133 - value) : getSize(60),
-                        backgroundColor: ColorConstant.whiteA700,
-                        flexibleSpace: DecoratedBox(
-                          decoration: BoxDecoration(color: ColorConstant.whiteA700),
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 800),
-                            transitionBuilder: (Widget child, Animation<double> animation) {
-                              return ScaleTransition(scale: animation, child: child);
-                            },
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              height: categories.isEmpty
-                                  ? 0
-                                  : !controller.animateSubCategories.value
-                                  ? getSize(133 - value)
-                                  : getSize(60),
-                              child: Obx(() {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  padding: getPadding(all: 0),
-                                  itemCount:controller.subCategoriesList.length,
-                                  itemBuilder: (BuildContext context, int index) {
-
-
-                                    var unescape = HtmlUnescape();
-                                    var text = unescape.convert(controller.subCategoriesList[index].categoryName);
-                                    return GestureDetector(
-                                        onTap: () {
-                                          var f = {
-                                            "categories": [
-                                              controller.subCategoriesList[index].id.toString(),
-                                            ],
-                                          };
-
-                                          controller.selectedCategoryForFilter = controller.subCategoriesList[index].id.toString();
-
-                                          String jsonString = jsonEncode(f);
-
-                                          // Get.delete<Filter_ProductsController>();
-
-                                          // Filter_ProductsController _controller = Get.find();
-                                          // _controller.onInit();
-                                          // Get.to(
-                                          //   () => Filter_Productsscreen(),
-                                          //   arguments: {
-                                          //     'title': categories[index].categoryName.toString(),
-                                          //     'id': int.parse(categories[index].id.toString()),
-                                          //     'type': jsonString,
-                                          //   },
-                                          // );
-
-                                          Get.toNamed(AppRoutes.Filter_products, arguments: {
-                                            'title': controller.subCategoriesList[index].categoryName.toString(),
-                                            'id': int.parse(controller.subCategoriesList[index].id.toString()),
-                                            'store_id': controller.arguments["store_id"],
-                                            'type': jsonString,
-                                          }, parameters: {
-                                            'tag': "${int.parse(controller.subCategoriesList[index].id.toString())}:${controller.subCategoriesList[index].categoryName.toString()}"
-                                          });
-                                          // controller.category.value = categories[index].id.toString();
-                                          // controller.type = jsonString;
-                                          // controller.title.value = categories[index].categoryName.toString();
-                                          // controller.selectedCategoryIds = int.parse(categories[index].id.toString());
-                                        },
-                                        child: Padding(
-                                          padding: getPadding(left: 8.0, right: 8, top: 8, bottom: 8),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: <Widget>[
-                                              Container(
-                                                decoration: !controller.animateSubCategories.value
-                                                    ? BoxDecoration(border: Border.all(width: 1, color: ColorConstant.logoSecondColor), shape: BoxShape.circle)
-                                                    : null,
-                                                alignment: Alignment.center,
-                                                padding: getPadding(all: 3),
-                                                child: AnimatedSwitcher(
-                                                    duration: const Duration(milliseconds: 800),
-                                                    transitionBuilder: (Widget child, Animation<double> animation) {
-                                                      return ScaleTransition(scale: animation, child: child);
-                                                    },
-                                                    child: Obx(
-                                                          () =>
-                                                      !controller.animateSubCategories.value
-                                                          ? ClipRRect(
-                                                        borderRadius: const BorderRadius.all(Radius.circular(50)),
-                                                        child: ProgressiveImage(
-                                                          key: UniqueKey(),
-
-                                                          placeholder: const AssetImage(AssetPaths.placeholderCircle),
-                                                          // size: 1.87KB
-                                                          thumbnail: CachedNetworkImageProvider(
-                                                            convertToThumbnailUrl(controller.subCategoriesList[index].main_image ?? '', isBlurred: true),
-                                                          ),
-                                                          blur: 0,
-                                                          // size: 1.29MB
-                                                          image: CachedNetworkImageProvider(convertToThumbnailUrl(controller.subCategoriesList[index].main_image ?? "", isBlurred: false) ?? ''),
-                                                          height: getSize(75 - value),
-                                                          width: getSize(75 - value),
-
-                                                          fit: BoxFit.cover,
-                                                          fadeDuration: Duration(milliseconds: 200),
-                                                        ),
-                                                      )
-                                                          : SizedBox(),
-                                                    )),
-                                              ),
-
-                                              // Container(
-                                              //   height: getSize(83),
-                                              //   width: getSize(80),
-                                              //   decoration: BoxDecoration(
-                                              //     borderRadius: BorderRadius.circular(5), // Adjust the value as needed
-                                              //     image: DecorationImage(
-                                              //       image: getAvatarImageProvider(categories[index].main_image, AssetPaths.placeholder),
-                                              //     ),
-                                              //   ),
-                                              // ),
-                                              const SizedBox(height: spacing_control),
-                                              value < 30
-                                                  ? Expanded(
-                                                child: SizedBox(
-                                                    width: getSize(76 - (value / 2)),
-                                                    child: Text(
-                                                      text,
-                                                      maxLines: 2,
-                                                      softWrap: true,
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        overflow: TextOverflow.visible,
-                                                        color: Colors.black,
-                                                        fontSize: getFontSize(15),
-                                                      ),
-                                                    )),
-                                              )
-                                                  : Expanded(
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
-                                                    border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
-                                                  ),
-                                                  padding: getPadding(all: 5),
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    text,
-                                                    maxLines: 1,
-                                                    softWrap: true,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      overflow: TextOverflow.visible,
-                                                      color: Colors.black,
-                                                      fontSize: getFontSize(15),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ));
+                            // print("valueeee: ${(Get.height / Get.width) / 1.5}");
+                            return SliverAppBar(
+                              pinned: true,
+                              leading: SizedBox.fromSize(),
+                              leadingWidth: 0,
+                              expandedHeight:
+                                  !controller.animateSubCategories.value
+                                      ? getSize(133 - value)
+                                      : getSize(60),
+                              collapsedHeight:
+                                  !controller.animateSubCategories.value
+                                      ? getSize(133 - value)
+                                      : getSize(60),
+                              backgroundColor: ColorConstant.whiteA700,
+                              flexibleSpace: DecoratedBox(
+                                decoration: BoxDecoration(
+                                    color: ColorConstant.whiteA700),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 800),
+                                  transitionBuilder: (Widget child,
+                                      Animation<double> animation) {
+                                    return ScaleTransition(
+                                        scale: animation, child: child);
                                   },
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  )
+                                  child: Container(
+                                    alignment: Alignment.centerLeft,
+                                    height: categories.isEmpty
+                                        ? 0
+                                        : !controller.animateSubCategories.value
+                                            ? getSize(133 - value)
+                                            : getSize(60),
+                                    child: Obx(() {
+                                      return ListView.builder(
+                                        shrinkWrap: true,
+                                        scrollDirection: Axis.horizontal,
+                                        padding: getPadding(all: 0),
+                                        itemCount:
+                                            controller.subCategoriesList.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          var unescape = HtmlUnescape();
+                                          var text = unescape.convert(controller
+                                              .subCategoriesList[index]
+                                              .categoryName);
+                                          return GestureDetector(
+                                              onTap: () {
+                                                var f = {
+                                                  "categories": [
+                                                    controller
+                                                        .subCategoriesList[
+                                                            index]
+                                                        .id
+                                                        .toString(),
+                                                  ],
+                                                };
+
+                                                controller
+                                                        .selectedCategoryForFilter =
+                                                    controller
+                                                        .subCategoriesList[
+                                                            index]
+                                                        .id
+                                                        .toString();
+
+                                                String jsonString =
+                                                    jsonEncode(f);
+
+                                                // Get.delete<Filter_ProductsController>();
+
+                                                // Filter_ProductsController _controller = Get.find();
+                                                // _controller.onInit();
+                                                // Get.to(
+                                                //   () => Filter_Productsscreen(),
+                                                //   arguments: {
+                                                //     'title': categories[index].categoryName.toString(),
+                                                //     'id': int.parse(categories[index].id.toString()),
+                                                //     'type': jsonString,
+                                                //   },
+                                                // );
+
+                                                Get.toNamed(
+                                                    AppRoutes.Filter_products,
+                                                    arguments: {
+                                                      'title': controller
+                                                          .subCategoriesList[
+                                                              index]
+                                                          .categoryName
+                                                          .toString(),
+                                                      'id': int.parse(controller
+                                                          .subCategoriesList[
+                                                              index]
+                                                          .id
+                                                          .toString()),
+                                                      'store_id':
+                                                          controller.arguments[
+                                                              "store_id"],
+                                                      'type': jsonString,
+                                                    },
+                                                    parameters: {
+                                                      'tag':
+                                                          "${int.parse(controller.subCategoriesList[index].id.toString())}:${controller.subCategoriesList[index].categoryName.toString()}"
+                                                    });
+                                                // controller.category.value = categories[index].id.toString();
+                                                // controller.type = jsonString;
+                                                // controller.title.value = categories[index].categoryName.toString();
+                                                // controller.selectedCategoryIds = int.parse(categories[index].id.toString());
+                                              },
+                                              child: Padding(
+                                                padding: getPadding(
+                                                    left: 8.0,
+                                                    right: 8,
+                                                    top: 8,
+                                                    bottom: 8),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    Container(
+                                                      decoration: !controller
+                                                              .animateSubCategories
+                                                              .value
+                                                          ? BoxDecoration(
+                                                              border: Border.all(
+                                                                  width: 1,
+                                                                  color: ColorConstant
+                                                                      .logoSecondColor),
+                                                              shape: BoxShape
+                                                                  .circle)
+                                                          : null,
+                                                      alignment:
+                                                          Alignment.center,
+                                                      padding:
+                                                          getPadding(all: 3),
+                                                      child: AnimatedSwitcher(
+                                                          duration:
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      800),
+                                                          transitionBuilder:
+                                                              (Widget child,
+                                                                  Animation<
+                                                                          double>
+                                                                      animation) {
+                                                            return ScaleTransition(
+                                                                scale:
+                                                                    animation,
+                                                                child: child);
+                                                          },
+                                                          child: Obx(
+                                                            () => !controller
+                                                                    .animateSubCategories
+                                                                    .value
+                                                                ? ClipRRect(
+                                                                    borderRadius:
+                                                                        const BorderRadius
+                                                                            .all(
+                                                                            Radius.circular(50)),
+                                                                    child:
+                                                                        ProgressiveImage(
+                                                                      key:
+                                                                          UniqueKey(),
+
+                                                                      placeholder:
+                                                                          const AssetImage(
+                                                                              AssetPaths.placeholderCircle),
+                                                                      // size: 1.87KB
+                                                                      thumbnail: Ui.isValidUri(convertToThumbnailUrl(
+                                                                              controller.subCategoriesList[index].main_image ??
+                                                                                  '',
+                                                                              isBlurred:
+                                                                                  true))
+                                                                          ? CachedNetworkImageProvider(
+                                                                              convertToThumbnailUrl(controller.subCategoriesList[index].main_image ?? '', isBlurred: true),
+                                                                            )
+                                                                          : const AssetImage(AssetPaths.placeholderCircle)
+                                                                              as ImageProvider,
+                                                                      blur: 0,
+                                                                      // size: 1.29MB
+                                                                      image: Ui.isValidUri(convertToThumbnailUrl(
+                                                                              controller.subCategoriesList[index].main_image ??
+                                                                                  "",
+                                                                              isBlurred:
+                                                                                  false))
+                                                                          ? CachedNetworkImageProvider(convertToThumbnailUrl(controller.subCategoriesList[index].main_image ?? "", isBlurred: false) ??
+                                                                              '')
+                                                                          : const AssetImage(AssetPaths.placeholderCircle)
+                                                                              as ImageProvider,
+                                                                      height: getSize(75 -
+                                                                          value),
+                                                                      width: getSize(75 -
+                                                                          value),
+
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      fadeDuration:
+                                                                          Duration(
+                                                                              milliseconds: 200),
+                                                                    ),
+                                                                  )
+                                                                : SizedBox(),
+                                                          )),
+                                                    ),
+
+                                                    // Container(
+                                                    //   height: getSize(83),
+                                                    //   width: getSize(80),
+                                                    //   decoration: BoxDecoration(
+                                                    //     borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                                    //     image: DecorationImage(
+                                                    //       image: getAvatarImageProvider(categories[index].main_image, AssetPaths.placeholder),
+                                                    //     ),
+                                                    //   ),
+                                                    // ),
+                                                    const SizedBox(
+                                                        height:
+                                                            spacing_control),
+                                                    value < 30
+                                                        ? Expanded(
+                                                            child: SizedBox(
+                                                                width: getSize(
+                                                                    76 -
+                                                                        (value /
+                                                                            2)),
+                                                                child: Text(
+                                                                  text,
+                                                                  maxLines: 2,
+                                                                  softWrap:
+                                                                      true,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .visible,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontSize:
+                                                                        getFontSize(
+                                                                            15),
+                                                                  ),
+                                                                )),
+                                                          )
+                                                        : Expanded(
+                                                            child: Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5),
+                                                                border: Border.all(
+                                                                    color: ColorConstant
+                                                                        .logoSecondColor,
+                                                                    width: 1),
+                                                              ),
+                                                              padding:
+                                                                  getPadding(
+                                                                      all: 5),
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Text(
+                                                                text,
+                                                                maxLines: 1,
+                                                                softWrap: true,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style:
+                                                                    TextStyle(
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .visible,
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize:
+                                                                      getFontSize(
+                                                                          15),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                  ],
+                                                ),
+                                              ));
+                                        },
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )
                       : SliverToBoxAdapter(child: SizedBox());
                 },
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 25.0, bottom: 10, top: 0),
+                  padding:
+                      const EdgeInsets.only(left: 25.0, bottom: 10, top: 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -269,14 +402,15 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                         padding: EdgeInsets.only(bottom: 3.0),
                         child: Text(
                           'Products'.tr,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Row(
                         children: [
-                          Obx(() => Text('${controller.count.value.toString()} results    ')),
-                          Obx(() =>
-                              Text(
+                          Obx(() => Text(
+                              '${controller.count.value.toString()} results    ')),
+                          Obx(() => Text(
                                 unescape.convert(controller.title.value),
                                 style: TextStyle(color: Colors.grey[600]),
                               )),
@@ -288,7 +422,8 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0, right: 25, bottom: 5),
+                  padding:
+                      const EdgeInsets.only(left: 12.0, right: 25, bottom: 5),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -302,7 +437,8 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
-                              border: Border.all(color: Colors.white.withOpacity(0.5)),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.5)),
                               color: sh_light_grey, // Use sh_light_grey here
                               boxShadow: [
                                 BoxShadow(
@@ -316,7 +452,8 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                       ),
                       typeDropDown(context),
                       LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
                           // Define the maximum width.
                           double maxWidth = getHorizontalSize(200);
 
@@ -329,109 +466,127 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
 
                           double calculateTextWidth(String text) {
                             final textPainter = TextPainter(
-                              text: TextSpan(text: text, style: TextStyle(fontSize: getFontSize(13))),
+                              text: TextSpan(
+                                  text: text,
+                                  style: TextStyle(fontSize: getFontSize(13))),
                               maxLines: 1,
                               textDirection: TextDirection.ltr,
                             );
-                            textPainter.layout(minWidth: 0, maxWidth: double.infinity);
+                            textPainter.layout(
+                                minWidth: 0, maxWidth: double.infinity);
                             return textPainter.width;
                           }
 
                           // Calculate the maximum text width.
-                          double textWidth = sampleTexts.map(calculateTextWidth).reduce(max);
+                          double textWidth =
+                              sampleTexts.map(calculateTextWidth).reduce(max);
 
                           // Add extra padding or other element widths.
-                          double totalWidth = textWidth + 20; // Adjust 20 for padding or other elements.
+                          double totalWidth = textWidth +
+                              20; // Adjust 20 for padding or other elements.
 
                           // Ensure the total width does not exceed the maximum width.
                           totalWidth = min(totalWidth, maxWidth);
 
                           return Obx(
-                                () =>
-                                Container(
-                                  constraints: BoxConstraints(minWidth: Get.width / 3, maxWidth: Get.width / 2),
-                                  height: getSize(50),
-                                  width: getHorizontalSize(130),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                    border: Border.all(color: Colors.white.withOpacity(0.5)),
-                                    color: sh_light_grey, // Use sh_light_grey here
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.shade300,
-                                        blurRadius: 1,
-                                        offset: const Offset(1, 2),
-                                      ),
-                                    ],
+                            () => Container(
+                              constraints: BoxConstraints(
+                                  minWidth: Get.width / 3,
+                                  maxWidth: Get.width / 2),
+                              height: getSize(50),
+                              width: getHorizontalSize(130),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25.0),
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.5)),
+                                color: sh_light_grey, // Use sh_light_grey here
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.shade300,
+                                    blurRadius: 1,
+                                    offset: const Offset(1, 2),
                                   ),
-                                  padding: getPadding(left: 16),
-                                  alignment: Alignment.bottomCenter,
-                                  child: DropdownButtonHideUnderline(
-                                    child: Theme(
-                                      data: Theme.of(context).copyWith(
-                                        canvasColor: sh_light_grey, // Dropdown background color
-                                        popupMenuTheme: PopupMenuThemeData(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(25),
-                                          ),
-                                        ),
-                                      ),
-                                      child: DropdownButton<String>(
-                                        value: controller.selectedValue?.value,
-                                        items: [
-                                          DropdownMenuItem(
-                                            value: 'newest',
-                                            child: Text(
-                                              'Newest'.tr,
-                                              style: TextStyle(color: Colors.black87, fontSize: getFontSize(13)), // Text color
-                                            ),
-                                          ),
-                                          DropdownMenuItem(
-                                            value: 'lowestToHighest',
-                                            child: Text(
-                                              'Lowest to Highest Price'.tr,
-                                              style: TextStyle(color: Colors.black87),
-                                            ),
-                                          ),
-                                          DropdownMenuItem(
-                                            value: 'highestToLowest',
-                                            child: Text(
-                                              'Highest to Lowest Price'.tr,
-                                              style: const TextStyle(color: Colors.black87),
-                                            ),
-                                          ),
-                                        ],
-                                        onChanged: (value) {
-                                          controller.loader.value = true;
-                                          controller.selectedValue?.value = value!;
-                                          controller.page.value = 1;
-                                          controller.loading.value = true;
-                                          controller.Products?.clear();
-                                          controller.Products?.clear();
-                                          controller.getProducts(1).then((value) => controller.loader.value = false);
-                                          // ... Your existing onChanged logic ...
-                                        },
-                                        hint: const Text(
-                                          'Sorting Options',
-                                          style: TextStyle(color: Colors.black54), // Hint text style
-                                        ),
-                                        icon: const Icon(
-                                          Icons.arrow_drop_down_sharp,
-                                          color: Colors.black, // Icon color
-                                        ),
-                                        style: TextStyle(color: Colors.black),
-                                        // Selected item style
-                                        isExpanded: true,
-                                        dropdownColor: sh_light_grey,
-                                        elevation: 16,
-                                        // Shadow elevation
-                                        borderRadius: BorderRadius.circular(15),
-                                        // Border radius of dropdown
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // Inner padding
+                                ],
+                              ),
+                              padding: getPadding(left: 16),
+                              alignment: Alignment.bottomCenter,
+                              child: DropdownButtonHideUnderline(
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    canvasColor:
+                                        sh_light_grey, // Dropdown background color
+                                    popupMenuTheme: PopupMenuThemeData(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
                                       ),
                                     ),
                                   ),
+                                  child: DropdownButton<String>(
+                                    value: controller.selectedValue?.value,
+                                    items: [
+                                      DropdownMenuItem(
+                                        value: 'newest',
+                                        child: Text(
+                                          'Newest'.tr,
+                                          style: TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: getFontSize(
+                                                  13)), // Text color
+                                        ),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'lowestToHighest',
+                                        child: Text(
+                                          'Lowest to Highest Price'.tr,
+                                          style:
+                                              TextStyle(color: Colors.black87),
+                                        ),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'highestToLowest',
+                                        child: Text(
+                                          'Highest to Lowest Price'.tr,
+                                          style: const TextStyle(
+                                              color: Colors.black87),
+                                        ),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      controller.loader.value = true;
+                                      controller.selectedValue?.value = value!;
+                                      controller.page.value = 1;
+                                      controller.loading.value = true;
+                                      controller.Products?.clear();
+                                      controller.Products?.clear();
+                                      controller.getProducts(1).then((value) =>
+                                          controller.loader.value = false);
+                                      // ... Your existing onChanged logic ...
+                                    },
+                                    hint: const Text(
+                                      'Sorting Options',
+                                      style: TextStyle(
+                                          color: Colors
+                                              .black54), // Hint text style
+                                    ),
+                                    icon: const Icon(
+                                      Icons.arrow_drop_down_sharp,
+                                      color: Colors.black, // Icon color
+                                    ),
+                                    style: TextStyle(color: Colors.black),
+                                    // Selected item style
+                                    isExpanded: true,
+                                    dropdownColor: sh_light_grey,
+                                    elevation: 16,
+                                    // Shadow elevation
+                                    borderRadius: BorderRadius.circular(15),
+                                    // Border radius of dropdown
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 8), // Inner padding
+                                  ),
                                 ),
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -439,7 +594,6 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                   ),
                 ),
               ),
-
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 20),
@@ -447,17 +601,21 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     children: [
-                      Obx(() =>
-                      !controller.loader.value
+                      Obx(() => !controller.loader.value
                           ? CustomListView(
-                                                controller: controller,
-                                              )
+                              controller: controller,
+                            )
                           : Progressor_indecator()),
                     ],
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: Obx(() => !controller.loadmore.value ? Container() : Align(alignment: Alignment.center, child: Progressor_indecator())))
+              SliverToBoxAdapter(
+                  child: Obx(() => !controller.loadmore.value
+                      ? Container()
+                      : Align(
+                          alignment: Alignment.center,
+                          child: Progressor_indecator())))
             ],
           ),
         ));
@@ -480,9 +638,10 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: getSize(12)), // Add padding for internal alignment
+        padding: EdgeInsets.symmetric(
+            horizontal: getSize(12)), // Add padding for internal alignment
         child: DropdownButtonHideUnderline(
-          child:  Theme(
+          child: Theme(
             data: Theme.of(context).copyWith(
               canvasColor: sh_light_grey, // Dropdown background color
               popupMenuTheme: PopupMenuThemeData(
@@ -494,7 +653,9 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
             child: DropdownButton<String>(
               isExpanded: true,
               value: controller.selectedType?.value,
-              items: globalController.homeDataList.value.productTypes?.where((element) => element.type=="Metal").map((type) {
+              items: globalController.homeDataList.value.productTypes
+                  ?.where((element) => element.type == "Metal")
+                  .map((type) {
                 return DropdownMenuItem<String>(
                   value: type.name,
                   child: Text(
@@ -506,17 +667,22 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
                   ),
                 );
               }).toList(),
-              icon: Icon(Icons.arrow_drop_down,), // Adjust icon size if needed
+              icon: Icon(
+                Icons.arrow_drop_down,
+              ), // Adjust icon size if needed
               onChanged: (newValue) {
                 controller.selectedType?.value = newValue.toString();
                 controller.selectedTypeObject?.value = globalController
                     .homeDataList.value.productTypes!
-                    .firstWhere((element) => element.name == newValue.toString());
+                    .firstWhere(
+                        (element) => element.name == newValue.toString());
                 controller.loader.value = true;
                 controller.page.value = 1;
                 controller.loading.value = true;
                 controller.Products?.clear();
-                controller.getProducts(1).then((value) => controller.loader.value = false);
+                controller
+                    .getProducts(1)
+                    .then((value) => controller.loader.value = false);
               },
               hint: Text(
                 "Select type".tr,
@@ -541,19 +707,17 @@ class Filter_Productsscreen extends GetView<Filter_ProductsController> {
     });
   }
 
-
   void _showBottomSheet(BuildContext context) {
     Get.bottomSheet(
-      FilterMenu(
-          tag: controller.tag
-      ),
+      FilterMenu(tag: controller.tag),
       isDismissible: true,
       enableDrag: true,
       ignoreSafeArea: true,
 
       backgroundColor: Colors.white,
 
-      isScrollControlled: true, // Set this to true to make the sheet full-screen.
+      isScrollControlled:
+          true, // Set this to true to make the sheet full-screen.
     );
   }
 }

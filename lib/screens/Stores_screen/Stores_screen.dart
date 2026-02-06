@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:iq_mall/routes/app_routes.dart';
-import 'package:iq_mall/widgets/custom_image_view.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../cores/math_utils.dart';
@@ -10,7 +10,11 @@ import '../../main.dart';
 import '../../models/Stores.dart';
 import '../../utils/ShColors.dart';
 import '../../utils/ShImages.dart';
+import '../../widgets/ui.dart';
 import 'controller/Stores_screen_controller.dart';
+
+// Cached HtmlUnescape instance - avoid recreating on each build
+final _htmlUnescape = HtmlUnescape();
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 STORES THEME - Premium Gold Design (Cached for Performance)
@@ -21,7 +25,6 @@ class _StoresTheme {
   static final Color primary = ColorConstant.logoFirstColor;
   static final Color accent = ColorConstant.logoSecondColor;
   static const Color background = Color(0xFFF8F6F3);
-  static const Color cardBg = Colors.white;
   static const Color textPrimary = Color(0xFF1A1A2E);
   static const Color textSecondary = Color(0xFF6B7280);
 
@@ -37,20 +40,6 @@ class _StoresTheme {
   static const double radiusMD = 12.0;
   static const double radiusLG = 16.0;
 
-  // Cached decorations - avoid recreating on each build
-  static final List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.12),
-      blurRadius: 16,
-      offset: const Offset(0, 6),
-    ),
-  ];
-
-  static final BoxDecoration cardDecoration = BoxDecoration(
-    borderRadius: BorderRadius.circular(radiusLG),
-    boxShadow: cardShadow,
-  );
-
   static final LinearGradient goldGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -58,18 +47,6 @@ class _StoresTheme {
       accent.withOpacity(0.85),
       accent,
     ],
-  );
-
-  static final LinearGradient cardOverlayGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Colors.black.withOpacity(0.15),
-      Colors.black.withOpacity(0.05),
-      Colors.black.withOpacity(0.35),
-      Colors.black.withOpacity(0.85),
-    ],
-    stops: const [0.0, 0.25, 0.6, 1.0],
   );
 
   // Cached text styles
@@ -403,13 +380,17 @@ class _StoresGridWidget extends StatelessWidget {
             .toList();
       }
 
+      // Calculate item count for paired rows
+      final int itemCount = (stores.length / 2).ceil();
+
       return Stack(
         children: [
           RefreshIndicator(
             color: _StoresTheme.accent,
             backgroundColor: Colors.white,
             onRefresh: () => controller.fetchStores(false, true),
-            child: GridView.builder(
+            // Use ListView.builder with rows for better performance than GridView
+            child: ListView.builder(
               padding: EdgeInsets.only(
                 bottom: getBottomPadding() + getSize(55),
                 right: _StoresTheme.spacingMD,
@@ -419,25 +400,47 @@ class _StoresGridWidget extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics()),
               controller: controller.scrollController,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                mainAxisExtent: getVerticalSize(260),
-                crossAxisCount: 2,
-                mainAxisSpacing: _StoresTheme.spacingMD,
-                crossAxisSpacing: _StoresTheme.spacingMD,
-              ),
-              // Add cacheExtent for smoother scrolling
-              cacheExtent: 500,
-              // Use addAutomaticKeepAlives for better scroll performance
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: true,
-              itemCount: stores.length,
-              itemBuilder: (context, index) {
-                return RepaintBoundary(
-                  child: _StoreCard(
-                    store: stores[index],
-                    index: index,
-                    controller: controller,
-                    tag: tag,
+              cacheExtent: 800, // Increased cache extent
+              itemCount: itemCount,
+              itemBuilder: (context, rowIndex) {
+                final firstIndex = rowIndex * 2;
+                final secondIndex = firstIndex + 1;
+                final hasSecond = secondIndex < stores.length;
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: _StoresTheme.spacingMD),
+                  child: SizedBox(
+                    height: getVerticalSize(260),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: RepaintBoundary(
+                            child: _OptimizedStoreCard(
+                              key: ValueKey(stores[firstIndex].value.id),
+                              store: stores[firstIndex],
+                              index: firstIndex,
+                              controller: controller,
+                              tag: tag,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: _StoresTheme.spacingMD),
+                        Expanded(
+                          child: hasSecond
+                              ? RepaintBoundary(
+                                  child: _OptimizedStoreCard(
+                                    key: ValueKey(stores[secondIndex].value.id),
+                                    store: stores[secondIndex],
+                                    index: secondIndex,
+                                    controller: controller,
+                                    tag: tag,
+                                  ),
+                                )
+                              : const SizedBox(),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -601,28 +604,23 @@ class _ShimmerLoading extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🏪 STORE CARD - Optimized with cached decorations
+// 🏪 OPTIMIZED STORE CARD - Performance focused with cached decorations
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _StoreCard extends StatelessWidget {
+class _OptimizedStoreCard extends StatelessWidget {
   final Rx<StoreClass> store;
   final int index;
   final StoreController controller;
   final String tag;
 
   // Static cached decorations to avoid recreation
+  static final _cardBorderRadius = BorderRadius.circular(_StoresTheme.radiusLG);
+
   static final _topAccentDecoration = BoxDecoration(
     gradient: _StoresTheme.goldGradient,
     borderRadius: const BorderRadius.vertical(
       top: Radius.circular(_StoresTheme.radiusLG),
     ),
-    boxShadow: [
-      BoxShadow(
-        color: _StoresTheme.accent.withOpacity(0.5),
-        blurRadius: 6,
-        offset: const Offset(0, 2),
-      ),
-    ],
   );
 
   static final _shopBadgeDecoration = BoxDecoration(
@@ -639,12 +637,12 @@ class _StoreCard extends StatelessWidget {
       color: Colors.white.withOpacity(0.25),
       width: 1.5,
     ),
+  );
+
+  static final _infoBadgeDecoration = BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
     boxShadow: [
-      BoxShadow(
-        color: _StoresTheme.accent.withOpacity(0.5),
-        blurRadius: 12,
-        offset: const Offset(0, 4),
-      ),
       BoxShadow(
         color: Colors.black.withOpacity(0.2),
         blurRadius: 6,
@@ -653,24 +651,8 @@ class _StoreCard extends StatelessWidget {
     ],
   );
 
-  static final _infoBadgeDecoration = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(_StoresTheme.radiusMD),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.25),
-        blurRadius: 10,
-        offset: const Offset(0, 3),
-      ),
-      BoxShadow(
-        color: _StoresTheme.accent.withOpacity(0.15),
-        blurRadius: 4,
-        offset: const Offset(0, 1),
-      ),
-    ],
-  );
-
-  const _StoreCard({
+  const _OptimizedStoreCard({
+    super.key,
     required this.store,
     required this.index,
     required this.controller,
@@ -679,34 +661,46 @@ class _StoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unescape = HtmlUnescape();
-    final storeName = unescape.convert(store.value.store_name ?? 'No Name');
+    // Use cached unescape instance
+    final storeName =
+        _htmlUnescape.convert(store.value.store_name ?? 'No Name');
     final mainImage = store.value.main_image ?? "";
 
-    return GestureDetector(
-      onTap: _onShopTap,
-      behavior: HitTestBehavior.opaque,
-      child: DecoratedBox(
-        decoration: _StoresTheme.cardDecoration,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: _cardBorderRadius,
+      elevation: 6,
+      shadowColor: Colors.black26,
+      child: InkWell(
+        onTap: _onShopTap,
+        borderRadius: _cardBorderRadius,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(_StoresTheme.radiusLG),
+          borderRadius: _cardBorderRadius,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Full-size background image with caching
-              CustomImageView(
-                image:
-                    mainImage.isNotEmpty ? mainImage : AssetPaths.placeholder,
-                placeHolder: AssetPaths.placeholder,
-                fit: BoxFit.cover,
+              // Optimized background image with memory caching
+              _OptimizedNetworkImage(
+                imageUrl: mainImage,
+                placeholder: AssetPaths.placeholder,
               ),
 
-              // Gradient overlay - using cached gradient
-              DecoratedBox(
+              // Gradient overlay - simple decoration
+              const DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: _StoresTheme.cardOverlayGradient,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x26000000),
+                      Color(0x0D000000),
+                      Color(0x59000000),
+                      Color(0xD9000000),
+                    ],
+                    stops: [0.0, 0.25, 0.6, 1.0],
+                  ),
                 ),
-                child: const SizedBox.expand(),
+                child: SizedBox.expand(),
               ),
 
               // Top accent border
@@ -714,9 +708,10 @@ class _StoreCard extends StatelessWidget {
                 top: 0,
                 left: 0,
                 right: 0,
+                height: 4,
                 child: DecoratedBox(
                   decoration: _topAccentDecoration,
-                  child: const SizedBox(height: 4),
+                  child: const SizedBox.expand(),
                 ),
               ),
 
@@ -724,41 +719,30 @@ class _StoreCard extends StatelessWidget {
               Positioned(
                 top: _StoresTheme.spacingMD,
                 right: _StoresTheme.spacingSM,
-                child: _InfoBadge(onTap: _onInfoTap),
+                child: _OptimizedInfoBadge(onTap: _onInfoTap),
               ),
 
               // Store name and Shop button - Bottom area
               Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Padding(
-                  padding: const EdgeInsets.all(_StoresTheme.spacingMD),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Store name
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: _StoresTheme.spacingSM,
-                          vertical: _StoresTheme.spacingXS,
-                        ),
-                        child: Text(
-                          storeName,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: _StoresTheme.storeNameStyle,
-                        ),
-                      ),
-
-                      const SizedBox(height: _StoresTheme.spacingMD),
-
-                      // Shop button badge
-                      _ShopBadge(onTap: _onShopTap),
-                    ],
-                  ),
+                left: _StoresTheme.spacingMD,
+                right: _StoresTheme.spacingMD,
+                bottom: _StoresTheme.spacingMD,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Store name - simplified text
+                    Text(
+                      storeName,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: _StoresTheme.storeNameStyle,
+                    ),
+                    const SizedBox(height: _StoresTheme.spacingMD),
+                    // Shop button badge
+                    _OptimizedShopBadge(onTap: _onShopTap),
+                  ],
                 ),
               ),
             ],
@@ -795,13 +779,55 @@ class _StoreCard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🛒 SHOP BADGE - Lightweight stateless widget
+// 🖼️ OPTIMIZED NETWORK IMAGE - Lightweight with memory caching
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _ShopBadge extends StatelessWidget {
+class _OptimizedNetworkImage extends StatelessWidget {
+  final String imageUrl;
+  final String placeholder;
+
+  const _OptimizedNetworkImage({
+    required this.imageUrl,
+    required this.placeholder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.isEmpty || !Ui.isValidUri(imageUrl)) {
+      return Image.asset(
+        placeholder,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      // Use memory cache limits for better performance
+      memCacheWidth: 400,
+      memCacheHeight: 500,
+      fadeInDuration: const Duration(milliseconds: 150),
+      fadeOutDuration: const Duration(milliseconds: 100),
+      placeholder: (context, url) => Image.asset(
+        placeholder,
+        fit: BoxFit.cover,
+      ),
+      errorWidget: (context, url, error) => Image.asset(
+        placeholder,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🛒 OPTIMIZED SHOP BADGE - Const where possible
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _OptimizedShopBadge extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _ShopBadge({required this.onTap});
+  const _OptimizedShopBadge({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -809,7 +835,7 @@ class _ShopBadge extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: DecoratedBox(
-        decoration: _StoreCard._shopBadgeDecoration,
+        decoration: _OptimizedStoreCard._shopBadgeDecoration,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: _StoresTheme.spacingLG,
@@ -842,13 +868,13 @@ class _ShopBadge extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ℹ️ INFO BADGE - Lightweight stateless widget
+// ℹ️ OPTIMIZED INFO BADGE - Simplified
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _InfoBadge extends StatelessWidget {
+class _OptimizedInfoBadge extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _InfoBadge({required this.onTap});
+  const _OptimizedInfoBadge({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -856,7 +882,7 @@ class _InfoBadge extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: DecoratedBox(
-        decoration: _StoreCard._infoBadgeDecoration,
+        decoration: _OptimizedStoreCard._infoBadgeDecoration,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: _StoresTheme.spacingMD,
@@ -865,17 +891,10 @@ class _InfoBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: _StoresTheme.accent.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.info_rounded,
-                  color: _StoresTheme.accent,
-                  size: getFontSize(14),
-                ),
+              Icon(
+                Icons.info_rounded,
+                color: _StoresTheme.accent,
+                size: getFontSize(14),
               ),
               const SizedBox(width: _StoresTheme.spacingXS + 2),
               Text(
@@ -894,3 +913,6 @@ class _InfoBadge extends StatelessWidget {
     );
   }
 }
+
+// Note: Legacy _StoreCard, _ShopBadge, and _InfoBadge classes have been replaced
+// with optimized versions above: _OptimizedStoreCard, _OptimizedShopBadge, _OptimizedInfoBadge
