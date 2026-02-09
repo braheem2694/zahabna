@@ -27,7 +27,7 @@ class API extends GetxService {
       await prefs?.remove('token');
       await prefs?.remove('user_id');
       await prefs?.remove('user');
-      
+
       // Show message to user
       Ui.flutterToast(
         'Session expired. Please login again.'.tr,
@@ -130,7 +130,7 @@ class API extends GetxService {
           ));
 
       print('✅ API Response [$url]: Status ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         try {
           resultData = response.data as Map<String, dynamic>;
@@ -158,7 +158,7 @@ class API extends GetxService {
       print('❌ DioException [$url]: Status ${error.response?.statusCode}');
       print('❌ DioException Message: ${error.message}');
       print('❌ DioException Response: ${error.response?.data}');
-      
+
       // Handle 401 Unauthorized
       if (error.response?.statusCode == 401) {
         print('🔒 401 Unauthorized detected! Redirecting to login...');

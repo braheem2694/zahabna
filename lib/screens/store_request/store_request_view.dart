@@ -1391,9 +1391,9 @@ class StoreRequestView extends GetView<StoreRequestController> {
                   title: 'Gallery'.tr,
                   subtitle: 'Choose from photos'.tr,
                   onTap: () {
+                    Get.back();
                     function.SingleImagePicker(ImageSource.gallery).then((v) {
                       if (v != null) image.value = v.path;
-                      Get.back();
                     });
                   },
                 ),
@@ -1403,9 +1403,9 @@ class StoreRequestView extends GetView<StoreRequestController> {
                   title: 'Camera'.tr,
                   subtitle: 'Take a new photo'.tr,
                   onTap: () {
+                    Get.back();
                     function.SingleImagePicker(ImageSource.camera).then((v) {
                       if (v != null) image.value = v.path;
-                      Get.back();
                     });
                   },
                 ),

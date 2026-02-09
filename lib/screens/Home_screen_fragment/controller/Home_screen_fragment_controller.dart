@@ -411,7 +411,7 @@ class Home_screen_fragmentController extends GetxController {
       if (response.isNotEmpty && response["current"] != null) {
         final current = response["current"];
         final diff = response["diff"];
-        
+
         if (current != null && diff != null) {
           double currentGoldPrice = 0.0;
           double currentSilverPrice = 0.0;
@@ -421,32 +421,32 @@ class Home_screen_fragmentController extends GetxController {
           // Parse gold price
           if (current['XAUUSD'] != null) {
             var xauValue = current['XAUUSD'];
-            currentGoldPrice = xauValue is String 
-                ? double.tryParse(xauValue) ?? 0.0 
+            currentGoldPrice = xauValue is String
+                ? double.tryParse(xauValue) ?? 0.0
                 : (xauValue as num).toDouble();
           }
 
           // Parse silver price
           if (current['XAGUSD'] != null) {
             var xagValue = current['XAGUSD'];
-            currentSilverPrice = xagValue is String 
-                ? double.tryParse(xagValue) ?? 0.0 
+            currentSilverPrice = xagValue is String
+                ? double.tryParse(xagValue) ?? 0.0
                 : (xagValue as num).toDouble();
           }
 
           // Parse gold diff
           if (diff['XAUUSD'] != null) {
             var diffValue = diff['XAUUSD'];
-            goldDiff = diffValue is String 
-                ? double.tryParse(diffValue) ?? 0.0 
+            goldDiff = diffValue is String
+                ? double.tryParse(diffValue) ?? 0.0
                 : (diffValue as num).toDouble();
           }
 
           // Parse silver diff
           if (diff['XAGUSD'] != null) {
             var diffValue = diff['XAGUSD'];
-            silverDiff = diffValue is String 
-                ? double.tryParse(diffValue) ?? 0.0 
+            silverDiff = diffValue is String
+                ? double.tryParse(diffValue) ?? 0.0
                 : (diffValue as num).toDouble();
           }
 
@@ -458,12 +458,11 @@ class Home_screen_fragmentController extends GetxController {
           );
         }
       }
-      
+
       // Fallback to old endpoint if new one fails
-      final fallbackResponse = await http.get(
-        Uri.parse('http://zahabna.com/priceData/prices.json')
-      );
-      
+      final fallbackResponse =
+          await http.get(Uri.parse('http://zahabna.com/priceData/prices.json'));
+
       if (fallbackResponse.statusCode == 200) {
         final data = json.decode(fallbackResponse.body);
         if (data != null) {
@@ -472,14 +471,14 @@ class Home_screen_fragmentController extends GetxController {
 
           if (data['XAUUSD'] != null) {
             var xauValue = data['XAUUSD'];
-            currentPrice = xauValue is String 
-                ? double.tryParse(xauValue) ?? 0.0 
+            currentPrice = xauValue is String
+                ? double.tryParse(xauValue) ?? 0.0
                 : (xauValue as num).toDouble();
           }
           if (data['XAGUSD'] != null) {
             var xagValue = data['XAGUSD'];
-            currentSilverPrice = xagValue is String 
-                ? double.tryParse(xagValue) ?? 0.0 
+            currentSilverPrice = xagValue is String
+                ? double.tryParse(xagValue) ?? 0.0
                 : (xagValue as num).toDouble();
           }
 
@@ -503,23 +502,15 @@ class Home_screen_fragmentController extends GetxController {
           );
         }
       }
-      
+
       return GoldPriceData(
-        price: 0.0, 
-        change: 0.0, 
-        silverPrice: 0.0, 
-        silverChange: 0.0
-      );
+          price: 0.0, change: 0.0, silverPrice: 0.0, silverChange: 0.0);
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching gold price: $e');
       }
       return GoldPriceData(
-        price: 0.0, 
-        change: 0.0, 
-        silverPrice: 0.0, 
-        silverChange: 0.0
-      );
+          price: 0.0, change: 0.0, silverPrice: 0.0, silverChange: 0.0);
     }
   }
 }
