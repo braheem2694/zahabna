@@ -13,6 +13,8 @@ import '../../widgets/ui.dart';
 import '../../cores/assets.dart';
 import '../SignIn_screen/controller/SignIn_controller.dart';
 import '../../utils/device_data.dart';
+import '../../models/country_model.dart';
+import '../../models/city_model.dart';
 
 class StoreRequestController extends GetxController {
   // Form fields
@@ -21,8 +23,6 @@ class StoreRequestController extends GetxController {
   final TextEditingController motherNameController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
-  final TextEditingController countryController = TextEditingController();
-  final TextEditingController regionController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController recordNumber = TextEditingController();
@@ -30,6 +30,11 @@ class StoreRequestController extends GetxController {
   final TextEditingController birthDay = TextEditingController();
   final TextEditingController subscriptionMonthsController =
       TextEditingController(text: "3");
+
+  // Dropdown selections
+  final Rxn<Country> selectedCountry = Rxn<Country>();
+  final Rxn<City> selectedCity = Rxn<City>();
+
   final agreedToTerms = false.obs;
   LatLng markerPosition = const LatLng(33.8886, 35.4955); // Beirut
   GoogleMapController? mapController;
@@ -121,12 +126,12 @@ class StoreRequestController extends GetxController {
       'store_name': storeNameController.text,
       'phone_number':
           "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
-      'country': globalController.countryName.value,
+      'country': selectedCountry.value?.name ?? '',
       'address': addressController.text,
-      'region': regionController.text,
+      'region': selectedCity.value?.name ?? '',
       'email': emailController.text,
       'record_no': recordNumber.text,
-      'place': regionController.text,
+      'place': selectedCity.value?.name ?? '',
       'birth_date': birthDay.text,
       'latitude': latController.text,
       'longitude': lngController.text,
@@ -142,7 +147,7 @@ class StoreRequestController extends GetxController {
           await api.getData(formData, "stores/update-store-request");
 
       debugPrint('📦 [update-store-request] Response: $response');
-      
+
       sendingRequest.value = false;
 
       if ((response['success'] ?? false) == true) {
@@ -157,8 +162,8 @@ class StoreRequestController extends GetxController {
           storeName: storeNameController.text,
           phoneNumber:
               "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
-          country: globalController.countryName.value,
-          region: regionController.text,
+          country: selectedCountry.value?.name ?? '',
+          region: selectedCity.value?.name ?? '',
           address: addressController.text,
           birthDay: birthDay.text,
           createdAt: args!.createdAt,
@@ -232,6 +237,53 @@ class StoreRequestController extends GetxController {
       enablingRequest.value = false;
     }
     return true;
+  }
+
+  Future<List<Country>> fetchCountries(String search, int page) async {
+    try {
+      final response = await api.getDataGet(
+        {
+          'page': page,
+          'search': search,
+        },
+        "stores/get-countries",
+      );
+
+      if (response['success'] == true) {
+        final List<dynamic> data = response['data'];
+        return data.map((e) => Country.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint("Error fetching countries: $e");
+    }
+    return [];
+  }
+
+  Future<List<City>> fetchCities(String search, int page) async {
+    if (selectedCountry.value == null) return [];
+    try {
+      final response = await api.getDataGet(
+        {
+          'page': page,
+          'search': search.isEmpty ? selectedCountry.value!.name : search,
+          'countryId': selectedCountry.value!.id,
+        },
+        "stores/get-cities",
+      );
+
+      if (response['success'] == true) {
+        final List<dynamic> data = response['data'];
+        return data.map((e) => City.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint("Error fetching cities: $e");
+    }
+    return [];
+  }
+
+  void onCountryChanged(Country? country) {
+    selectedCountry.value = country;
+    selectedCity.value = null; // Reset city when country changes
   }
 
   /// Refreshes the tabs controller to update the bottom navigation after store deletion
@@ -602,10 +654,12 @@ class StoreRequestController extends GetxController {
     recordNumber.text = request.recordNumber.toString();
     phoneNumberController.text = normalizePhoneNumber(request.phoneNumber);
 
-    countryController.text = request.country;
-    emailController.text = request.email ?? '';
+    // We cannot easily pre-fill the dropdowns without fetching the lists first or just setting the text.
+    // For now, let's assuming we might want to show the text.
+    // However, since we switched to objects, we should try to match if possible, or maybe just set a temporary object with name.
 
-    regionController.text = request.region;
+    selectedCountry.value = Country(id: 0, code: '', name: request.country);
+    selectedCity.value = City(id: 0, rDhlCountryId: 0, name: request.region);
     branchCountController.text = request.branchCount.toString();
     subscriptionMonthsController.text = request.subscriptionMonths.toString();
     agreedToTerms.value = request.userTermsANdConditions != "" ? true : false;
@@ -700,10 +754,10 @@ class StoreRequestController extends GetxController {
       'store_name': storeNameController.text,
       'phone_number':
           "${country_code.value.toString().replaceAll('+', '')}${phoneNumberController.text}",
-      'country': globalController.countryName.value,
+      'country': selectedCountry.value?.name ?? '',
       'address': addressController.text,
-      'region': regionController.text,
-      "place": regionController.text,
+      'region': selectedCity.value?.name ?? '',
+      "place": selectedCity.value?.name ?? '',
       'email': emailController.text,
       'latitude': latController.text,
       'longitude': lngController.text,
@@ -724,12 +778,12 @@ class StoreRequestController extends GetxController {
 
     try {
       debugPrint('📤 [create-store-request] Sending formData: $formData');
-      
+
       final response =
           await api.getData(formData, "stores/create-store-request");
 
       debugPrint('📦 [create-store-request] Response: $response');
-      
+
       sendingRequest.value = false;
 
       bool isSuccess =
@@ -754,7 +808,7 @@ class StoreRequestController extends GetxController {
         storeNameController.clear();
         phoneNumberController.clear();
         addressController.clear();
-        regionController.clear();
+        // regionController.clear(); // Removed
         emailController.clear();
         birthDay.clear();
         branchCountController.clear();

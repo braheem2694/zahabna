@@ -21,6 +21,7 @@ class HomeData {
   String? categoryType;
   String? requestTerms;
   String? deleteTermsConditions;
+  String? renewTermsConditions;
   String? paymentRequestTerms;
   bool? isRetail;
   double? requestPrice;
@@ -60,6 +61,7 @@ class HomeData {
     this.requestFees,
     this.requestTerms,
     this.deleteTermsConditions,
+    this.renewTermsConditions,
   });
 
   factory HomeData.fromJson(Map<dynamic, dynamic> json) => HomeData(
@@ -72,6 +74,7 @@ class HomeData {
             double.tryParse(json["request_fees"]?.toString() ?? "0") ?? 0.0,
         requestTerms: json["request_terms_conditions"],
         deleteTermsConditions: json["delete_terms_conditions"],
+        renewTermsConditions: json["renew_terms_conditions"],
         paymentRequestTerms: json["payment_request_terms_conditions"],
         categoryType: json["categoryType"],
         categories: List<Category>.from(

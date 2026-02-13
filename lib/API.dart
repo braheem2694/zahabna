@@ -173,4 +173,59 @@ class API extends GetxService {
 
     return resultData;
   }
+
+  Future<Map<String, dynamic>> getDataGet(
+      Map<String, dynamic> param, String url,
+      [bool isMaster = false]) async {
+    Map<String, dynamic> resultData = <String, dynamic>{};
+
+    String? path = con!;
+
+    if (isMaster) {
+      path = conVersion;
+    }
+
+    try {
+      final dio2 = Dio();
+      print('🌐 API Request [GET]: $path$url');
+      print('🌐 API Params: $param');
+
+      final response = await dio2.get('$path$url',
+          queryParameters: param,
+          cancelToken: globalController.cancelToken.value,
+          options: Options(
+            responseType: ResponseType.json,
+            headers: {
+              'Authorization': 'Bearer ${prefs?.getString("token") ?? ""}',
+            },
+          ));
+
+      print('✅ API Response [GET][$url]: Status ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        try {
+          resultData = response.data as Map<String, dynamic>;
+        } catch (e) {
+          print(e);
+        }
+      } else {
+        print(
+            '⚠️ API Non-200 Response [GET][$url]: Status ${response.statusCode}');
+      }
+    } on DioException catch (error) {
+      print('❌ DioException [GET][$url]: Status ${error.response?.statusCode}');
+      print('❌ DioException Message: ${error.message}');
+      print('❌ DioException Response: ${error.response?.data}');
+
+      if (error.response?.statusCode == 401) {
+        print('🔒 401 Unauthorized detected! Redirecting to login...');
+        await _handleUnauthorized();
+        return resultData;
+      }
+    } catch (error) {
+      print('❌ General Error [GET][$url]: $error');
+    }
+
+    return resultData;
+  }
 }

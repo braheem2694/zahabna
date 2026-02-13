@@ -19,6 +19,9 @@ import '../TermsAndConditions_screen/terms_widget.dart';
 import 'store_request_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:iq_mall/widgets/Ui.dart';
+import '../../widgets/searchable_dropdown.dart';
+import '../../models/country_model.dart';
+import '../../models/city_model.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ✨ Simple & Cute Gold Theme
@@ -239,25 +242,39 @@ class StoreRequestView extends GetView<StoreRequestController> {
                           subtitle: 'Where is your store?',
                           color: const Color(0xFF8B5CF6),
                           children: [
-                            Obx(() => _buildField(
+                            Obx(() => SearchableDropdown<Country>(
                                   label: 'Country',
-                                  controller: TextEditingController(
-                                      text: globalController.countryName.value),
-                                  focusNode: countryFocus,
+                                  value:
+                                      controller.selectedCountry.value?.name ??
+                                          '',
                                   icon: Icons.public_outlined,
                                   isReadOnly: isReadOnly,
+                                  fetchItems: controller.fetchCountries,
+                                  itemLabel: (item) => item.name,
+                                  onChanged: controller.onCountryChanged,
                                   validator: (v) =>
-                                      v?.isEmpty ?? true ? 'Required'.tr : null,
+                                      controller.selectedCountry.value == null
+                                          ? 'Required'.tr
+                                          : null,
                                 )),
-                            _buildField(
-                              label: 'Region / City',
-                              controller: controller.regionController,
-                              focusNode: regionFocus,
-                              icon: Icons.map_outlined,
-                              isReadOnly: isReadOnly,
-                              validator: (v) =>
-                                  v?.isEmpty ?? true ? 'Required'.tr : null,
-                            ),
+                            const SizedBox(height: 12),
+                            Obx(() => SearchableDropdown<City>(
+                                  label: 'Region / City',
+                                  value:
+                                      controller.selectedCity.value?.name ?? '',
+                                  icon: Icons.map_outlined,
+                                  isLocalSearch: true,
+                                  isReadOnly: isReadOnly ||
+                                      controller.selectedCountry.value == null,
+                                  fetchItems: controller.fetchCities,
+                                  itemLabel: (item) => item.name,
+                                  onChanged: (city) =>
+                                      controller.selectedCity.value = city,
+                                  validator: (v) =>
+                                      controller.selectedCity.value == null
+                                          ? 'Required'.tr
+                                          : null,
+                                )),
                             _buildField(
                               label: 'Street Address',
                               controller: controller.addressController,

@@ -99,7 +99,11 @@ Future<void> main() async {
     // Register background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   } catch (e) {
-    debugPrint("Firebase initialization failed: $e");
+    if (e.toString().contains("duplicate-app")) {
+      debugPrint("Firebase already initialized.");
+    } else {
+      debugPrint("Firebase initialization failed: $e");
+    }
   }
 
   // 1️⃣ Load translations before launching the app

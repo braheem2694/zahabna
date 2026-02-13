@@ -141,11 +141,15 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
           },
           color: ColorConstant.logoSecondColorConstant,
           child: ListView.builder(
-            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 60),
+            padding:
+                const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 60),
             itemCount: controller.requests.length,
             itemBuilder: (context, index) {
               var request = controller.requests[index];
-              bool canCancel = request.endDate == null ? false : request.endDate!.isAfter(DateTime.now());
+              print("Store Request status: ${request.status}");
+              bool canCancel = request.endDate == null
+                  ? false
+                  : request.endDate!.isAfter(DateTime.now());
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 10),
@@ -187,9 +191,11 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                             children: [
                               Obx(
                                 () => Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: _getStatusColor(controller.requests[index].status),
+                                    color: _getStatusColor(
+                                        controller.requests[index].status),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -207,14 +213,17 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      _buildInfoRow(Icons.phone, 'Phone: ${request.phoneNumber}'),
+                      _buildInfoRow(
+                          Icons.phone, 'Phone: ${request.phoneNumber}'),
                       const SizedBox(height: 8),
-                      _buildInfoRow(Icons.location_on, 'Location: ${request.country}, ${request.region}'),
+                      _buildInfoRow(Icons.location_on,
+                          'Location: ${request.country}, ${request.region}'),
                       // const SizedBox(height: 8),
                       // _buildInfoRow(Icons.store, 'Branches: ${request.branchCount}'),
                       const SizedBox(height: 8),
                       // _buildInfoRow(Icons.attach_money, 'Total Amount: ${request.totalAmount}'),
-                      _buildInfoRow(Icons.calendar_today, 'Duration: ${request.subscriptionMonths} months'),
+                      _buildInfoRow(Icons.calendar_today,
+                          'Duration: ${request.subscriptionMonths} months'),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: getVerticalSize(147),
@@ -222,41 +231,64 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                           children: [
                             request.registerDate == null
                                 ? const SizedBox()
-                                : _buildInfoRow(Icons.calendar_today, '${'registration Date'.tr}:  ${request.registerDate != null ? Ui.formatDate(request.registerDate!) : "N/A"}'),
+                                : _buildInfoRow(Icons.calendar_today,
+                                    '${'registration Date'.tr}:  ${request.registerDate != null ? Ui.formatDate(request.registerDate!) : "N/A"}'),
                             const SizedBox(height: 8),
-                            _buildInfoRow(Icons.calendar_today, '${'Start Date'.tr}:  ${request.startDate != null ? Ui.formatDate(request.startDate!) : "N/A"}'),
+                            _buildInfoRow(Icons.calendar_today,
+                                '${'Start Date'.tr}:  ${request.startDate != null ? Ui.formatDate(request.startDate!) : "N/A"}'),
                             const SizedBox(height: 8),
-                            _buildInfoRow(Icons.calendar_today, '${'End Date'.tr}:  ${request.endDate != null ? Ui.formatDate(request.endDate!) : "N/A"}', color: canCancel ? Colors.red : null),
+                            _buildInfoRow(Icons.calendar_today,
+                                '${'End Date'.tr}:  ${request.endDate != null ? Ui.formatDate(request.endDate!) : "N/A"}',
+                                color: canCancel ? Colors.red : null),
                             const Spacer(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Align(
                                   alignment: Alignment.center,
-                                  child: request.status.toLowerCase() == "deleted" || request.status.toLowerCase() == "cancelled" || request.status == 'Pending'
+                                  child: request.status.toLowerCase() ==
+                                              "deleted" ||
+                                          request.status.toLowerCase() ==
+                                              "cancelled" ||
+                                          request.status == 'Pending' ||
+                                          request.status.toLowerCase() ==
+                                              "waiting approval"
                                       ? const SizedBox()
                                       : Obx(() {
                                           return MyCustomButton(
-                                            text: request.status.toLowerCase() == "waiting payment" ? "Pay".tr : "Renew".tr,
+                                            text:
+                                                request.status.toLowerCase() ==
+                                                        "waiting payment"
+                                                    ? "Pay".tr
+                                                    : "Renew".tr,
                                             fontSize: 14,
                                             height: 40,
                                             width: getHorizontalSize(135),
                                             borderRadius: 10,
                                             padding: ButtonPadding.PaddingNone,
-                                            buttonColor: ColorConstant.logoSecondColor,
+                                            buttonColor:
+                                                ColorConstant.logoSecondColor,
                                             borderColor: Colors.transparent,
-                                            isExpanded: controller.cancelRequests[index],
+                                            isExpanded: controller
+                                                .cancelRequests[index],
                                             onTap: () {
                                               Get.to(
-                                                      () => PaymentImagePickerScreen(
+                                                      () =>
+                                                          PaymentImagePickerScreen(
                                                             request: request,
-                                                            isReneu: true,
+                                                            isReneu: request
+                                                                    .status
+                                                                    .toLowerCase() !=
+                                                                "waiting payment",
                                                           ),
-                                                      transition: Transition.rightToLeft,
-                                                      duration: const Duration(milliseconds: 200))
+                                                      transition: Transition
+                                                          .rightToLeft,
+                                                      duration: const Duration(
+                                                          milliseconds: 200))
                                                   ?.then(
                                                 (value) {
-                                                  controller.requests[index] = value;
+                                                  controller.requests[index] =
+                                                      value;
                                                   request = value;
                                                   controller.requests.refresh();
                                                 },
@@ -272,19 +304,29 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                                     text: "View Request".tr,
                                     fontSize: 14,
                                     height: 40,
-                                    width: request.status.toLowerCase() == "deleted" || request.status.toLowerCase() == "cancelled" || request.status == 'Pending'
+                                    width: request.status.toLowerCase() ==
+                                                "deleted" ||
+                                            request.status.toLowerCase() ==
+                                                "cancelled" ||
+                                            request.status == 'Pending' ||
+                                            request.status.toLowerCase() ==
+                                                "waiting approval"
                                         ? getHorizontalSize(290)
                                         : getHorizontalSize(135),
                                     borderRadius: 10,
                                     padding: ButtonPadding.PaddingNone,
                                     buttonColor: Colors.grey[600],
                                     borderColor: Colors.transparent,
-                                    isExpanded: controller.cancelRequests[index],
+                                    isExpanded:
+                                        controller.cancelRequests[index],
                                     onTap: () {
-                                      Get.toNamed(AppRoutes.storeRequest, arguments: request)?.then(
+                                      Get.toNamed(AppRoutes.storeRequest,
+                                              arguments: request)
+                                          ?.then(
                                         (value) {
                                           if (value != null) {
-                                            controller.requests[index] = value as StoreRequest;
+                                            controller.requests[index] =
+                                                value as StoreRequest;
                                             controller.requests.refresh();
                                             controller.fetchStoreRequests();
                                           }
@@ -330,7 +372,8 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
         bool isFound = false;
         controller.requests.forEach(
           (element) {
-            if (element.status.toLowerCase() != "deleted" && element.status.toLowerCase() != "cancelled") {
+            if (element.status.toLowerCase() != "deleted" &&
+                element.status.toLowerCase() != "cancelled") {
               isFound = true;
             }
           },
@@ -349,7 +392,8 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
                 icon: Icon(Icons.add, color: Colors.white),
                 label: Text(
                   "New Request".tr,
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: ColorConstant.logoSecondColor,
                 elevation: 6,
@@ -410,7 +454,9 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Directionality(
-              textDirection: prefs?.getString("locale") == "en" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") == "en"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 'Alert'.tr,
                 style: TextStyle(
@@ -420,7 +466,9 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
               ),
             ),
             Directionality(
-              textDirection: prefs?.getString("locale") != "ar" ? TextDirection.ltr : TextDirection.rtl,
+              textDirection: prefs?.getString("locale") != "ar"
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
               child: Text(
                 "Do you want to cancel the request?".tr,
                 textAlign: TextAlign.justify,
@@ -452,7 +500,8 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
               alignment: Alignment.center,
               child: Text(
                 "Yes".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.whiteA700),
+                style: TextStyle(
+                    fontSize: getFontSize(16), color: ColorConstant.whiteA700),
               ),
             ),
           ),
@@ -470,12 +519,15 @@ class StoreRequestsView extends GetView<StoreRequestsController> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: ColorConstant.whiteA700,
-                border: Border.all(color: ColorConstant.logoSecondColor, width: 1),
+                border:
+                    Border.all(color: ColorConstant.logoSecondColor, width: 1),
               ),
               alignment: Alignment.center,
               child: Text(
                 "No".tr,
-                style: TextStyle(fontSize: getFontSize(16), color: ColorConstant.logoSecondColor),
+                style: TextStyle(
+                    fontSize: getFontSize(16),
+                    color: ColorConstant.logoSecondColor),
               ),
             ),
           ),

@@ -164,8 +164,9 @@ class _PaymentImagePickerScreenState extends State<PaymentImagePickerScreen> {
       ),
       // FieldRowController(initialTitle: 'email'.tr, isRequired: false, initialValue: widget.request.email ?? '', isTitleLocked: true, entryType: FieldEntryType.text),
     ]);
-    htmlContract.value =
-        globalController.homeDataList.value.paymentRequestTerms ?? '';
+    htmlContract.value = widget.isReneu
+        ? (globalController.homeDataList.value.renewTermsConditions ?? '')
+        : (globalController.homeDataList.value.paymentRequestTerms ?? '');
   }
 
   @override
